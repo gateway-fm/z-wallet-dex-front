@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { CurrencyAmount, Token, ChainId as UniswapSDKChainId } from '@uniswap/sdk-core'
+import { CurrencyAmount, Token } from '@uniswap/sdk-core'
 import type { ImageSourcePropType } from 'react-native'
 import { Chain as BackendChainId } from 'uniswap/src/data/graphql/uniswap-data-api/__generated__/types-and-hooks'
 import { ElementName } from 'uniswap/src/features/telemetry/constants'
@@ -10,50 +10,19 @@ export function isUniverseChainId(chainId?: number | UniverseChainId | null): ch
 }
 
 export enum UniverseChainId {
-  Mainnet = UniswapSDKChainId.MAINNET,
-  ArbitrumOne = UniswapSDKChainId.ARBITRUM_ONE,
-  Avalanche = UniswapSDKChainId.AVALANCHE,
-  Base = UniswapSDKChainId.BASE,
-  Blast = UniswapSDKChainId.BLAST,
-  Bnb = UniswapSDKChainId.BNB,
-  Celo = UniswapSDKChainId.CELO,
-  MonadTestnet = UniswapSDKChainId.MONAD_TESTNET,
-  Optimism = UniswapSDKChainId.OPTIMISM,
-  Polygon = UniswapSDKChainId.POLYGON,
-  Sepolia = UniswapSDKChainId.SEPOLIA,
-  Soneium = UniswapSDKChainId.SONEIUM,
-  Unichain = UniswapSDKChainId.UNICHAIN,
-  UnichainSepolia = UniswapSDKChainId.UNICHAIN_SEPOLIA,
-  WorldChain = UniswapSDKChainId.WORLDCHAIN,
-  Zksync = UniswapSDKChainId.ZKSYNC,
-  Zora = UniswapSDKChainId.ZORA,
+  Zephyr = Number(process.env.REACT_APP_CUSTOM_NETWORK_CHAIN_ID) || 1417429182,
 }
 
 export const SUPPORTED_CHAIN_IDS: UniverseChainId[] = [
-  UniverseChainId.Mainnet,
-  UniverseChainId.Unichain,
-  UniverseChainId.Polygon,
-  UniverseChainId.ArbitrumOne,
-  UniverseChainId.Optimism,
-  UniverseChainId.Base,
-  UniverseChainId.Bnb,
-  UniverseChainId.Blast,
-  UniverseChainId.Avalanche,
-  UniverseChainId.Celo,
-  UniverseChainId.WorldChain,
-  UniverseChainId.Soneium,
-  UniverseChainId.Zora,
-  UniverseChainId.Zksync,
+  UniverseChainId.Zephyr, // Only Zephyr is supported
 ]
 
 export const SUPPORTED_TESTNET_CHAIN_IDS: UniverseChainId[] = [
-  UniverseChainId.Sepolia,
-  UniverseChainId.UnichainSepolia,
-  UniverseChainId.MonadTestnet,
+  UniverseChainId.Zephyr, // Only Zephyr is supported
 ]
 
 // This order is used as a fallback for chain ordering but will otherwise defer to useOrderedChainIds
-export const ALL_CHAIN_IDS: UniverseChainId[] = [...SUPPORTED_CHAIN_IDS, ...SUPPORTED_TESTNET_CHAIN_IDS]
+export const ALL_CHAIN_IDS: UniverseChainId[] = [UniverseChainId.Zephyr] // Only Zephyr is supported
 
 export interface EnabledChainsInfo {
   chains: UniverseChainId[]

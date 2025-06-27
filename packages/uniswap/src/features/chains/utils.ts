@@ -236,7 +236,7 @@ export function getEnabledChains({
   return {
     chains: supportedChainIds,
     gqlChains: supportedGqlChains,
-    defaultChainId: UniverseChainId.Mainnet as UniverseChainId,
+    defaultChainId: UniverseChainId.Zephyr as UniverseChainId,
     isTestnetModeEnabled,
   }
 }
