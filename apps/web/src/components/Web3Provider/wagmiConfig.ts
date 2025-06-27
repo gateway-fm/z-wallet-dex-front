@@ -33,9 +33,8 @@ function createWagmiConnectors(params: {
 
   const baseConnectors = [
     injectedWithFallback(),
-    // There are no unit tests that expect WalletConnect to be included here,
-    // so we can disable it to reduce log noise.
-    ...(isTestEnv() && !isPlaywrightEnv() ? [] : [walletConnect(WC_PARAMS)]),
+    // Disable WalletConnect to avoid external API calls
+    // ...(isTestEnv() && !isPlaywrightEnv() ? [] : [walletConnect(WC_PARAMS)]),
     embeddedWallet(),
     coinbaseWallet({
       appName: 'Uniswap',
