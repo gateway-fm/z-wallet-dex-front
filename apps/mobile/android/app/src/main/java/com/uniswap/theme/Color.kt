@@ -193,8 +193,8 @@ val lightCustomColors = CustomColors(
   neutral2 = Color(0xFF7D7D7D),
   neutral3 = Color(0xFFCECECE),
 
-  accent1 = Color(0xFFFC72FF),
-  accent2 = Color(0xFFFFEFFF),
+  accent1 = Color(0xFF8950FA),
+  accent2 = Color(0xFFF5F3FF),
 
   statusActive = Color(0xFF236EFF),
   statusSuccess = Color(0xFF40B66B),
@@ -214,8 +214,8 @@ val darkCustomColors = CustomColors(
   neutral2 = Color(0xFF9B9B9B),
   neutral3 = Color(0xFF5E5E5E),
 
-  accent1 = Color(0xFFFC72FF),
-  accent2 = Color(0xFF311C31),
+  accent1 = Color(0xFF8950FA),
+  accent2 = Color(0xFF1A0D2E),
 
   statusActive = Color(0xFF236EFF),
   statusSuccess = Color(0xFF40B66B),
