@@ -1,16 +1,14 @@
 import { MenuItem, MenuSection, useMenuContent } from 'components/NavBar/CompanyMenu/Content'
-import { DownloadApp } from 'components/NavBar/CompanyMenu/DownloadAppCTA'
 import { LegalAndPrivacyMenu } from 'components/NavBar/LegalAndPrivacyMenu'
 import { NavDropdown } from 'components/NavBar/NavDropdown'
 import { useTabsVisible } from 'components/NavBar/ScreenSizes'
 import { useTabsContent } from 'components/NavBar/Tabs/TabsContent'
-import { Socials } from 'pages/Landing/sections/Footer'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { ThemedText } from 'theme/components'
 import { ExternalLink } from 'theme/components/Links'
-import { Flex, Separator, Text, styled } from 'ui/src'
+import { Flex, Text, styled } from 'ui/src'
 import { TextVariantTokens } from 'ui/src/theme'
 import { FeatureFlags } from 'uniswap/src/features/gating/flags'
 import { useFeatureFlag } from 'uniswap/src/features/gating/hooks'
@@ -98,17 +96,6 @@ export function MenuDropdown({ close }: { close?: () => void }) {
       <Container>
         <Flex gap="$spacing20">
           {!areTabsVisible && <Section title={t('common.app')} items={tabsMenuItems} closeMenu={close} />}
-          {menuContent.map((sectionContent, index) => (
-            <Section
-              key={`menu_section_${index}`}
-              title={sectionContent.title}
-              items={sectionContent.items}
-              closeMenu={close}
-            />
-          ))}
-          <Separator />
-          <DownloadApp onClick={close} />
-          <Socials iconSize="25px" />
           {isConversionTrackingEnabled && <LegalAndPrivacyMenu closeMenu={close} />}
         </Flex>
       </Container>

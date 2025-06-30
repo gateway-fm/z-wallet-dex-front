@@ -1,11 +1,9 @@
-import { ColumnCenter } from 'components/deprecated/Column'
 import { useCurrency } from 'hooks/Tokens'
 import { useScroll } from 'hooks/useScroll'
 import { TokenCloud } from 'pages/Landing/components/TokenCloud'
-import { Hover, RiseIn, RiseInText } from 'pages/Landing/components/animations'
+import { RiseIn, RiseInText } from 'pages/Landing/components/animations'
 import { Swap } from 'pages/Swap'
 import { Fragment, useCallback, useMemo } from 'react'
-import { ChevronDown } from 'react-feather'
 import { Trans, useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { serializeSwapStateToURLParameters } from 'state/swap/hooks'
@@ -19,7 +17,7 @@ interface HeroProps {
   transition?: boolean
 }
 
-export function Hero({ scrollToRef, transition }: HeroProps) {
+export function Hero({ transition }: HeroProps) {
   const media = useMedia()
   const { height: scrollPosition } = useScroll({ enabled: !media.sm })
   const { defaultChainId } = useEnabledChains()
@@ -142,35 +140,6 @@ export function Hero({ scrollToRef, transition }: HeroProps) {
       </Flex>
 
       <Flex flex={1} />
-
-      <Flex
-        position="absolute"
-        width="100%"
-        centered
-        pointerEvents="none"
-        bottom={48}
-        style={{ transform: `translate(0px, ${translateY}px)`, opacity: opacityY }}
-        $midHeight={{ display: 'none' }}
-      >
-        <RiseIn delay={0.3}>
-          <Flex
-            alignItems="center"
-            justifyContent="flex-start"
-            onPress={() => scrollToRef()}
-            cursor="pointer"
-            width={500}
-          >
-            <Hover>
-              <ColumnCenter>
-                <Text variant="body2">
-                  <Trans i18nKey="hero.scroll" />
-                </Text>
-                <ChevronDown />
-              </ColumnCenter>
-            </Hover>
-          </Flex>
-        </RiseIn>
-      </Flex>
     </Flex>
   )
 }

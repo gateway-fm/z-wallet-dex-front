@@ -1,13 +1,7 @@
 import { Hero } from 'pages/Landing/sections/Hero'
-import { Suspense, lazy, memo, useRef } from 'react'
+import { memo, useRef } from 'react'
 import { Flex, styled } from 'ui/src'
 import { INTERFACE_NAV_HEIGHT } from 'ui/src/theme'
-
-// The Fold is always loaded, but is lazy-loaded because it is not seen without user interaction.
-// Annotating it with webpackPreload allows it to be ready when requested.
-const Fold = lazy(() => import(/* webpackPreload: true */ './Fold'))
-
-const Rive = lazy(() => import(/* webpackPreload: true */ 'setupRive'))
 
 const Grain = styled(Flex, {
   position: 'absolute',
@@ -38,10 +32,6 @@ function LandingV2({ transition }: { transition?: boolean }) {
     >
       <Grain />
       <Hero scrollToRef={scrollToRef} transition={transition} />
-      <Suspense>
-        <Rive />
-        <Fold ref={scrollAnchor} />
-      </Suspense>
     </Flex>
   )
 }
