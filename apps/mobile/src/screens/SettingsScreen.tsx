@@ -48,9 +48,9 @@ import {
   Passkey,
   Sliders,
   TouchId,
-  UniswapLogo,
   WavePulse,
   Wrench,
+  GatewayLogo,
 } from 'ui/src/components/icons'
 import { iconSizes } from 'ui/src/theme'
 import { uniswapUrls } from 'uniswap/src/constants/urls'
@@ -393,13 +393,13 @@ export function SettingsScreen(): JSX.Element {
           {
             navigationModal: ModalName.Experiments,
             text: 'Dev Modal',
-            icon: <UniswapLogo {...svgProps} />,
+            icon: <GatewayLogo {...svgProps} />,
             testID: TestID.AppSettingsDevModal,
           },
           {
             screen: MobileScreens.Dev,
             text: 'Dev options',
-            icon: <UniswapLogo {...svgProps} />,
+            icon: <GatewayLogo {...svgProps} />,
           },
           { component: <OnboardingRow iconProps={svgProps} /> },
           { component: <ResetBehaviorHistoryRow iconProps={svgProps} /> },

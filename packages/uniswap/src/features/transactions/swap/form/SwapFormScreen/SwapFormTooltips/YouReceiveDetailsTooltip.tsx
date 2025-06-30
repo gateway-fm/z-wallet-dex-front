@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
-import { UniswapLogo } from 'ui/src/components/icons/UniswapLogo'
 import { UniswapX } from 'ui/src/components/icons/UniswapX'
+import { GatewayLogo } from 'ui/src/components/icons/GatewayLogo'
 import { TransactionDetailsTooltip as Tooltip } from 'uniswap/src/components/TransactionDetailsTooltip'
 import { useLocalizationContext } from 'uniswap/src/features/language/LocalizationContext'
 import { FeeOnTransferFeeGroupProps } from 'uniswap/src/features/transactions/TransactionDetails/types'
@@ -50,7 +50,7 @@ export function YouReceiveDetailsTooltip({
         title={{
           title: t('swap.bestPrice.through', { provider: isUniswapXContext ? 'UniswapX' : 'Uniswap API' }),
         }}
-        Icon={isUniswapXContext ? UniswapX : UniswapLogo}
+        Icon={isUniswapXContext ? UniswapX : GatewayLogo}
         iconColor="$accent1"
       />
       <Tooltip.Content>

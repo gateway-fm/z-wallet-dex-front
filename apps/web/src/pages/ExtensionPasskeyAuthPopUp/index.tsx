@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
 import { Anchor, Button, Flex, SpinningLoader, Text } from 'ui/src'
 import { Passkey } from 'ui/src/components/icons/Passkey'
-import { UniswapLogo } from 'ui/src/components/icons/UniswapLogo'
+import { GatewayLogo } from 'ui/src/components/icons/GatewayLogo'
 import { uniswapUrls } from 'uniswap/src/constants/urls'
 import { parseMessage } from 'uniswap/src/extension/messagePassing/platform'
 import {
@@ -177,7 +177,7 @@ export default function ExtensionPasskeyAuthPopUp() {
           </Flex>
 
           <Flex alignItems="center">
-            <UniswapLogo size="$icon.40" color="$accent1" />
+            <GatewayLogo size="$icon.40" color="$accent1" />
           </Flex>
 
           {signInAttemptStatus === ReferrerVerification.Denied ? (

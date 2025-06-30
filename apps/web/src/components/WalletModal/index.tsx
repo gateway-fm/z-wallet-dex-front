@@ -17,7 +17,7 @@ import { transitions } from 'theme/styles'
 import { Flex, Separator, Text } from 'ui/src'
 import { DoubleChevron } from 'ui/src/components/icons/DoubleChevron'
 import { DoubleChevronInverted } from 'ui/src/components/icons/DoubleChevronInverted'
-import { UniswapLogo } from 'ui/src/components/icons/UniswapLogo'
+import { GatewayLogo } from 'ui/src/components/icons/GatewayLogo'
 import { CONNECTION_PROVIDER_IDS } from 'uniswap/src/constants/web3'
 import { FeatureFlags } from 'uniswap/src/features/gating/flags'
 import { useFeatureFlag } from 'uniswap/src/features/gating/hooks'
@@ -78,7 +78,7 @@ export default function WalletModal() {
       </Flex>
       {isEmbeddedWalletEnabled ? (
         <Flex justifyContent="center" alignItems="center" py={8}>
-          <UniswapLogo size={48} color="$accent1" />
+          <GatewayLogo size={48} color="$accent1" />
         </Flex>
       ) : (
         <UniswapWalletOptions />

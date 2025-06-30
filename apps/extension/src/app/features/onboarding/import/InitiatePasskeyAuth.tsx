@@ -13,7 +13,7 @@ import { navigate } from 'src/app/navigation/state'
 import { bringWindowToFront, closeWindow, openPopupWindow } from 'src/app/navigation/utils'
 import { Button, Flex, IconButton, SpinningLoader, Text } from 'ui/src'
 import { X } from 'ui/src/components/icons'
-import { UniswapLogo } from 'ui/src/components/icons/UniswapLogo'
+import { GatewayLogo } from 'ui/src/components/icons/GatewayLogo'
 import { fetchChallengeRequest } from 'uniswap/src/data/rest/embeddedWallet/requests'
 import { parseMessage } from 'uniswap/src/extension/messagePassing/platform'
 import {
@@ -278,7 +278,7 @@ function InitiatePasskeyAuthContent(): JSX.Element {
       </Flex>
 
       <Flex gap="$spacing32" centered>
-        <UniswapLogo size={80} />
+        <GatewayLogo size={80} />
 
         <Text>{t('onboarding.importPasskey.continueInSecureWindow')}</Text>
 

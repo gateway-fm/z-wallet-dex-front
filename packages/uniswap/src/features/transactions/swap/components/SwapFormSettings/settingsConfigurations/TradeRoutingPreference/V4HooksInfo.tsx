@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { Flex, Text } from 'ui/src'
 import { InfoCircleFilled } from 'ui/src/components/icons/InfoCircleFilled'
-import { UniswapLogo } from 'ui/src/components/icons/UniswapLogo'
+import { GatewayLogo } from 'ui/src/components/icons/GatewayLogo'
 import { WarningInfo } from 'uniswap/src/components/modals/WarningModal/WarningInfo'
 import { WarningSeverity } from 'uniswap/src/components/modals/WarningModal/types'
 import { LearnMoreLink } from 'uniswap/src/components/text/LearnMoreLink'
@@ -21,7 +21,7 @@ export function V4HooksInfo(): JSX.Element {
         rejectText: t('common.button.close'),
         severity: WarningSeverity.None,
         modalName: ModalName.V4HooksInfo,
-        icon: <UniswapLogo size="$icon.24" />,
+        icon: <GatewayLogo size="$icon.24" />,
       }}
       trigger={
         <Flex row centered>

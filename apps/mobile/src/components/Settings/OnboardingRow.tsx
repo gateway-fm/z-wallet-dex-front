@@ -1,7 +1,7 @@
 import { useDispatch } from 'react-redux'
 import { useSettingsStackNavigation } from 'src/app/navigation/types'
 import { Flex, IconProps, Text, TouchableArea } from 'ui/src'
-import { RotatableChevron, UniswapLogo } from 'ui/src/components/icons'
+import { RotatableChevron, GatewayLogo } from 'ui/src/components/icons'
 import { iconSizes } from 'ui/src/theme'
 import { resetUniswapBehaviorHistory } from 'uniswap/src/features/behaviorHistory/slice'
 import { logger } from 'utilities/src/logger/logger'
@@ -38,7 +38,7 @@ export function OnboardingRow({ iconProps }: { iconProps: IconProps }): JSX.Elem
       <Flex row alignItems="center" justifyContent="space-between" py="$spacing4">
         <Flex row alignItems="center">
           <Flex centered height={32} width={32}>
-            <UniswapLogo {...iconProps} />
+            <GatewayLogo {...iconProps} />
           </Flex>
           <Text ml="$spacing12" variant="body1">
             Onboarding

@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Flex } from 'ui/src'
 import { ShieldCheck } from 'ui/src/components/icons/ShieldCheck'
-import { UniswapLogo } from 'ui/src/components/icons/UniswapLogo'
+import { GatewayLogo } from 'ui/src/components/icons/GatewayLogo'
 import { UniswapX } from 'ui/src/components/icons/UniswapX'
 import RoutingDiagram from 'uniswap/src/components/RoutingDiagram/RoutingDiagram'
 import { TransactionDetailsTooltip as Tooltip } from 'uniswap/src/components/TransactionDetailsTooltip'
@@ -28,7 +28,7 @@ export function BestRouteTooltip(): JSX.Element | null {
         title={{
           title: t('common.bestRoute.with', { provider: 'Uniswap API' }),
         }}
-        Icon={UniswapLogo}
+        Icon={GatewayLogo}
         iconColor="$accent1"
       />
       <Tooltip.Content>

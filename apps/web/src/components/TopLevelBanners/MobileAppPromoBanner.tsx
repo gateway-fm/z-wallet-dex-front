@@ -1,4 +1,4 @@
-import { ReactComponent as UniswapLogo } from 'assets/svg/uniswap_app_logo.svg'
+import { GatewayLogo } from 'ui/src/components/icons/GatewayLogo'
 import { useEthersWeb3Provider } from 'hooks/useEthersProvider'
 import { useAtom } from 'jotai'
 import { useAtomValue } from 'jotai/utils'
@@ -98,7 +98,7 @@ export function MobileAppPromoBanner() {
             setHideMobileAppPromoBanner(true)
           }}
         />
-        <UniswapLogo width="32px" height="32px" />
+        <GatewayLogo size={32} />
         <Flex shrink>
           <Text variant="body3">{t('mobileAppPromo.banner.title')}</Text>
           <Text variant="body4" color="$neutral2">
