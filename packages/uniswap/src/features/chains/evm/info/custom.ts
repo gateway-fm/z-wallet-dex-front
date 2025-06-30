@@ -12,7 +12,6 @@ import {
 import { ElementName } from 'uniswap/src/features/telemetry/constants'
 
 // Environment variables with fallbacks
-const CUSTOM_NETWORK_CHAIN_ID = Number(process.env.REACT_APP_CUSTOM_NETWORK_CHAIN_ID) || 1417429182
 const CUSTOM_NETWORK_RPC_URL = process.env.REACT_APP_CUSTOM_NETWORK_RPC_URL || 'https://zephyr-rpc.eu-north-2.gateway.fm'
 const CUSTOM_NETWORK_EXPLORER_URL = process.env.REACT_APP_CUSTOM_NETWORK_EXPLORER_URL || 'https://zephyr-blockscout.eu-north-2.gateway.fm/' as const
 const CUSTOM_NETWORK_BRIDGE_URL = process.env.REACT_APP_CUSTOM_NETWORK_BRIDGE_URL || 'https://zephyr-bridge.eu-north-2.gateway.fm'

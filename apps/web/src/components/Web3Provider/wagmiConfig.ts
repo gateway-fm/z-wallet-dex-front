@@ -1,16 +1,15 @@
 import { PLAYWRIGHT_CONNECT_ADDRESS } from 'components/Web3Provider/constants'
 import { injectedWithFallback } from 'components/Web3Provider/injectedWithFallback'
-import { WC_PARAMS } from 'components/Web3Provider/walletConnect'
 import { embeddedWallet } from 'connection/EmbeddedWalletConnector'
 import { UNISWAP_LOGO } from 'ui/src/assets'
 import { UNISWAP_WEB_URL } from 'uniswap/src/constants/urls'
 import { UNIVERSE_CHAINS_SORTED, getChainInfo } from 'uniswap/src/features/chains/chainInfo'
 import { isTestnetChain } from 'uniswap/src/features/chains/utils'
-import { isPlaywrightEnv, isTestEnv } from 'utilities/src/environment/env'
+import { isPlaywrightEnv } from 'utilities/src/environment/env'
 import { logger } from 'utilities/src/logger/logger'
 import { Chain, createClient } from 'viem'
 import { Config, createConfig, fallback, http } from 'wagmi'
-import { coinbaseWallet, mock, safe, walletConnect } from 'wagmi/connectors'
+import { coinbaseWallet, mock, safe } from 'wagmi/connectors'
 
 export const orderedTransportUrls = (chain: ReturnType<typeof getChainInfo>): string[] => {
   const orderedRpcUrls = [

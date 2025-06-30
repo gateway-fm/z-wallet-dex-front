@@ -15,7 +15,7 @@ export const UNIVERSE_CHAIN_INFO = {
   [UniverseChainId.Zephyr]: ZEPHYR_CHAIN_INFO,
 } as const
 
-function getUniverseChainsSorted() {
+function getUniverseChainsSorted(): UniverseChainInfo[] {
   const sortOrder = new Map(ALL_CHAIN_IDS.map((chainId, idx) => [chainId, idx]))
   return Object.values(UNIVERSE_CHAIN_INFO).sort((a, b) => {
     const indexA = sortOrder.get(a.id) ?? Infinity
