@@ -32,6 +32,7 @@ export enum UniverseChainId {
 
 export const SUPPORTED_CHAIN_IDS: UniverseChainId[] = [
   UniverseChainId.Mainnet,
+  UniverseChainId.Sepolia,
   UniverseChainId.Zephyr,
 ]
 

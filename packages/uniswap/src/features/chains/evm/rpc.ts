@@ -15,6 +15,8 @@ export function getQuicknodeChainId(chainId: UniverseChainId): string {
   switch (chainId) {
     case UniverseChainId.Mainnet:
       return ''
+    case UniverseChainId.Sepolia:
+      return 'sepolia'
     case UniverseChainId.Zephyr:
       // Custom network
       return 'zephyr'
@@ -29,7 +31,8 @@ export function getQuicknodeChainIdPathSuffix(chainId: UniverseChainId): string 
     case UniverseChainId.Avalanche:
       return '/ext/bc/C/rpc' // https://www.quicknode.com/docs/avalanche#overview
     default:
-  return ''
+      return ''
+  }
 }
 
 export function getQuicknodeEndpointUrl(chainId: UniverseChainId): string {
