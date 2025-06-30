@@ -10,19 +10,59 @@ export function isUniverseChainId(chainId?: number | UniverseChainId | null): ch
 }
 
 export enum UniverseChainId {
+  Mainnet = 1,
+  ArbitrumOne = 42161,
+  Avalanche = 43114,
+  Base = 8453,
+  Blast = 81457,
+  Bnb = 56,
+  Celo = 42220,
+  MonadTestnet = 1337,
+  Optimism = 10,
+  Polygon = 137,
+  Sepolia = 11155111,
+  Soneium = 123456789,
+  Unichain = 987654321,
+  UnichainSepolia = 111111111,
+  WorldChain = 222222222,
+  Zksync = 324,
+  Zora = 7777777,
   Zephyr = Number(process.env.REACT_APP_CUSTOM_NETWORK_CHAIN_ID) || 1417429182,
 }
 
 export const SUPPORTED_CHAIN_IDS: UniverseChainId[] = [
-  UniverseChainId.Zephyr, // Only Zephyr is supported
+  UniverseChainId.Mainnet,
+  UniverseChainId.Zephyr,
 ]
 
 export const SUPPORTED_TESTNET_CHAIN_IDS: UniverseChainId[] = [
-  UniverseChainId.Zephyr, // Only Zephyr is supported
+  UniverseChainId.Sepolia,
+  UniverseChainId.MonadTestnet,
+  UniverseChainId.UnichainSepolia,
+  UniverseChainId.Zephyr,
 ]
 
 // This order is used as a fallback for chain ordering but will otherwise defer to useOrderedChainIds
-export const ALL_CHAIN_IDS: UniverseChainId[] = [UniverseChainId.Zephyr] // Only Zephyr is supported
+export const ALL_CHAIN_IDS: UniverseChainId[] = [
+  UniverseChainId.Mainnet,
+  UniverseChainId.ArbitrumOne,
+  UniverseChainId.Avalanche,
+  UniverseChainId.Base,
+  UniverseChainId.Blast,
+  UniverseChainId.Bnb,
+  UniverseChainId.Celo,
+  UniverseChainId.MonadTestnet,
+  UniverseChainId.Optimism,
+  UniverseChainId.Polygon,
+  UniverseChainId.Sepolia,
+  UniverseChainId.Soneium,
+  UniverseChainId.Unichain,
+  UniverseChainId.UnichainSepolia,
+  UniverseChainId.WorldChain,
+  UniverseChainId.Zksync,
+  UniverseChainId.Zora,
+  UniverseChainId.Zephyr,
+]
 
 export interface EnabledChainsInfo {
   chains: UniverseChainId[]

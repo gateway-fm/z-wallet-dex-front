@@ -1,15 +1,17 @@
 import { ZEPHYR_CHAIN_INFO } from 'uniswap/src/features/chains/evm/info/custom'
+import { MAINNET_CHAIN_INFO } from 'uniswap/src/features/chains/evm/info/mainnet'
 import { ALL_CHAIN_IDS, UniverseChainId, UniverseChainInfo } from 'uniswap/src/features/chains/types'
 
 export function getChainInfo(chainId: UniverseChainId): UniverseChainInfo {
   const chainInfo = UNIVERSE_CHAIN_INFO[chainId as keyof typeof UNIVERSE_CHAIN_INFO]
   if (!chainInfo) {
-    return UNIVERSE_CHAIN_INFO[UniverseChainId.Zephyr]
+    return UNIVERSE_CHAIN_INFO[UniverseChainId.Zephyr] as UniverseChainInfo
   }
   return chainInfo
 }
 
 export const UNIVERSE_CHAIN_INFO = {
+  [UniverseChainId.Mainnet]: MAINNET_CHAIN_INFO,
   [UniverseChainId.Zephyr]: ZEPHYR_CHAIN_INFO,
 } as const
 

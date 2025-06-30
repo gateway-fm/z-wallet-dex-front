@@ -3,6 +3,15 @@ import { Currency, NativeCurrency, Token, UNI_ADDRESSES, WETH9 } from '@uniswap/
 import invariant from 'tiny-invariant'
 import { UniverseChainId } from 'uniswap/src/features/chains/types'
 
+// Zephyr chain tokens
+export const USDC_ZEPHYR = new Token(
+  UniverseChainId.Zephyr,
+  process.env.REACT_APP_CUSTOM_NETWORK_USDC_ADDRESS || '0x078D782b760474a361dDA0AF3839290b0EF57AD6',
+  6,
+  'USDC',
+  'USD Coin',
+)
+
 export const USDT_MONAD_TESTNET = new Token(
   UniverseChainId.MonadTestnet,
   '0xfBC2D240A5eD44231AcA3A9e9066bc4b33f01149',
@@ -258,6 +267,7 @@ export const USDT_AVALANCHE = new Token(
   'USDT',
   'Tether USD',
 )
+
 export const WETH_AVALANCHE = new Token(
   UniverseChainId.Avalanche,
   '0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB',
@@ -265,6 +275,7 @@ export const WETH_AVALANCHE = new Token(
   'WETH',
   'Wrapped Ether',
 )
+
 export const DAI_AVALANCHE = new Token(
   UniverseChainId.Avalanche,
   '0xd586E7F844cEa2F87f50152665BCbc2C279D8d70',
@@ -376,6 +387,7 @@ export const LDO = new Token(
   'LDO',
   'Lido DAO Token',
 )
+
 export const NMR = new Token(
   UniverseChainId.Mainnet,
   '0x1776e1F26f98b1A5dF9cD347953a26dd3Cb46671',
@@ -383,6 +395,7 @@ export const NMR = new Token(
   'NMR',
   'Numeraire',
 )
+
 export const MNW = new Token(
   UniverseChainId.Mainnet,
   '0xd3E4Ba569045546D09CF021ECC5dFe42b1d7f6E4',
@@ -491,6 +504,13 @@ export const WRAPPED_NATIVE_CURRENCY: { [chainId: number]: Token | undefined } =
     18,
     'WETH',
     'Wrapped Ether',
+  ),
+  [UniverseChainId.Zephyr]: new Token(
+    UniverseChainId.Zephyr,
+    process.env.REACT_APP_CUSTOM_NETWORK_WRAPPED_NATIVE_ADDRESS || '0x4200000000000000000000000000000000000006',
+    18,
+    'WZERO',
+    'Wrapped Zero',
   ),
   [UniverseChainId.Zksync]: new Token(
     UniverseChainId.Zksync,
@@ -646,6 +666,32 @@ class MonadTestnetNativeCurrency extends NativeCurrency {
   }
 }
 
+function isZephyr(chainId: number): chainId is UniverseChainId.Zephyr {
+  return chainId === UniverseChainId.Zephyr
+}
+
+class ZephyrNativeCurrency extends NativeCurrency {
+  equals(other: Currency): boolean {
+    return other.isNative && other.chainId === this.chainId
+  }
+
+  get wrapped(): Token {
+    if (!isZephyr(this.chainId)) {
+      throw new Error('Not zephyr')
+    }
+    const wrapped = WRAPPED_NATIVE_CURRENCY[this.chainId]
+    invariant(wrapped instanceof Token)
+    return wrapped
+  }
+
+  public constructor(chainId: number) {
+    if (!isZephyr(chainId)) {
+      throw new Error('Not zephyr')
+    }
+    super(chainId, 18, 'ZERO', 'Zero')
+  }
+}
+
 class ExtendedEther extends NativeCurrency {
   public get wrapped(): Token {
     const wrapped = WRAPPED_NATIVE_CURRENCY[this.chainId]
@@ -686,6 +732,8 @@ export function nativeOnChain(chainId: number): NativeCurrency | Token {
     nativeCurrency = new AvaxNativeCurrency(chainId)
   } else if (isMonadTestnet(chainId)) {
     nativeCurrency = new MonadTestnetNativeCurrency(chainId)
+  } else if (isZephyr(chainId)) {
+    nativeCurrency = new ZephyrNativeCurrency(chainId)
   } else {
     nativeCurrency = ExtendedEther.onChain(chainId)
   }

@@ -32,6 +32,30 @@ export const USDC_ZEPHYR = new Token(
 export const ZEPHYR_CHAIN_INFO = {
   name: 'Zephyr',
   id: UniverseChainId.Zephyr,
+  nativeCurrency: {
+    name: 'Zero',
+    symbol: 'ZERO',
+    decimals: 18,
+    address: DEFAULT_NATIVE_ADDRESS_LEGACY,
+    logo: ETH_LOGO,
+  },
+  rpcUrls: {
+    [RPCType.Public]: { http: [CUSTOM_NETWORK_RPC_URL] },
+    [RPCType.Default]: { http: [CUSTOM_NETWORK_RPC_URL] },
+    [RPCType.Interface]: { http: [CUSTOM_NETWORK_RPC_URL] },
+  },
+  blockExplorers: {
+    default: {
+      name: 'Zephyr Blockscout',
+      url: CUSTOM_NETWORK_EXPLORER_URL,
+    },
+  },
+  contracts: {
+    multicall3: {
+      address: (process.env.REACT_APP_CUSTOM_NETWORK_MULTICALL_ADDRESS || '0xdb718F574AA8Dad534F0AfA12388a84Ec8DbC08B') as `0x${string}`,
+      blockCreated: 1,
+    },
+  },
   assetRepoNetworkName: undefined,
   backendChain: {
     chain: BackendChainId.Ethereum as GqlChainId,
@@ -50,20 +74,8 @@ export const ZEPHYR_CHAIN_INFO = {
   interfaceName: 'zephyr',
   label: 'Zephyr',
   logo: ETH_LOGO,
-  nativeCurrency: {
-    name: 'Zero',
-    symbol: 'ZERO',
-    decimals: 18,
-    address: DEFAULT_NATIVE_ADDRESS_LEGACY,
-    logo: ETH_LOGO,
-  },
   networkLayer: NetworkLayer.L2,
   pendingTransactionsRetryOptions: undefined,
-  rpcUrls: {
-    [RPCType.Public]: { http: [CUSTOM_NETWORK_RPC_URL] },
-    [RPCType.Default]: { http: [CUSTOM_NETWORK_RPC_URL] },
-    [RPCType.Interface]: { http: [CUSTOM_NETWORK_RPC_URL] },
-  },
   spotPriceStablecoinAmount: CurrencyAmount.fromRawAmount(USDC_ZEPHYR, 10_000e6),
   stablecoins: [USDC_ZEPHYR],
   statusPage: undefined,
@@ -73,7 +85,7 @@ export const ZEPHYR_CHAIN_INFO = {
     name: 'Wrapped Zero',
     symbol: 'WZERO',
     decimals: 18,
-    address: CUSTOM_NETWORK_WRAPPED_NATIVE_ADDRESS,
+    address: CUSTOM_NETWORK_WRAPPED_NATIVE_ADDRESS as `0x${string}`,
   },
   testnet: false,
 } as const satisfies UniverseChainInfo 
