@@ -32,7 +32,6 @@ export default function TopLevelModals() {
       <>
         <ModalRenderer modalName={ModalName.PrivacyPolicy} />
         <ModalRenderer modalName={ModalName.PrivacyChoices} />
-        <ModalRenderer modalName={ModalName.GetTheApp} />
         <ModalRenderer modalName={ModalName.FeatureFlags} />
         <ModalRenderer modalName={ModalName.UniWalletConnect} />
         <ModalRenderer modalName={ModalName.BlockedAccount} />
@@ -47,12 +46,10 @@ export default function TopLevelModals() {
       <ModalRenderer modalName={ModalName.AddressClaim} />
       <ModalRenderer modalName={ModalName.BlockedAccount} />
       <ModalRenderer modalName={ModalName.UniWalletConnect} />
-      <ModalRenderer modalName={ModalName.Banners} />
       <ModalRenderer modalName={ModalName.OffchainActivity} />
       <ModalRenderer modalName={ModalName.TransactionConfirmation} />
       <ModalRenderer modalName={ModalName.UkDisclaimer} />
       <ModalRenderer modalName={ModalName.TestnetMode} componentProps={{ showCloseButton: true }} />
-      <ModalRenderer modalName={ModalName.GetTheApp} />
       <ModalRenderer modalName={ModalName.PrivacyPolicy} />
       <ModalRenderer modalName={ModalName.PrivacyChoices} />
       <ModalRenderer modalName={ModalName.FeatureFlags} />
