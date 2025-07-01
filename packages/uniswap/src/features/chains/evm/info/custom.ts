@@ -57,8 +57,8 @@ export const ZEPHYR_CHAIN_INFO = {
   },
   assetRepoNetworkName: undefined,
   backendChain: {
-    chain: BackendChainId.Ethereum as GqlChainId,
-    backendSupported: false,
+    chain: BackendChainId.UnknownChain as GqlChainId,
+    backendSupported: true,
     nativeTokenBackendAddress: undefined,
   },
   blockPerMainnetEpochForChainId: 1,

@@ -99,6 +99,8 @@ export function fromGraphQLChain(chain: Chain | string | undefined): UniverseCha
       return UniverseChainId.Zksync
     case Chain.Zora:
       return UniverseChainId.Zora
+    case Chain.UnknownChain:
+      return UniverseChainId.Zephyr
   }
 
   return null
@@ -144,6 +146,8 @@ export function fromUniswapWebAppLink(network: string | null): UniverseChainId |
       return UniverseChainId.Zksync
     case Chain.Zora.toLowerCase():
       return UniverseChainId.Zora
+    case Chain.UnknownChain.toLowerCase():
+      return UniverseChainId.Zephyr
     default:
       throw new Error(`Network "${network}" can not be mapped`)
   }
@@ -185,6 +189,8 @@ export function toUniswapWebAppLink(chainId: UniverseChainId): string | null {
       return Chain.Zksync.toLowerCase()
     case UniverseChainId.Zora:
       return Chain.Zora.toLowerCase()
+    case UniverseChainId.Zephyr:
+      return Chain.UnknownChain.toLowerCase()
     default:
       throw new Error(`ChainID "${chainId}" can not be mapped`)
   }
@@ -217,7 +223,7 @@ export function getEnabledChains({
     return {
       chains: supportedTestnetChainIds,
       gqlChains: GQL_TESTNET_CHAINS,
-      defaultChainId: UniverseChainId.Sepolia as UniverseChainId,
+      defaultChainId: UniverseChainId.Zephyr as UniverseChainId,
       isTestnetModeEnabled,
     }
   }
