@@ -126,8 +126,8 @@ export function useGraphQLPortfolioData({
     fetchPolicy: internalFetchPolicy,
     notifyOnNetworkStatusChange: true,
     pollInterval: internalPollInterval,
-    variables: address ? { ownerAddress: address, valueModifiers, chains: gqlChains } : undefined,
-    skip: !address || queryOptions.skip,
+    variables: address && address.trim() ? { ownerAddress: address, valueModifiers, chains: gqlChains } : undefined,
+    skip: !address || !address.trim() || queryOptions.skip,
     // Prevents wiping out the cache with partial data on error.
     errorPolicy: 'none',
   })
@@ -207,8 +207,12 @@ export function useGraphQLPortfolioData({
   }, [balancesForAddress])
 
   const retry = useCallback(
-    () => refetch({ ownerAddress: address, valueModifiers }),
-    [address, valueModifiers, refetch],
+    () => {
+      if (address && address.trim()) {
+        refetch({ ownerAddress: address, valueModifiers, chains: gqlChains })
+      }
+    },
+    [address, valueModifiers, gqlChains, refetch],
   )
 
   return {
@@ -267,8 +271,8 @@ export function useGraphQLPortfolioTotalValue({
     fetchPolicy: internalFetchPolicy,
     notifyOnNetworkStatusChange: true,
     pollInterval: internalPollInterval,
-    variables: address ? { ownerAddress: address, valueModifiers, chains: gqlChains } : undefined,
-    skip: !address || !enabled,
+    variables: address && address.trim() ? { ownerAddress: address, valueModifiers, chains: gqlChains } : undefined,
+    skip: !address || !address.trim() || !enabled,
     // Prevents wiping out the cache with partial data on error.
     errorPolicy: 'none',
   })
@@ -289,8 +293,12 @@ export function useGraphQLPortfolioTotalValue({
   }, [portfolioForAddress])
 
   const retry = useCallback(
-    () => refetch({ ownerAddress: address, valueModifiers }),
-    [address, valueModifiers, refetch],
+    () => {
+      if (address && address.trim()) {
+        refetch({ ownerAddress: address, valueModifiers, chains: gqlChains })
+      }
+    },
+    [address, valueModifiers, gqlChains, refetch],
   )
 
   return {

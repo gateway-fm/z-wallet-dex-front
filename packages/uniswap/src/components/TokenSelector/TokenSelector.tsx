@@ -302,7 +302,7 @@ export function TokenSelectorContent({
                 {hasClipboardString && <PasteButton inline textVariant="buttonLabel3" onPress={handlePaste} />}
                 <NetworkFilter
                   includeAllNetworks={!isTestnetModeEnabled}
-                  chainIds={chainIds || enabledChains}
+                  chainIds={[...(chainIds || enabledChains)].filter((v, i, a) => a.indexOf(v) === i)}
                   selectedChain={chainFilter}
                   styles={isExtension || isMobileWeb ? { dropdownZIndex: zIndexes.overlay } : undefined}
                   onDismiss={dismissNativeKeyboard}
