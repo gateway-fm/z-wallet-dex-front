@@ -1,34 +1,20 @@
-import { useCallback, useMemo } from 'react'
-import { useTokenProjectsQuery } from 'uniswap/src/data/graphql/uniswap-data-api/__generated__/types-and-hooks'
+import { useMemo } from 'react'
 import { GqlResult } from 'uniswap/src/data/types'
 import { CurrencyInfo } from 'uniswap/src/features/dataApi/types'
-import { currencyIdToContractInput, tokenProjectToCurrencyInfos } from 'uniswap/src/features/dataApi/utils'
 import { CurrencyId } from 'uniswap/src/types/currency'
 
 /**
- * Fetches token information as CurrencyInfo from currencyIds. When used, wrap component
- * with Suspense.
+ * NOTE: This is a stub for web
+ * to avoid requests to TokenProjects with ContractInput
  */
-export function useTokenProjects(currencyIds: CurrencyId[]): GqlResult<CurrencyInfo[]> {
-  const contracts = useMemo(() => currencyIds.map((id) => currencyIdToContractInput(id)), [currencyIds])
-
-  const { data, loading, error, refetch } = useTokenProjectsQuery({
-    variables: { contracts },
-    skip: currencyIds.length === 0,
-  })
-
-  const formattedData = useMemo(() => {
-    if (!data || !data.tokenProjects) {
-      return undefined
-    }
-
-    return tokenProjectToCurrencyInfos(data.tokenProjects)
-  }, [data])
-
-  const retry = useCallback(() => refetch({ contracts }), [contracts, refetch])
-
+export function useTokenProjects(_currencyIds: CurrencyId[]): GqlResult<CurrencyInfo[]> {
   return useMemo(
-    () => ({ data: formattedData, loading, refetch: retry, error }),
-    [formattedData, loading, retry, error],
+    () => ({ 
+      data: [], 
+      loading: false, 
+      refetch: () => {}, 
+      error: undefined 
+    }),
+    []
   )
 }

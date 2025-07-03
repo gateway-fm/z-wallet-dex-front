@@ -1,51 +1,96 @@
-import { SearchTokensResponse, SearchType } from '@uniswap/client-search/dist/search/v1/api_pb'
 import { useMemo } from 'react'
-import { searchTokenToCurrencyInfo, useSearchTokensAndPoolsQuery } from 'uniswap/src/data/rest/searchTokensAndPools'
 import { GqlResult } from 'uniswap/src/data/types'
-import { SUPPORTED_CHAIN_IDS, UniverseChainId } from 'uniswap/src/features/chains/types'
+import { UniverseChainId } from 'uniswap/src/features/chains/types'
 import { CurrencyInfo } from 'uniswap/src/features/dataApi/types'
 import { NUMBER_OF_RESULTS_LONG } from 'uniswap/src/features/search/SearchModal/constants'
-import { useEvent } from 'utilities/src/react/hooks'
+import { useQuery } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { Token } from '@uniswap/sdk-core'
+import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client'
+
+const zephyrApolloClient = new ApolloClient({
+  link: new HttpLink({
+    uri: process.env.REACT_APP_AWS_API_ENDPOINT || 'https://api.dex-zephyr.cloudbuilder.ru/subgraphs/name/v3-tokens-mainnet',
+  }),
+  cache: new InMemoryCache(),
+})
+
+const SEARCH_TOKENS_QUERY = gql`
+  query SearchTokens($first: Int) {
+    tokens(first: $first) {
+      id
+      name
+      symbol
+      decimals
+    }
+  }
+`
+
+function graphqlTokenToCurrencyInfo(token: { id: string; name: string; symbol: string; decimals?: string }): CurrencyInfo | null {
+  if (!token.id || !token.symbol) {
+    return null
+  }
+
+  const chainId = UniverseChainId.Zephyr
+
+  const currency = new Token(
+    chainId,
+    token.id,
+    parseInt(String(token.decimals)) || 18,
+    token.symbol,
+    token.name
+  )
+
+  return {
+    currency,
+    currencyId: `${chainId}-${token.id}`,
+    logoUrl: null,
+    safetyInfo: undefined,
+  }
+}
 
 export function useSearchTokens({
   searchQuery,
   chainFilter,
-  skip,
-  size = NUMBER_OF_RESULTS_LONG,
+  skip = false,
 }: {
   searchQuery: string | null
   chainFilter: UniverseChainId | null
-  skip: boolean
-  size?: number
+  skip?: boolean
 }): GqlResult<CurrencyInfo[]> {
-  const variables = useMemo(
-    () => ({
-      searchQuery: searchQuery ?? undefined,
-      chainIds: chainFilter ? [chainFilter] : SUPPORTED_CHAIN_IDS,
-      searchType: SearchType.TOKEN,
-      page: 1,
-      size,
-    }),
-    [searchQuery, chainFilter, size],
-  )
-
-  const tokenSelect = useEvent((data: SearchTokensResponse): CurrencyInfo[] => {
-    return data.tokens.map((token) => searchTokenToCurrencyInfo(token)).filter((c): c is CurrencyInfo => Boolean(c))
+  const { data, loading, error, refetch } = useQuery(SEARCH_TOKENS_QUERY, {
+    client: zephyrApolloClient,
+    variables: {
+      first: NUMBER_OF_RESULTS_LONG,
+    },
+    skip: skip || (chainFilter !== null && chainFilter !== UniverseChainId.Zephyr),
   })
 
-  const {
-    data: tokens,
-    error,
-    isPending,
-    refetch,
-  } = useSearchTokensAndPoolsQuery<CurrencyInfo[]>({
-    input: variables,
-    enabled: !skip,
-    select: tokenSelect,
-  })
+  const tokens = useMemo(() => {
+    if (!data?.tokens) return []
+    
+    let filteredTokens = data.tokens
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase()
+      filteredTokens = data.tokens.filter((token: any) => 
+        token.name?.toLowerCase().includes(query) ||
+        token.symbol?.toLowerCase().includes(query) ||
+        token.id?.toLowerCase().includes(query)
+      )
+    }
+    
+    return filteredTokens
+      .map((token: { id: string; name: string; symbol: string; decimals?: string }) => graphqlTokenToCurrencyInfo(token))
+      .filter((token: CurrencyInfo | null): token is CurrencyInfo => token !== null)
+  }, [data, searchQuery])
 
   return useMemo(
-    () => ({ data: tokens, loading: isPending, error: error ?? undefined, refetch }),
-    [tokens, isPending, error, refetch],
+    () => ({
+      data: tokens,
+      loading,
+      error: error || undefined,
+      refetch,
+    }),
+    [tokens, loading, error, refetch],
   )
 }

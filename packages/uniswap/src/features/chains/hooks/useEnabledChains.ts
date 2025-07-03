@@ -3,8 +3,7 @@ import { useSelector } from 'react-redux'
 import { CONNECTION_PROVIDER_IDS } from 'uniswap/src/constants/web3'
 import { useConnector } from 'uniswap/src/contexts/UniswapContext'
 import { useFeatureFlaggedChainIds } from 'uniswap/src/features/chains/hooks/useFeatureFlaggedChainIds'
-import { useOrderedChainIds } from 'uniswap/src/features/chains/hooks/useOrderedChainIds'
-import { ALL_CHAIN_IDS, EnabledChainsInfo, GqlChainId, UniverseChainId } from 'uniswap/src/features/chains/types'
+import { ALL_CHAIN_IDS, GqlChainId, UniverseChainId } from 'uniswap/src/features/chains/types'
 import { getEnabledChains, isTestnetChain } from 'uniswap/src/features/chains/utils'
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { selectIsTestnetModeEnabled } from 'uniswap/src/features/settings/selectors'
@@ -59,30 +58,14 @@ export function useIsModeMismatch(chainId?: UniverseChainId): boolean {
   return isTestnetChain(chainId ?? UniverseChainId.Mainnet) ? !isTestnetModeEnabled : isTestnetModeEnabled
 }
 
-export function useEnabledChains(): EnabledChainsInfo {
-  const featureFlaggedChainIds = useFeatureFlaggedChainIds()
-  const connectedWalletChainIds = useConnectedWalletSupportedChains()
-  const isTestnetModeEnabled = useSelector(selectIsTestnetModeEnabled)
-
-  const {
-    chains: unorderedChains,
-    gqlChains,
-    defaultChainId,
-  } = useMemo(
-    () =>
-      getEnabledChains({
-        isTestnetModeEnabled,
-        connectedWalletChainIds,
-        featureFlaggedChainIds,
-      }),
-    [isTestnetModeEnabled, connectedWalletChainIds, featureFlaggedChainIds],
-  )
-
-  const orderedChains = useOrderedChainIds(unorderedChains)
-
-  return useMemo(() => {
-    return { chains: orderedChains, gqlChains, defaultChainId, isTestnetModeEnabled }
-  }, [defaultChainId, gqlChains, isTestnetModeEnabled, orderedChains])
+export function useEnabledChains(): any {
+  // NOTE: Only Zephyr
+  return useMemo(() => ({
+    chains: [UniverseChainId.Zephyr],
+    gqlChains: [],
+    defaultChainId: UniverseChainId.Zephyr,
+    isTestnetModeEnabled: false,
+  }), [])
 }
 
 // Note: can be used outside of Uniswap context

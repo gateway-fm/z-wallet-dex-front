@@ -22,6 +22,23 @@ import {
 import { buildCurrencyId, buildNativeCurrencyId } from 'uniswap/src/utils/currencyId'
 import { logger } from 'utilities/src/logger/logger'
 
+/**
+ * NOTE: This is a stub for web
+ * to avoid requests to TokenProjectsService
+ */
+function useTokenProjectsQueryStub(_variables: any) {
+  return {
+    data: { 
+      tokenProjects: [{ 
+        tokens: []  
+      }] 
+    },
+    loading: false,
+    error: null,
+    refetch: () => {},
+  }
+}
+
 export function useBridgingTokenWithHighestBalance({
   address,
   currencyAddress,
@@ -44,7 +61,8 @@ export function useBridgingTokenWithHighestBalance({
   const tokenIn = currencyAddress ? getTokenAddressFromChainForTradingApi(currencyAddress, currencyChainId) : undefined
   const tokenInChainId = toTradingApiSupportedChainId(currencyChainId)
 
-  const { data: tokenProjectsData, loading: tokenProjectsLoading } = useTokenProjectsQuery({
+  // NOTE: This is a stub for web
+  const { data: tokenProjectsData, loading: tokenProjectsLoading } = useTokenProjectsQueryStub({
     variables: { contracts: [currencyIdToContractInput(currencyId)] },
   })
 
