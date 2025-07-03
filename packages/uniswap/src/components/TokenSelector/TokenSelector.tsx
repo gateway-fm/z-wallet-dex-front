@@ -217,7 +217,7 @@ export function TokenSelectorContent({
       )
     }
 
-    if (searchFilter) {
+    if (chainFilter === UniverseChainId.Zephyr || searchFilter) {
       return (
         <TokenSelectorSearchResultsList
           activeAccountAddress={activeAccountAddress}
@@ -226,7 +226,7 @@ export function TokenSelectorContent({
           debouncedSearchFilter={debouncedSearchFilter}
           isBalancesOnlySearch={variation === TokenSelectorVariation.BalancesOnly}
           parsedChainFilter={parsedChainFilter}
-          searchFilter={searchFilter}
+          searchFilter={searchFilter || ''}
           input={input}
           onSelectCurrency={onSelectCurrencyCallback}
         />
