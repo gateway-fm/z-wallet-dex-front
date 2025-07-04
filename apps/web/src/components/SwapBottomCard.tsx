@@ -104,6 +104,7 @@ const CHAIN_THEME_LIGHT: Record<UniverseChainId, ChainTheme> = {
   [UniverseChainId.WorldChain]: { bgColor: 'rgba(0, 0, 0, 0.12)', textColor: '#000000' },
   [UniverseChainId.Zksync]: { bgColor: 'rgba(54, 103, 246, 0.12)', textColor: '#3667F6' },
   [UniverseChainId.Zora]: { bgColor: 'rgba(0, 0, 0, 0.12)', textColor: '#000000' },
+  [UniverseChainId.Zephyr]: { bgColor: '#8950FA33', textColor: '#8950FA' },
 }
 
 const CHAIN_THEME_DARK: Record<UniverseChainId, ChainTheme> = {
@@ -114,6 +115,7 @@ const CHAIN_THEME_DARK: Record<UniverseChainId, ChainTheme> = {
   [UniverseChainId.WorldChain]: { bgColor: 'rgba(255, 255, 255, 0.12)', textColor: '#FFFFFF' },
   [UniverseChainId.Zksync]: { bgColor: 'rgba(97, 137, 255, 0.12)', textColor: '#6189FF' },
   [UniverseChainId.Zora]: { bgColor: 'rgba(255, 255, 255, 0.12)', textColor: '#FFFFFF' },
+  [UniverseChainId.Zephyr]: { bgColor: '#8950FA33', textColor: '#8950FA' },
 }
 
 function useChainTheme(chainId: UniverseChainId): ChainTheme {

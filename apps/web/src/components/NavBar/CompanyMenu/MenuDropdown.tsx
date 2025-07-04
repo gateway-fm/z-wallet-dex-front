@@ -1,4 +1,4 @@
-import { MenuItem, MenuSection, useMenuContent } from 'components/NavBar/CompanyMenu/Content'
+import { MenuItem, MenuSection } from 'components/NavBar/CompanyMenu/Content'
 import { LegalAndPrivacyMenu } from 'components/NavBar/LegalAndPrivacyMenu'
 import { NavDropdown } from 'components/NavBar/NavDropdown'
 import { useTabsVisible } from 'components/NavBar/ScreenSizes'
@@ -77,7 +77,6 @@ function Section({ title, items, closeMenu }: MenuSection) {
 export function MenuDropdown({ close }: { close?: () => void }) {
   const { t } = useTranslation()
   const isConversionTrackingEnabled = useFeatureFlag(FeatureFlags.ConversionTracking)
-  const menuContent = useMenuContent()
   const areTabsVisible = useTabsVisible()
   const tabs = useTabsContent()
   const tabsMenuItems = useMemo(() => {

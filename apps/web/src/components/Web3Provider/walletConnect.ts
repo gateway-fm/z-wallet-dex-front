@@ -31,6 +31,7 @@ export const walletTypeToAmplitudeWalletType = (connectionType?: string) => {
   }
 }
 
+// eslint-disable-next-line import/no-unused-modules
 export const WC_PARAMS = {
   projectId: WALLET_CONNECT_PROJECT_ID,
   metadata: {
