@@ -1,5 +1,6 @@
 import { Currency, CurrencyAmount, Token } from '@uniswap/sdk-core'
-import { UNIVERSAL_ROUTER_ADDRESS, UniversalRouterVersion } from '@uniswap/universal-router-sdk'
+import { UniversalRouterVersion } from '@uniswap/universal-router-sdk'
+import { getUniversalRouterAddress } from 'utils/universalRouterPatch'
 import { OpenLimitOrdersButton } from 'components/AccountDrawer/MiniPortfolio/Limits/OpenLimitOrdersButton'
 import { useAccountDrawer } from 'components/AccountDrawer/MiniPortfolio/hooks'
 import { MenuState, miniPortfolioMenuStateAtom } from 'components/AccountDrawer/constants'
@@ -258,7 +259,7 @@ function LimitForm({ onCurrencyChange }: LimitFormProps) {
 
   const allowance = usePermit2Allowance({
     amount: parsedAmounts.input?.currency.isNative ? undefined : (parsedAmounts.input as CurrencyAmount<Token>),
-    spender: isSupportedChain ? UNIVERSAL_ROUTER_ADDRESS(UniversalRouterVersion.V1_2, chainId) : undefined,
+            spender: isSupportedChain ? getUniversalRouterAddress(UniversalRouterVersion.V1_2, chainId) : undefined,
     tradeFillType: TradeFillType.UniswapX,
   })
 

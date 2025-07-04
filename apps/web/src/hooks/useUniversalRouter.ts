@@ -4,9 +4,9 @@ import { Percent } from '@uniswap/sdk-core'
 import {
   FlatFeeOptions,
   SwapRouter,
-  UNIVERSAL_ROUTER_ADDRESS,
   UniversalRouterVersion,
 } from '@uniswap/universal-router-sdk'
+import { getUniversalRouterAddress } from 'utils/universalRouterPatch'
 import { FeeOptions, toHex } from '@uniswap/v3-sdk'
 import { useTotalBalancesUsdForAnalytics } from 'appGraphql/data/apollo/useTotalBalancesUsdForAnalytics'
 import { useAccount } from 'hooks/useAccount'
@@ -112,7 +112,7 @@ export function useUniversalRouterSwapCallback({
       })
       const tx = {
         from: account.address,
-        to: UNIVERSAL_ROUTER_ADDRESS(UniversalRouterVersion.V1_2, chainId),
+        to: getUniversalRouterAddress(UniversalRouterVersion.V1_2, chainId),
         data,
         // TODO(https://github.com/Uniswap/universal-router-sdk/issues/113): universal-router-sdk returns a non-hexlified value.
         ...(value && !isZero(value) ? { value: toHex(value) } : {}),

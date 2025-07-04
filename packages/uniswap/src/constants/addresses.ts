@@ -51,3 +51,7 @@ export const TICK_LENS_ADDRESSES: { [chainId in UniverseChainId]?: string } = {
 export const V3_MIGRATOR_ADDRESSES: { [chainId in UniverseChainId]?: string } = {
   [UniverseChainId.Zephyr]: process.env.REACT_APP_CUSTOM_NETWORK_V3_MIGRATOR_ADDRESS || '0xdACEF64026d35EB778A2da9406aE9BE59737FEFb',
 }
+
+export const UNIVERSAL_ROUTER_ADDRESSES: { [chainId in UniverseChainId]?: string } = {
+  [UniverseChainId.Zephyr]: process.env.REACT_APP_CUSTOM_NETWORK_UNIVERSAL_ROUTER_ADDRESS || '0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD',
+}
