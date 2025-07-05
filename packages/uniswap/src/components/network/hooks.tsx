@@ -9,11 +9,13 @@ export function useNetworkOptions({
   selectedChain,
   includeAllNetworks,
   chainIds,
+  defaultChainId,
 }: {
   onPress: (chainId: UniverseChainId | null) => void
   selectedChain: UniverseChainId | null
   includeAllNetworks?: boolean
   chainIds: UniverseChainId[]
+  defaultChainId?: UniverseChainId
 }): { key: string; onPress: () => void; render: () => JSX.Element }[] {
   const newChains = useNewChainIds()
   return useMemo(
@@ -24,12 +26,12 @@ export function useNetworkOptions({
         render: () => (
           <NetworkOption
             chainId={chainId}
-            currentlySelected={selectedChain === chainId}
+            currentlySelected={selectedChain === chainId || (selectedChain === null && chainId === defaultChainId)}
             isNew={chainId !== null && newChains.includes(chainId)}
           />
         ),
         onPress: () => onPress(chainId),
       })),
-    [includeAllNetworks, chainIds, selectedChain, newChains, onPress],
+    [includeAllNetworks, chainIds, selectedChain, newChains, onPress, defaultChainId],
   )
 }

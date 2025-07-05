@@ -111,6 +111,7 @@ export function NetworkFilter({
     onPress,
     includeAllNetworks,
     chainIds,
+    defaultChainId,
   })
 
   return (
@@ -128,7 +129,10 @@ export function NetworkFilter({
       {showUnsupportedConnectedChainWarning ? (
         <AlertTriangle color="$neutral2" size={20} />
       ) : (
-        <NetworkLogo chainId={selectedChain ?? (includeAllNetworks ? null : defaultChainId)} size={NETWORK_ICON_SIZE} />
+        <NetworkLogo 
+          chainId={selectedChain ?? defaultChainId} 
+          size={NETWORK_ICON_SIZE} 
+        />
       )}
     </ActionSheetDropdown>
   )

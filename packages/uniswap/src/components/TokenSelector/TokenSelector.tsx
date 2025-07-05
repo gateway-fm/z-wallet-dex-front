@@ -217,7 +217,7 @@ export function TokenSelectorContent({
       )
     }
 
-    if (chainFilter === UniverseChainId.Zephyr || searchFilter) {
+    if (searchFilter) {
       return (
         <TokenSelectorSearchResultsList
           activeAccountAddress={activeAccountAddress}

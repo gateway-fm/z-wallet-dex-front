@@ -26,6 +26,7 @@ import {
   USDC_SONEIUM,
   USDC_UNICHAIN,
   USDC_WORLD_CHAIN,
+  USDC_ZEPHYR,
   USDC_ZKSYNC,
   USDC_ZORA,
   USDT,
@@ -174,6 +175,12 @@ export const COMMON_BASES: ChainCurrencyList = {
     nativeOnChain(UniverseChainId.Zora),
     WRAPPED_NATIVE_CURRENCY[UniverseChainId.Zora] as Token,
     USDC_ZORA,
+  ].map(buildPartialCurrencyInfo),
+
+  [UniverseChainId.Zephyr]: [
+    nativeOnChain(UniverseChainId.Zephyr),
+    WRAPPED_NATIVE_CURRENCY[UniverseChainId.Zephyr] as Token,
+    USDC_ZEPHYR,
   ].map(buildPartialCurrencyInfo),
 }
 

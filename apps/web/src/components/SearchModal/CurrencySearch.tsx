@@ -73,7 +73,7 @@ export function CurrencySearch({
         <TokenSelectorContent
           activeAccountAddress={account.address!}
           isLimits={currentTab === SwapTab.Limit}
-          chainId={!isMultichainContext || isUserSelectedToken ? chainId : undefined}
+          chainId={!isMultichainContext || isUserSelectedToken ? chainId : UniverseChainId.Zephyr}
           chainIds={chainIds ?? chains}
           currencyField={currencyField}
           flow={TokenSelectorFlow.Swap}

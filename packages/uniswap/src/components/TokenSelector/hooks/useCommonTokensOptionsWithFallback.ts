@@ -5,6 +5,7 @@ import {
   currencyInfosToTokenOptions,
   useCurrencyInfosToTokenOptions,
 } from 'uniswap/src/components/TokenSelector/hooks/useCurrencyInfosToTokenOptions'
+import { useZephyrTokensOptions } from 'uniswap/src/components/TokenSelector/hooks/useZephyrTokensOptions'
 import { TokenOption } from 'uniswap/src/components/lists/items/types'
 import { COMMON_BASES } from 'uniswap/src/constants/routing'
 import { GqlResult } from 'uniswap/src/data/types'
@@ -15,7 +16,9 @@ export function useCommonTokensOptionsWithFallback(
   address: Address | undefined,
   chainFilter: UniverseChainId | null,
 ): GqlResult<TokenOption[] | undefined> {
+  const zephyrResult = useZephyrTokensOptions(address, chainFilter)
   const { data, error, refetch, loading } = useCommonTokensOptions(address, chainFilter)
+  
   const commonBases = chainFilter ? currencyInfosToTokenOptions(COMMON_BASES[chainFilter]) : undefined
   const commonBasesCurrencyIds = useMemo(
     () => commonBases?.map((token) => currencyId(token.currencyInfo.currency)).filter(Boolean) ?? [],
@@ -28,6 +31,12 @@ export function useCommonTokensOptionsWithFallback(
   })
 
   const shouldFallback = data?.length === 0 && commonBases?.length
+  const useZephyrHook = chainFilter === UniverseChainId.Zephyr || (chainFilter === null)
+
+  if (useZephyrHook) {
+    // NOTE: Return Zephyr result if we're dealing with it
+    return zephyrResult
+  }
 
   return useMemo(
     () => ({
