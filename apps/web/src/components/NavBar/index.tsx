@@ -3,7 +3,6 @@ import { CompanyMenu } from 'components/NavBar/CompanyMenu'
 import { NewUserCTAButton } from 'components/NavBar/DownloadApp/NewUserCTAButton'
 import { PreferenceMenu } from 'components/NavBar/PreferencesMenu'
 import { useTabsVisible } from 'components/NavBar/ScreenSizes'
-import { SearchBar } from 'components/NavBar/SearchBar'
 import { Tabs } from 'components/NavBar/Tabs/Tabs'
 import TestnetModeTooltip from 'components/NavBar/TestnetMode/TestnetModeTooltip'
 import Web3Status from 'components/Web3Status'
@@ -78,7 +77,6 @@ export default function Navbar() {
   const media = useMedia()
   const isSmallScreen = media.md
   const areTabsVisible = useTabsVisible()
-  const collapseSearchBar = media.xl
   const account = useAccount()
 
   const hideChainSelector = useShouldHideChainSelector()
@@ -94,10 +92,7 @@ export default function Navbar() {
           {areTabsVisible && <Tabs />}
         </Left>
 
-        {!collapseSearchBar && <SearchBar />}
-
         <Right>
-          {collapseSearchBar && <SearchBar />}
           {!isEmbeddedWalletEnabled && isLandingPage && !isSmallScreen && <NewUserCTAButton />}
           {!account.isConnected && !account.isConnecting && <PreferenceMenu />}
           {!hideChainSelector && <ChainSelector />}
