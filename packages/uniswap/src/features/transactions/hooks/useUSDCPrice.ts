@@ -1,6 +1,7 @@
 import { Currency, CurrencyAmount, Price, Token, TradeType } from '@uniswap/sdk-core'
 import { useMemo } from 'react'
 import { PollingInterval } from 'uniswap/src/constants/misc'
+import { useZephyrPrice } from 'uniswap/src/features/dataApi/zephyrPricing'
 import {
   USDB_BLAST,
   USDC,
@@ -16,6 +17,7 @@ import {
   USDC_UNICHAIN,
   USDC_UNICHAIN_SEPOLIA,
   USDC_WORLD_CHAIN,
+  USDC_ZEPHYR,
   USDC_ZKSYNC,
   USDC_ZORA,
   USDT_MONAD_TESTNET,
@@ -47,6 +49,7 @@ export const STABLECOIN_AMOUNT_OUT: Record<UniverseChainId, CurrencyAmount<Token
   [UniverseChainId.Unichain]: CurrencyAmount.fromRawAmount(USDC_UNICHAIN, USDC_DEFAULT_MIN),
   [UniverseChainId.UnichainSepolia]: CurrencyAmount.fromRawAmount(USDC_UNICHAIN_SEPOLIA, USDC_DEFAULT_MIN),
   [UniverseChainId.WorldChain]: CurrencyAmount.fromRawAmount(USDC_WORLD_CHAIN, USDC_DEFAULT_MIN),
+  [UniverseChainId.Zephyr]: CurrencyAmount.fromRawAmount(USDC_ZEPHYR, USDC_DEFAULT_MIN),
   [UniverseChainId.Zksync]: CurrencyAmount.fromRawAmount(USDC_ZKSYNC, USDC_DEFAULT_MIN),
   [UniverseChainId.Zora]: CurrencyAmount.fromRawAmount(USDC_ZORA, USDC_DEFAULT_MIN),
 }
@@ -63,9 +66,11 @@ export function useUSDCPrice(
   isLoading: boolean
 } {
   const chainId = currency?.chainId
+  const isZephyr = chainId === UniverseChainId.Zephyr
 
   const quoteAmount = isUniverseChainId(chainId) ? STABLECOIN_AMOUNT_OUT[chainId] : undefined
   const stablecoin = quoteAmount?.currency
+  const zephyrPrice = useZephyrPrice(currency, stablecoin)
 
   // avoid requesting quotes for stablecoin input
   const currencyIsStablecoin = Boolean(
@@ -74,14 +79,18 @@ export function useUSDCPrice(
   const amountSpecified = currencyIsStablecoin ? undefined : quoteAmount
 
   const { trade, isLoading } = useTrade({
-    amountSpecified,
-    otherCurrency: currency,
+    amountSpecified: isZephyr ? undefined : amountSpecified, // Skip trade for Zephyr
+    otherCurrency: isZephyr ? undefined : currency,
     tradeType: TradeType.EXACT_OUTPUT,
     pollInterval,
     isUSDQuote: true,
   })
 
   return useMemo(() => {
+    if (isZephyr) {
+      return { price: zephyrPrice, isLoading: false }
+    }
+
     if (!stablecoin) {
       return { price: undefined, isLoading: false }
     }
@@ -97,7 +106,7 @@ export function useUSDCPrice(
 
     const { numerator, denominator } = trade.routes[0].midPrice
     return { price: new Price(currency, stablecoin, denominator, numerator), isLoading }
-  }, [currency, stablecoin, currencyIsStablecoin, trade, isLoading])
+  }, [isZephyr, zephyrPrice, currency, stablecoin, currencyIsStablecoin, trade, isLoading])
 }
 
 export function useUSDCValue(

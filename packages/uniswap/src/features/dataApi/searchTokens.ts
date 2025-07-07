@@ -22,11 +22,27 @@ const SEARCH_TOKENS_QUERY = gql`
       name
       symbol
       decimals
+      derivedETH
+      totalValueLockedUSD
+      volumeUSD
+      feesUSD
+    }
+    bundle(id: "1") {
+      ethPriceUSD
     }
   }
 `
 
-function graphqlTokenToCurrencyInfo(token: { id: string; name: string; symbol: string; decimals?: string }): CurrencyInfo | null {
+function graphqlTokenToCurrencyInfo(token: { 
+  id: string; 
+  name: string; 
+  symbol: string; 
+  decimals?: string;
+  derivedETH?: string;
+  totalValueLockedUSD?: string;
+  volumeUSD?: string;
+  feesUSD?: string;
+}): CurrencyInfo | null {
   if (!token.id || !token.symbol) {
     return null
   }
@@ -80,7 +96,7 @@ export function useSearchTokens({
     }
     
     return filteredTokens
-      .map((token: { id: string; name: string; symbol: string; decimals?: string }) => graphqlTokenToCurrencyInfo(token))
+      .map((token: any) => graphqlTokenToCurrencyInfo(token))
       .filter((token: CurrencyInfo | null): token is CurrencyInfo => token !== null)
   }, [data, searchQuery])
 

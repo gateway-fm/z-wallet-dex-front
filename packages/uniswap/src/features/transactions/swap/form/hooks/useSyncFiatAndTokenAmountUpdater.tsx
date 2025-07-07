@@ -35,10 +35,15 @@ export function useSyncFiatAndTokenAmountUpdater({ skip = false }: { skip?: bool
     if (isFiatMode) {
       const fiatAmount = exactAmountFiat && !isNaN(parseFloat(exactAmountFiat)) ? parseFloat(exactAmountFiat) : 0
       const usdAmount = (fiatAmount / conversionRate).toFixed(NUM_DECIMALS_FIAT_ROUNDING)
+      const stablecoinCurrencyAmount = STABLECOIN_AMOUNT_OUT[chainId]
+      if (!stablecoinCurrencyAmount) {
+        return
+      }
+      
       const stablecoinAmount = getCurrencyAmount({
         value: usdAmount,
         valueType: ValueType.Exact,
-        currency: STABLECOIN_AMOUNT_OUT[chainId].currency,
+        currency: stablecoinCurrencyAmount.currency,
       })
       const tokenAmount = stablecoinAmount ? usdPriceOfCurrency.invert().quote(stablecoinAmount) : undefined
       updateSwapForm({ exactAmountToken: tokenAmount?.toExact() })

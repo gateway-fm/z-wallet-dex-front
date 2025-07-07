@@ -173,9 +173,21 @@ async function getDenominatedValue({
 
   const tokenAddress = token.address ?? getNativeAddress(universeChainId)
 
-  const stablecoinCurrency = STABLECOIN_AMOUNT_OUT[universeChainId].currency
+  const stablecoinAmount = STABLECOIN_AMOUNT_OUT[universeChainId]
+  
+  if (!stablecoinAmount) {
+    logger.error(new Error('[ITBU] No `stablecoinAmount` found for chain'), {
+      tags: {
+        file: 'fetchOnChainBalances.ts',
+        function: 'getDenominatedValue',
+      },
+      extra: { ...extra, universeChainId },
+    })
+    return undefined
+  }
 
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  const stablecoinCurrency = stablecoinAmount.currency
+
   if (!stablecoinCurrency) {
     logger.error(new Error('[ITBU] No `stablecoinCurrency` found'), {
       tags: {

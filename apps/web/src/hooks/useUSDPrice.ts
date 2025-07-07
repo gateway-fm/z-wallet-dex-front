@@ -12,6 +12,7 @@ import { useEnabledChains } from 'uniswap/src/features/chains/hooks/useEnabledCh
 import { useIsSupportedChainId, useSupportedChainId } from 'uniswap/src/features/chains/hooks/useSupportedChainId'
 import { UniverseChainId } from 'uniswap/src/features/chains/types'
 import { toGraphQLChain } from 'uniswap/src/features/chains/utils'
+import { useZephyrUSDPrice } from 'uniswap/src/features/transactions/hooks/useZephyrUSDPrice'
 import { getNativeTokenDBAddress } from 'utils/nativeTokens'
 
 // ETH amounts used when calculating spot price for a given currency.
@@ -118,6 +119,13 @@ export function useUSDPrice(
   isLoading: boolean
 } {
   const currency = currencyAmount?.currency ?? prefetchCurrency
+  
+  // Use custom Zephyr pricing for Zephyr network
+  const zephyrPrice = useZephyrUSDPrice(currencyAmount, prefetchCurrency)
+  if (currency?.chainId === UniverseChainId.Zephyr) {
+    return zephyrPrice
+  }
+  
   const chainId = useSupportedChainId(currency?.chainId)
   const { defaultChainId } = useEnabledChains()
   const chain = toGraphQLChain(chainId ?? defaultChainId)
