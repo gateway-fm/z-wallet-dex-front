@@ -1,6 +1,7 @@
 import { TradeType } from '@uniswap/sdk-core'
 import { useMemo } from 'react'
 import { useAccountMeta, useUniswapContextSelector } from 'uniswap/src/contexts/UniswapContext'
+import { UniverseChainId } from 'uniswap/src/features/chains/types'
 import { useEnabledChains } from 'uniswap/src/features/chains/hooks/useEnabledChains'
 import { FeatureFlags } from 'uniswap/src/features/gating/flags'
 import { useFeatureFlag } from 'uniswap/src/features/gating/hooks'
@@ -11,6 +12,7 @@ import { useTransactionSettingsContext } from 'uniswap/src/features/transactions
 import { useUSDCValue } from 'uniswap/src/features/transactions/hooks/useUSDCPrice'
 import { usePriceUXEnabled } from 'uniswap/src/features/transactions/swap/hooks/usePriceUXEnabled'
 import { useTrade } from 'uniswap/src/features/transactions/swap/hooks/useTrade'
+import { useZephyrTrade } from 'uniswap/src/features/transactions/swap/hooks/useZephyrTrade'
 import { DerivedSwapInfo } from 'uniswap/src/features/transactions/swap/types/derivedSwapInfo'
 import { getWrapType } from 'uniswap/src/features/transactions/swap/utils/wrap'
 import { TransactionState } from 'uniswap/src/features/transactions/types/transactionState'
@@ -102,7 +104,20 @@ export function useDerivedSwapInfo({
     isV4HookPoolsEnabled,
   }
 
-  const trade = useTrade(tradeParams)
+  // Use special trade logic for Zephyr network
+  const isZephyr = chainId === UniverseChainId.Zephyr
+  const regularTrade = useTrade(isZephyr ? { ...tradeParams, skip: true } : tradeParams)
+  const zephyrTrade = useZephyrTrade(
+    isZephyr
+      ? {
+          amountSpecified: amountSpecified || undefined,
+          otherCurrency,
+          tradeType: isExactIn ? TradeType.EXACT_INPUT : TradeType.EXACT_OUTPUT,
+        }
+      : { amountSpecified: undefined, otherCurrency: undefined, tradeType: TradeType.EXACT_INPUT }
+  )
+
+  const trade = isZephyr ? zephyrTrade : regularTrade
 
   const displayableTrade = trade.trade ?? trade.indicativeTrade
 
