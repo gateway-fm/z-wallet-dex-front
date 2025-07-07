@@ -117,14 +117,14 @@ export function useOrderedConnections(options?: { showSecondaryConnectors?: bool
       CONNECTION_PROVIDER_IDS.COINBASE_SDK_CONNECTOR_ID,
       SHOULD_THROW,
     )
+    // WalletConnect is optional - may be disabled to avoid external API calls
     const walletConnectConnector = getConnectorWithId(
       connectors,
       CONNECTION_PROVIDER_IDS.WALLET_CONNECT_CONNECTOR_ID,
-      SHOULD_THROW,
     )
 
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (!coinbaseSdkConnector || !walletConnectConnector) {
+    if (!coinbaseSdkConnector) {
       throw new Error('Expected connector(s) missing from wagmi context.')
     }
 
@@ -150,7 +150,7 @@ export function useOrderedConnections(options?: { showSecondaryConnectors?: bool
       if (isMobileWeb && isEmbeddedWalletEnabled) {
         orderedConnectors.push(embeddedWalletConnector)
       }
-      const secondaryConnectors = [walletConnectConnector, coinbaseSdkConnector]
+      const secondaryConnectors = [walletConnectConnector, coinbaseSdkConnector].filter((c): c is Connector => Boolean(c))
       // Recent connector should have already been shown on the primary page unless on mobile
       orderedConnectors.push(...secondaryConnectors.filter((c) => c.id !== recentConnectorId || isMobileWeb))
     } else {
@@ -162,11 +162,13 @@ export function useOrderedConnections(options?: { showSecondaryConnectors?: bool
         // If used recently, still add mobile wallets to primary
         if (recentConnectorId === CONNECTION_PROVIDER_IDS.COINBASE_SDK_CONNECTOR_ID) {
           orderedConnectors.push(coinbaseSdkConnector)
-        } else if (recentConnectorId === CONNECTION_PROVIDER_IDS.WALLET_CONNECT_CONNECTOR_ID) {
+        } else if (recentConnectorId === CONNECTION_PROVIDER_IDS.WALLET_CONNECT_CONNECTOR_ID && walletConnectConnector) {
           orderedConnectors.push(walletConnectConnector)
         }
       } else {
-        orderedConnectors.push(walletConnectConnector)
+        if (walletConnectConnector) {
+          orderedConnectors.push(walletConnectConnector)
+        }
         orderedConnectors.push(coinbaseSdkConnector)
       }
     }
