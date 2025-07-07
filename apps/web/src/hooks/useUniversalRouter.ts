@@ -1,12 +1,7 @@
 import { TransactionResponse } from '@ethersproject/abstract-provider'
 import { BigNumber } from '@ethersproject/bignumber'
 import { Percent } from '@uniswap/sdk-core'
-import {
-  FlatFeeOptions,
-  SwapRouter,
-  UniversalRouterVersion,
-} from '@uniswap/universal-router-sdk'
-import { getUniversalRouterAddress } from 'utils/universalRouterPatch'
+import { FlatFeeOptions, SwapRouter, UniversalRouterVersion } from '@uniswap/universal-router-sdk'
 import { FeeOptions, toHex } from '@uniswap/v3-sdk'
 import { useTotalBalancesUsdForAnalytics } from 'appGraphql/data/apollo/useTotalBalancesUsdForAnalytics'
 import { useAccount } from 'hooks/useAccount'
@@ -29,6 +24,7 @@ import { calculateGasMargin } from 'utils/calculateGasMargin'
 import { UserRejectedRequestError, WrongChainError } from 'utils/errors'
 import isZero from 'utils/isZero'
 import { didUserReject, swapErrorToUserReadableMessage } from 'utils/swapErrorToUserReadableMessage'
+import { getUniversalRouterAddress } from 'utils/universalRouterPatch'
 
 /** Thrown when gas estimation fails. This class of error usually requires an emulator to determine the root cause. */
 class GasEstimationError extends Error {

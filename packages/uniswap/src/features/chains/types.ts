@@ -1,5 +1,6 @@
  
-import { CurrencyAmount, Token } from '@uniswap/sdk-core'
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { CurrencyAmount, Token, ChainId as UniswapSDKChainId } from '@uniswap/sdk-core'
 import type { ImageSourcePropType } from 'react-native'
 import { Chain as BackendChainId } from 'uniswap/src/data/graphql/uniswap-data-api/__generated__/types-and-hooks'
 import { ElementName } from 'uniswap/src/features/telemetry/constants'
@@ -10,23 +11,23 @@ export function isUniverseChainId(chainId?: number | UniverseChainId | null): ch
 }
 
 export enum UniverseChainId {
-  Mainnet = 1,
-  ArbitrumOne = 42161,
-  Avalanche = 43114,
-  Base = 8453,
-  Blast = 81457,
-  Bnb = 56,
-  Celo = 42220,
-  MonadTestnet = 1337,
-  Optimism = 10,
-  Polygon = 137,
-  Sepolia = 11155111,
-  Soneium = 123456789,
-  Unichain = 987654321,
-  UnichainSepolia = 111111111,
-  WorldChain = 222222222,
-  Zksync = 324,
-  Zora = 7777777,
+  Mainnet = UniswapSDKChainId.MAINNET,
+  ArbitrumOne = UniswapSDKChainId.ARBITRUM_ONE,
+  Avalanche = UniswapSDKChainId.AVALANCHE,
+  Base = UniswapSDKChainId.BASE,
+  Blast = UniswapSDKChainId.BLAST,
+  Bnb = UniswapSDKChainId.BNB,
+  Celo = UniswapSDKChainId.CELO,
+  MonadTestnet = UniswapSDKChainId.MONAD_TESTNET,
+  Optimism = UniswapSDKChainId.OPTIMISM,
+  Polygon = UniswapSDKChainId.POLYGON,
+  Sepolia = UniswapSDKChainId.SEPOLIA,
+  Soneium = UniswapSDKChainId.SONEIUM,
+  Unichain = UniswapSDKChainId.UNICHAIN,
+  UnichainSepolia = UniswapSDKChainId.UNICHAIN_SEPOLIA,
+  WorldChain = UniswapSDKChainId.WORLDCHAIN,
+  Zksync = UniswapSDKChainId.ZKSYNC,
+  Zora = UniswapSDKChainId.ZORA,
   Zephyr = Number(process.env.REACT_APP_CUSTOM_NETWORK_CHAIN_ID) || 1417429182,
 }
 

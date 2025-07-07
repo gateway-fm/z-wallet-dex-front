@@ -119,13 +119,13 @@ export function useUSDPrice(
   isLoading: boolean
 } {
   const currency = currencyAmount?.currency ?? prefetchCurrency
-  
+
   // Use custom Zephyr pricing for Zephyr network
   const zephyrPrice = useZephyrUSDPrice(currencyAmount, prefetchCurrency)
   if (currency?.chainId === UniverseChainId.Zephyr) {
     return zephyrPrice
   }
-  
+
   const chainId = useSupportedChainId(currency?.chainId)
   const { defaultChainId } = useEnabledChains()
   const chain = toGraphQLChain(chainId ?? defaultChainId)
