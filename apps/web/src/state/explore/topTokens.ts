@@ -1,3 +1,4 @@
+import { useQuery, gql } from '@apollo/client'
 import { Amount, PriceHistory, TokenStats } from '@uniswap/client-explore/dist/uniswap/explore/v1/service_pb'
 import { SparklineMap } from 'appGraphql/data/types'
 import { PricePoint, TimePeriod, unwrapToken } from 'appGraphql/data/util'
@@ -121,6 +122,38 @@ function useFilteredTokens(tokens: TokenStat[] | undefined) {
 }
 
 const MAX_TOP_TOKENS = 100
+
+const TOKENS_QUERY = gql`
+  query Tokens($where: Token_filter, $first: Int, $skip: Int, $orderBy: Token_orderBy, $orderDirection: OrderDirection) {
+    tokens(where: $where, first: $first, skip: $skip, orderBy: $orderBy, orderDirection: $orderDirection) {
+      id
+      symbol
+      name
+      decimals
+      volume
+      totalValueLocked
+      derivedETH
+      tokenDayData {
+        priceUSD
+        date
+      }
+    }
+  }
+`
+
+export function useTopTokensGraphQL({
+  where = {},
+  first = 100,
+  skip = 0,
+  orderBy = 'volume',
+  orderDirection = 'desc',
+} = {}) {
+  const { data, loading, error } = useQuery(TOKENS_QUERY, {
+    variables: { where, first, skip, orderBy, orderDirection },
+  })
+  const topTokens = useMemo(() => data?.tokens ?? [], [data])
+  return { topTokens, isLoading: loading, isError: !!error }
+}
 
 export function useTopTokens() {
   const duration = useAtomValue(filterTimeAtom)

@@ -31,7 +31,7 @@ import { useAtomValue } from 'jotai/utils'
 import { ReactElement, ReactNode, memo, useMemo } from 'react'
 import { Trans } from 'react-i18next'
 import { TABLE_PAGE_SIZE, giveExploreStatDefaultValue } from 'state/explore'
-import { useTopTokens as useRestTopTokens } from 'state/explore/topTokens'
+import { useTopTokensGraphQL } from 'state/explore/topTokens'
 import { TokenStat } from 'state/explore/types'
 import { Flex, Text, View, styled, useMedia } from 'ui/src'
 import { useEnabledChains } from 'uniswap/src/features/chains/hooks/useEnabledChains'
@@ -78,7 +78,8 @@ function TokenDescription({ token }: { token: TokenStat }) {
 }
 
 export const TopTokensTable = memo(function TopTokensTable() {
-  const { topTokens, tokenSortRank, isLoading, sparklines, isError } = useRestTopTokens()
+  const { topTokens, isLoading, isError } = useTopTokensGraphQL()
+  // TODO: make tokenSortRank and sparklines for GraphQL version if needed
 
   const { page, loadMore } = useSimplePagination()
 
@@ -86,8 +87,8 @@ export const TopTokensTable = memo(function TopTokensTable() {
     <TableWrapper data-testid="top-tokens-explore-table">
       <TokenTable
         tokens={topTokens?.slice(0, page * TABLE_PAGE_SIZE)}
-        tokenSortRank={tokenSortRank}
-        sparklines={sparklines}
+        tokenSortRank={{}}
+        sparklines={{}}
         loading={isLoading}
         loadMore={loadMore}
         error={isError}

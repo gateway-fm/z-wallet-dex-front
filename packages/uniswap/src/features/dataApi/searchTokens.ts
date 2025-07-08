@@ -83,7 +83,7 @@ export function useSearchTokens({
   })
 
   const tokens = useMemo(() => {
-    if (!data?.tokens) return []
+    if (!data?.tokens) {return []}
     
     let filteredTokens = data.tokens
     if (searchQuery) {

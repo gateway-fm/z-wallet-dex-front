@@ -6,7 +6,6 @@ import { OnchainItemListOptionType, TokenOption } from 'uniswap/src/components/l
 import { useTradingApiSwappableTokensQuery } from 'uniswap/src/data/apiClients/tradingApi/useTradingApiSwappableTokensQuery'
 import { tradingApiSwappableTokenToCurrencyInfo } from 'uniswap/src/data/apiClients/tradingApi/utils/tradingApiSwappableTokenToCurrencyInfo'
 import { useCrossChainBalances } from 'uniswap/src/data/balances/hooks/useCrossChainBalances'
-import { useTokenProjectsQuery } from 'uniswap/src/data/graphql/uniswap-data-api/__generated__/types-and-hooks'
 import { GetSwappableTokensResponse } from 'uniswap/src/data/tradingApi/__generated__'
 import { GqlResult } from 'uniswap/src/data/types'
 import { TradeableAsset } from 'uniswap/src/entities/assets'
@@ -66,7 +65,7 @@ export function useBridgingTokenWithHighestBalance({
     variables: { contracts: [currencyIdToContractInput(currencyId)] },
   })
 
-  const crossChainTokens = tokenProjectsData?.tokenProjects?.[0]?.tokens
+  const crossChainTokens = tokenProjectsData?.tokenProjects[0]?.tokens
 
   const { otherChainBalances } = useCrossChainBalances({
     address,
