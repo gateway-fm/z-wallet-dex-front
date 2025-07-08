@@ -6,7 +6,7 @@ import { useTheme } from 'lib/styled-components'
 import { useState } from 'react'
 import { Check } from 'react-feather'
 import { useTranslation } from 'react-i18next'
-import { Flex, useMedia } from 'ui/src'
+import { Flex, Text, useMedia } from 'ui/src'
 import { TestID } from 'uniswap/src/test/fixtures/testIDs'
 
 export enum TimePeriodDisplay {
@@ -82,7 +82,7 @@ export default function VolumeTimeFrameSelector() {
             }}
           >
             <Flex>
-              {DISPLAYS[time]} {t('common.volume').toLowerCase()}
+              <Text>{DISPLAYS[time]} {t('common.volume').toLowerCase()}</Text>
             </Flex>
             {time === activeTime && <Check color={theme.accent1} size={16} />}
           </InternalMenuItem>
