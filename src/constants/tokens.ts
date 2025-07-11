@@ -1,6 +1,8 @@
 import { ChainId, Currency, Ether, NativeCurrency, Token, UNI_ADDRESSES, WETH9 } from '@uniswap/sdk-core'
 import invariant from 'tiny-invariant'
 
+import { ZEPHYR_CHAIN_ID } from './chains'
+
 export const NATIVE_CHAIN_ID = 'NATIVE'
 
 // When decimals are not specified for an ERC20 token
@@ -262,6 +264,23 @@ export const OP = new Token(ChainId.OPTIMISM, '0x4200000000000000000000000000000
 
 export const LDO = new Token(ChainId.MAINNET, '0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32', 18, 'LDO', 'Lido DAO Token')
 
+// Zephyr Network Tokens
+export const WRAPPED_ZERO = new Token(
+  ZEPHYR_CHAIN_ID,
+  '0x08a19Ce4b93E957aDD175F61e022b81894e66720',
+  18,
+  'WZERO',
+  'Wrapped ZERO'
+)
+
+export const USDC_ZEPHYR = new Token(
+  ZEPHYR_CHAIN_ID,
+  '0xDF4BDAC4Ba259127D1c53C07cdd005AD54CCAfb0',
+  6,
+  'USDC',
+  'USD Coin'
+)
+
 export const WRAPPED_NATIVE_CURRENCY: { [chainId: number]: Token | undefined } = {
   ...(WETH9 as Record<ChainId, Token>),
   [ChainId.OPTIMISM]: new Token(
@@ -336,6 +355,7 @@ export const WRAPPED_NATIVE_CURRENCY: { [chainId: number]: Token | undefined } =
     'WAVAX',
     'Wrapped AVAX'
   ),
+  [ZEPHYR_CHAIN_ID]: WRAPPED_ZERO,
 }
 
 export function isCelo(chainId: number): chainId is ChainId.CELO | ChainId.CELO_ALFAJORES {
@@ -473,5 +493,6 @@ export const TOKEN_SHORTHANDS: { [shorthand: string]: { [chainId in ChainId]?: s
     [ChainId.GOERLI]: USDC_GOERLI.address,
     [ChainId.SEPOLIA]: USDC_SEPOLIA.address,
     [ChainId.AVALANCHE]: USDC_AVALANCHE.address,
+    [ZEPHYR_CHAIN_ID]: USDC_ZEPHYR.address,
   },
 }
