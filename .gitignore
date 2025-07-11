@@ -23,6 +23,14 @@
 /build
 /dts
 
+# from the future
+/apps/web
+/packages
+.turbo
+/.yarn
+/dist
+
+
 # misc
 .DS_Store
 .env.local
