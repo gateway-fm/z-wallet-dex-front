@@ -13,7 +13,7 @@ const linguiConfig = {
       ],
     },
   ],
-  compileNamespace: 'cjs',
+  compileNamespace: 'es',
   fallbackLocales: {
     default: 'en-US',
   },
