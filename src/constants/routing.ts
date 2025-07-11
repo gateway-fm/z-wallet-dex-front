@@ -1,6 +1,7 @@
 // a list of tokens by chain
 import { ChainId, Currency, Token } from '@uniswap/sdk-core'
 
+import { ZEPHYR_CHAIN_ID } from './chains'
 import {
   ARB,
   BTC_BSC,
@@ -28,6 +29,7 @@ import {
   USDC_MAINNET,
   USDC_OPTIMISM,
   USDC_POLYGON,
+  USDC_ZEPHYR,
   USDT,
   USDT_ARBITRUM_ONE,
   USDT_AVALANCHE,
@@ -115,6 +117,7 @@ export const COMMON_BASES: ChainCurrencyList = {
     USDT_AVALANCHE,
     WETH_AVALANCHE,
   ],
+  [ZEPHYR_CHAIN_ID]: [nativeOnChain(ZEPHYR_CHAIN_ID), WRAPPED_NATIVE_CURRENCY[ZEPHYR_CHAIN_ID] as Token, USDC_ZEPHYR],
 }
 
 // used to construct the list of all pairs we consider by default in the frontend
@@ -136,6 +139,11 @@ export const BASES_TO_TRACK_LIQUIDITY_FOR: ChainTokenList = {
     USDC_AVALANCHE,
     USDT_AVALANCHE,
     WETH_AVALANCHE,
+  ],
+  [ZEPHYR_CHAIN_ID]: [
+    ...WRAPPED_NATIVE_CURRENCIES_ONLY[ZEPHYR_CHAIN_ID],
+    WRAPPED_NATIVE_CURRENCY[ZEPHYR_CHAIN_ID] as Token,
+    USDC_ZEPHYR,
   ],
 }
 export const PINNED_PAIRS: { readonly [chainId: number]: [Token, Token][] } = {
