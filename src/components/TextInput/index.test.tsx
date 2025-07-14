@@ -29,7 +29,9 @@ describe('TextInput', () => {
       />
     )
 
-    fireEvent.change(screen.getByPlaceholderText('Test Placeholder'), { target: { value: 'New value' } })
+    fireEvent.change(screen.getByPlaceholderText('Test Placeholder'), {
+      target: { value: 'New value' },
+    })
 
     expect(onUserInputSpy).toHaveBeenCalledWith('New value')
     expect(onUserInputSpy).toHaveBeenCalledTimes(1)
@@ -62,7 +64,9 @@ describe('ResizableTextArea', () => {
       />
     )
 
-    fireEvent.change(screen.getByPlaceholderText('Test Placeholder'), { target: { value: 'New value' } })
+    fireEvent.change(screen.getByPlaceholderText('Test Placeholder'), {
+      target: { value: 'New value' },
+    })
 
     expect(onUserInputSpy).toHaveBeenCalledWith('New value')
     expect(onUserInputSpy).toHaveBeenCalledTimes(1)

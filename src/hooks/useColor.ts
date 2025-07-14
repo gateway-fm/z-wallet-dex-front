@@ -54,7 +54,7 @@ function convertColorArrayToString([red, green, blue]: number[]): string {
 }
 
 export function useColor(token?: Token) {
-  const [color, setColor] = useState('#2172E5')
+  const [color, setColor] = useState('#8950FA')
   const [src] = useTokenLogoSource(token?.address, token?.chainId, token?.isNative)
 
   useEffect(() => {
@@ -70,7 +70,7 @@ export function useColor(token?: Token) {
 
     return () => {
       stale = true
-      setColor('#2172E5')
+      setColor('#8950FA')
     }
   }, [src, token])
 
