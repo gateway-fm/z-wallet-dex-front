@@ -281,6 +281,23 @@ export const USDC_ZEPHYR = new Token(
   'USD Coin'
 )
 
+// Zephyr Protocol native tokens (addresses will be updated when available)
+export const ZSD_ZEPHYR = new Token(
+  ZEPHYR_CHAIN_ID,
+  '0x0000000000000000000000000000000000000000', // Placeholder - update when deployed
+  18,
+  'ZSD',
+  'Zephyr Stable Dollar'
+)
+
+export const ZRS_ZEPHYR = new Token(
+  ZEPHYR_CHAIN_ID,
+  '0x0000000000000000000000000000000000000000', // Placeholder - update when deployed
+  18,
+  'ZRS',
+  'Zephyr Reserve Share'
+)
+
 export const WRAPPED_NATIVE_CURRENCY: { [chainId: number]: Token | undefined } = {
   ...(WETH9 as Record<ChainId, Token>),
   [ChainId.OPTIMISM]: new Token(

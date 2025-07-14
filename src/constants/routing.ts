@@ -45,6 +45,8 @@ import {
   WETH_POLYGON,
   WETH_POLYGON_MUMBAI,
   WRAPPED_NATIVE_CURRENCY,
+  ZRS_ZEPHYR,
+  ZSD_ZEPHYR,
 } from './tokens'
 
 type ChainTokenList = {
@@ -117,7 +119,13 @@ export const COMMON_BASES: ChainCurrencyList = {
     USDT_AVALANCHE,
     WETH_AVALANCHE,
   ],
-  [ZEPHYR_CHAIN_ID]: [nativeOnChain(ZEPHYR_CHAIN_ID), WRAPPED_NATIVE_CURRENCY[ZEPHYR_CHAIN_ID] as Token, USDC_ZEPHYR],
+  [ZEPHYR_CHAIN_ID]: [
+    nativeOnChain(ZEPHYR_CHAIN_ID),
+    WRAPPED_NATIVE_CURRENCY[ZEPHYR_CHAIN_ID] as Token,
+    USDC_ZEPHYR,
+    ZSD_ZEPHYR,
+    ZRS_ZEPHYR,
+  ],
 }
 
 // used to construct the list of all pairs we consider by default in the frontend
@@ -144,6 +152,8 @@ export const BASES_TO_TRACK_LIQUIDITY_FOR: ChainTokenList = {
     ...WRAPPED_NATIVE_CURRENCIES_ONLY[ZEPHYR_CHAIN_ID],
     WRAPPED_NATIVE_CURRENCY[ZEPHYR_CHAIN_ID] as Token,
     USDC_ZEPHYR,
+    ZSD_ZEPHYR,
+    ZRS_ZEPHYR,
   ],
 }
 export const PINNED_PAIRS: { readonly [chainId: number]: [Token, Token][] } = {
