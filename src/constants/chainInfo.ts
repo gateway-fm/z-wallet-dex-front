@@ -262,7 +262,7 @@ const CHAIN_INFO: ChainInfoMap = {
   [ZEPHYR_CHAIN_ID]: {
     networkType: NetworkType.L1,
     blockWaitMsBeforeWarning: ms(`10m`),
-    docs: 'https://docs.zephyr.network/',
+    docs: 'https://docs.zephyr.network/', // TODO: from env vars?
     explorer: 'https://zephyr-blockscout.eu-north-2.gateway.fm',
     infoLink: 'https://info.uniswap.org/#/zephyr/',
     label: 'Zephyr',
