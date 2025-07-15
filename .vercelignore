@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Development files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing
+coverage/
+cypress/videos/
+cypress/screenshots/
+.nyc_output
+
+# Build artifacts (except final build)
+build/static/js/*.map
+build/static/css/*.map
+
+# Cache directories
+.cache/
+.eslintcache
+.tsbuildinfo
+
+# Documentation
+docs/
+*.md
+CHANGELOG.md
+CONTRIBUTING.md
+
+# Git
+.git/
+.gitignore
+
+# CI/CD
+.github/
+.circleci/
+workflows/
+
+# Others
+*.log
+.DS_Store 
