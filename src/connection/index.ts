@@ -1,4 +1,3 @@
-import { ChainId } from '@uniswap/sdk-core'
 import { CoinbaseWallet } from '@web3-react/coinbase-wallet'
 import { initializeConnector } from '@web3-react/core'
 import { GnosisSafe } from '@web3-react/gnosis-safe'
@@ -10,8 +9,8 @@ import HORSWAP_LOGO from 'assets/svg/logo.svg'
 import COINBASE_ICON from 'assets/wallets/coinbase-icon.svg'
 import { isMobile } from 'utils/userAgent'
 
+import { ZEPHYR_CHAIN_ID } from '../constants/chains'
 import { RPC_URLS } from '../constants/networks'
-import { RPC_PROVIDERS } from '../constants/providers'
 import { Connection, ConnectionType } from './types'
 import { getInjection, getIsCoinbaseWallet, getIsInjected, getIsMetaMaskWallet } from './utils'
 
@@ -20,7 +19,12 @@ function onError(error: Error) {
 }
 
 const [web3Network, web3NetworkHooks] = initializeConnector<Network>(
-  (actions) => new Network({ actions, urlMap: RPC_PROVIDERS, defaultChainId: 1 })
+  (actions) =>
+    new Network({
+      actions,
+      urlMap: RPC_URLS,
+      defaultChainId: ZEPHYR_CHAIN_ID,
+    })
 )
 export const networkConnection: Connection = {
   getName: () => 'Network',
@@ -66,12 +70,12 @@ export const gnosisSafeConnection: Connection = {
   shouldDisplay: () => false,
 }
 
-const [web3CoinbaseWallet, web3CoinbaseWalletHooks] = initializeConnector<CoinbaseWallet>(
+const [web3WalletConnect, web3WalletConnectHooks] = initializeConnector<CoinbaseWallet>(
   (actions) =>
     new CoinbaseWallet({
       actions,
       options: {
-        url: RPC_URLS[ChainId.MAINNET][0],
+        url: RPC_URLS[ZEPHYR_CHAIN_ID][0],
         appName: 'Horswap',
         appLogoUrl: HORSWAP_LOGO,
         reloadOnDisconnect: false,
@@ -81,8 +85,8 @@ const [web3CoinbaseWallet, web3CoinbaseWalletHooks] = initializeConnector<Coinba
 )
 const coinbaseWalletConnection: Connection = {
   getName: () => 'Coinbase Wallet',
-  connector: web3CoinbaseWallet,
-  hooks: web3CoinbaseWalletHooks,
+  connector: web3WalletConnect,
+  hooks: web3WalletConnectHooks,
   type: ConnectionType.COINBASE_WALLET,
   getIcon: () => COINBASE_ICON,
   shouldDisplay: () =>

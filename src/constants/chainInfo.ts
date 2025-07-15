@@ -294,7 +294,7 @@ export function getChainInfo(chainId: any): any {
   return undefined
 }
 
-const MAINNET_INFO = CHAIN_INFO[ChainId.MAINNET]
+const ZEPHYR_INFO = CHAIN_INFO[ZEPHYR_CHAIN_ID]
 export function getChainInfoOrDefault(chainId: number | undefined) {
-  return getChainInfo(chainId) ?? MAINNET_INFO
+  return getChainInfo(chainId) ?? ZEPHYR_INFO
 }
