@@ -23,15 +23,15 @@ describe('Wallet Dropdown', () => {
 
   function itChangesLocale() {
     it('should change locale', () => {
-      cy.contains('Horswap available in: English').should('not.exist')
+      cy.contains('Available in: English').should('not.exist')
 
       cy.get(getTestSelector('wallet-language-item')).contains('Afrikaans').click({ force: true })
       cy.location('search').should('match', /\?lng=af-ZA$/)
-      cy.contains('Horswap available in: English')
+      cy.contains('Available in: English')
 
       cy.get(getTestSelector('wallet-language-item')).contains('English').click({ force: true })
       cy.location('search').should('match', /\?lng=en-US$/)
-      cy.contains('Horswap available in: English').should('not.exist')
+      cy.contains('Available in: English').should('not.exist')
     })
   }
 

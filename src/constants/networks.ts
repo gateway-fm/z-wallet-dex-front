@@ -2,7 +2,7 @@ import { NETWORK_CONFIG } from '../config/zephyr'
 import { ZEPHYR_CHAIN_ID } from './chains'
 
 /**
- * Fallback JSON-RPC endpoints for Zephyr network.
+ * Fallback JSON-RPC endpoints for Zephyr network
  */
 // eslint-disable-next-line import/no-unused-modules
 export const FALLBACK_URLS: { [chainId: number]: string[] } = {
@@ -13,7 +13,7 @@ export const FALLBACK_URLS: { [chainId: number]: string[] } = {
 }
 
 /**
- * Known JSON-RPC endpoints for Zephyr network.
+ * Known JSON-RPC endpoints for Zephyr network
  */
 export const RPC_URLS: { [chainId: number]: string[] } = {
   [ZEPHYR_CHAIN_ID]: [...FALLBACK_URLS[ZEPHYR_CHAIN_ID]],
