@@ -46,18 +46,6 @@ export const TOKENS_CONFIG = {
     NAME: 'USD Coin',
     DECIMALS: 6,
   },
-  ZSD: {
-    ADDRESS: process.env.REACT_APP_ZSD_ADDRESS || '0x0000000000000000000000000000000000000000',
-    SYMBOL: 'ZSD',
-    NAME: 'Zephyr Stable Dollar',
-    DECIMALS: 18,
-  },
-  ZRS: {
-    ADDRESS: process.env.REACT_APP_ZRS_ADDRESS || '0x0000000000000000000000000000000000000000',
-    SYMBOL: 'ZRS',
-    NAME: 'Zephyr Reserve Share',
-    DECIMALS: 18,
-  },
 } as const
 
 export const FEATURES_CONFIG = {

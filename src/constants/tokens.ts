@@ -282,22 +282,7 @@ export const USDC_ZEPHYR = new Token(
   TOKENS_CONFIG.USDC.NAME
 )
 
-// Zephyr Protocol native tokens (addresses will be updated when available)
-export const ZSD_ZEPHYR = new Token(
-  NETWORK_CONFIG.CHAIN_ID,
-  TOKENS_CONFIG.ZSD.ADDRESS,
-  TOKENS_CONFIG.ZSD.DECIMALS,
-  TOKENS_CONFIG.ZSD.SYMBOL,
-  TOKENS_CONFIG.ZSD.NAME
-)
-
-export const ZRS_ZEPHYR = new Token(
-  NETWORK_CONFIG.CHAIN_ID,
-  TOKENS_CONFIG.ZRS.ADDRESS,
-  TOKENS_CONFIG.ZRS.DECIMALS,
-  TOKENS_CONFIG.ZRS.SYMBOL,
-  TOKENS_CONFIG.ZRS.NAME
-)
+// Additional tokens will be loaded dynamically from GraphQL
 
 export const WRAPPED_NATIVE_CURRENCY: { [chainId: number]: Token | undefined } = {
   [NETWORK_CONFIG.CHAIN_ID]: WRAPPED_ZERO,

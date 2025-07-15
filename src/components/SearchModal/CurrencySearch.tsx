@@ -15,7 +15,9 @@ import { Text } from 'rebass'
 import styled, { useTheme } from 'styled-components'
 import { CloseIcon, ThemedText } from 'theme/components'
 
-import { useDefaultActiveTokens, useIsUserAddedToken, useSearchInactiveTokenLists, useToken } from '../../hooks/Tokens'
+import { ZEPHYR_CHAIN_ID } from '../../constants/chains'
+import { useIsUserAddedToken, useSearchInactiveTokenLists, useToken } from '../../hooks/Tokens'
+import { useZephyrTokens, useZephyrTokenSearch } from '../../hooks/useZephyrTokens'
 import { isAddress } from '../../utils'
 import Column from '../Column'
 import Row, { RowBetween } from '../Row'
@@ -68,10 +70,14 @@ export function CurrencySearch({
   const searchToken = useToken(debouncedQuery)
   const searchTokenIsAdded = useIsUserAddedToken(searchToken)
 
-  const defaultTokens = useDefaultActiveTokens(chainId)
+  // Use Zephyr tokens for Zephyr network, default tokens for others
+  const defaultTokens = useZephyrTokens(chainId)
+  const { tokens: searchTokens, loading: searchLoading } = useZephyrTokenSearch(debouncedQuery, chainId)
+
   const filteredTokens: Token[] = useMemo(() => {
-    return Object.values(defaultTokens).filter(getTokenFilter(debouncedQuery))
-  }, [defaultTokens, debouncedQuery])
+    const tokensToUse = debouncedQuery && chainId === ZEPHYR_CHAIN_ID ? searchTokens : defaultTokens
+    return Object.values(tokensToUse).filter(getTokenFilter(debouncedQuery))
+  }, [defaultTokens, searchTokens, debouncedQuery, chainId])
 
   const filteredSortedTokens = useSortTokensByQuery(debouncedQuery, filteredTokens)
 

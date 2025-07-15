@@ -1,14 +1,12 @@
 import { t } from '@lingui/macro'
 import { ChainId } from '@uniswap/sdk-core'
 import { useWeb3React } from '@web3-react/core'
-import { showTestnetsAtom } from 'components/AccountDrawer/TestnetsToggle'
 import { MouseoverTooltip } from 'components/Tooltip'
 import { getChainInfo } from 'constants/chainInfo'
-import { getChainPriority, L1_CHAIN_IDS, L2_CHAIN_IDS, TESTNET_CHAIN_IDS, ZEPHYR_CHAIN_ID } from 'constants/chains'
+import { getChainPriority, L1_CHAIN_IDS, L2_CHAIN_IDS } from 'constants/chains'
 import { useOnClickOutside } from 'hooks/useOnClickOutside'
 import useSelectChain from 'hooks/useSelectChain'
 import useSyncChainQuery from 'hooks/useSyncChainQuery'
-import { useAtomValue } from 'jotai/utils'
 import { Box } from 'nft/components/Box'
 import { Portal } from 'nft/components/common/Portal'
 import { Column, Row } from 'nft/components/Flex'
@@ -38,12 +36,12 @@ export const ChainSelector = ({ leftAlign }: ChainSelectorProps) => {
 
   const theme = useTheme()
 
-  const showTestnets = useAtomValue(showTestnetsAtom)
   const walletSupportsChain = useWalletSupportedChains()
 
   const [supportedChains, unsupportedChains] = useMemo(() => {
     const { supported, unsupported } = NETWORK_SELECTOR_CHAINS.filter((chain) => {
-      return showTestnets || !TESTNET_CHAIN_IDS.includes(chain as typeof ZEPHYR_CHAIN_ID)
+      // Since TESTNET_CHAIN_IDS is empty, all chains in NETWORK_SELECTOR_CHAINS are main networks
+      return true
     })
       .sort((a, b) => getChainPriority(a) - getChainPriority(b))
       .reduce(
@@ -58,7 +56,7 @@ export const ChainSelector = ({ leftAlign }: ChainSelectorProps) => {
         { supported: [], unsupported: [] } as Record<string, number[]>
       )
     return [supported, unsupported]
-  }, [showTestnets, walletSupportsChain])
+  }, [walletSupportsChain])
 
   const ref = useRef<HTMLDivElement>(null)
   const modalRef = useRef<HTMLDivElement>(null)

@@ -10,6 +10,19 @@ type SVGProps = React.SVGProps<SVGSVGElement> & {
   gradientId?: string
 }
 
+export const GatewayIcon = (props: SVGProps) => (
+  <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 101 111" fill="none">
+    <path d="M89.9206 13.9504L0 60.1228V74.9466L90.0513 28.7074L89.9206 13.9504Z" fill="#8950FA" />
+    <path d="M64.7601 0.64917L64.8907 15.7879L0 49.1079V33.9021L64.7601 0.64917Z" fill="#8950FA" />
+    <path d="M51.171 59.6862L65.6059 52.2743L100.168 70.0211V84.8449L51.171 59.6862Z" fill="#8950FA" />
+    <path d="M100.168 34.5275V59.0063L76.3316 46.7668L100.168 34.5275Z" fill="#8950FA" />
+    <path
+      d="M40.4453 65.1936L89.9208 90.598L50.0839 111.053L0.60864 85.6488L15.2847 78.1131L50.3191 96.1026L61.0449 90.5951L26.0104 72.6057L40.4453 65.1936Z"
+      fill="#8950FA"
+    />
+  </svg>
+)
+
 export const HorIcon = (props: SVGProps) => (
   <svg {...props} viewBox="0 0 215 215" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path

@@ -2,7 +2,7 @@
 import { Currency, Token } from '@uniswap/sdk-core'
 
 import { ZEPHYR_CHAIN_ID } from './chains'
-import { nativeOnChain, USDC_ZEPHYR, WRAPPED_NATIVE_CURRENCY, ZRS_ZEPHYR, ZSD_ZEPHYR } from './tokens'
+import { nativeOnChain, USDC_ZEPHYR, WRAPPED_NATIVE_CURRENCY } from './tokens'
 
 type ChainTokenList = {
   readonly [chainId: number]: Token[]
@@ -24,8 +24,7 @@ export const COMMON_BASES: ChainCurrencyList = {
     nativeOnChain(ZEPHYR_CHAIN_ID),
     WRAPPED_NATIVE_CURRENCY[ZEPHYR_CHAIN_ID] as Token,
     USDC_ZEPHYR,
-    ZSD_ZEPHYR,
-    ZRS_ZEPHYR,
+    // Additional tokens will be loaded dynamically from GraphQL
   ],
 }
 
@@ -35,15 +34,13 @@ export const BASES_TO_TRACK_LIQUIDITY_FOR: ChainTokenList = {
     ...WRAPPED_NATIVE_CURRENCIES_ONLY[ZEPHYR_CHAIN_ID],
     WRAPPED_NATIVE_CURRENCY[ZEPHYR_CHAIN_ID] as Token,
     USDC_ZEPHYR,
-    ZSD_ZEPHYR,
-    ZRS_ZEPHYR,
+    // Additional tokens will be loaded dynamically from GraphQL
   ],
 }
 
 export const PINNED_PAIRS: { readonly [chainId: number]: [Token, Token][] } = {
   [ZEPHYR_CHAIN_ID]: [
     [USDC_ZEPHYR, WRAPPED_NATIVE_CURRENCY[ZEPHYR_CHAIN_ID] as Token],
-    [ZSD_ZEPHYR, WRAPPED_NATIVE_CURRENCY[ZEPHYR_CHAIN_ID] as Token],
-    [ZRS_ZEPHYR, WRAPPED_NATIVE_CURRENCY[ZEPHYR_CHAIN_ID] as Token],
+    // Additional pairs will be created dynamically based on GraphQL token data
   ],
 }
