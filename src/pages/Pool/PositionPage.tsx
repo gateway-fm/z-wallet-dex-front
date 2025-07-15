@@ -220,7 +220,7 @@ function LinkedCurrency({ chainId, currency }: { chainId?: number; currency?: Cu
   if (typeof chainId === 'number' && address) {
     const Link = isGqlSupportedChain(chainId) ? TokenLink : ExternalTokenLink
     return (
-      <Link chainId={chainId} address={address}>
+      <Link chainId={chainId as any} address={address}>
         <RowFixed>
           <CurrencyLogo currency={currency} size="20px" style={{ marginRight: '0.5rem' }} />
           <ThemedText.DeprecatedMain>{currency?.symbol} ↗</ThemedText.DeprecatedMain>

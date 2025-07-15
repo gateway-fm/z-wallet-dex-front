@@ -91,7 +91,7 @@ const MobileMenuHeader = styled(Row)`
 
 export default function SettingsTab({ autoSlippage, chainId }: { autoSlippage: Percent; chainId?: number }) {
   const { chainId: connectedChainId } = useWeb3React()
-  const showDeadlineSettings = Boolean(chainId && !L2_CHAIN_IDS.includes(chainId))
+  const showDeadlineSettings = Boolean(chainId && L2_CHAIN_IDS.length === 0)
   const node = useRef<HTMLDivElement | null>(null)
   const isOpen = useModalIsOpen(ApplicationModal.SETTINGS)
 

@@ -5,7 +5,7 @@ import RouterLabel from 'components/RouterLabel'
 import Row, { RowBetween } from 'components/Row'
 import { MouseoverTooltip, TooltipSize } from 'components/Tooltip'
 import { getChainInfo } from 'constants/chainInfo'
-import { SUPPORTED_GAS_ESTIMATE_CHAIN_IDS } from 'constants/chains'
+import { ZEPHYR_CHAIN_ID } from 'constants/chains'
 import useHoverProps from 'hooks/useHoverProps'
 import { useIsMobile } from 'nft/hooks'
 import React, { PropsWithChildren } from 'react'
@@ -113,7 +113,7 @@ function useLineItem(props: SwapLineItemProps): LineItemData | undefined {
         tooltipSize: TooltipSize.Small,
       }
     case SwapLineItemType.NETWORK_COST:
-      if (!SUPPORTED_GAS_ESTIMATE_CHAIN_IDS.includes(chainId)) return
+      if (chainId !== ZEPHYR_CHAIN_ID) return
       return {
         Label: () => <Trans>Network cost</Trans>,
         TooltipBody: () => <GasBreakdownTooltip trade={trade} />,

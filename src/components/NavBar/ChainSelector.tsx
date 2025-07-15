@@ -4,7 +4,7 @@ import { useWeb3React } from '@web3-react/core'
 import { showTestnetsAtom } from 'components/AccountDrawer/TestnetsToggle'
 import { MouseoverTooltip } from 'components/Tooltip'
 import { getChainInfo } from 'constants/chainInfo'
-import { getChainPriority, L1_CHAIN_IDS, L2_CHAIN_IDS, TESTNET_CHAIN_IDS } from 'constants/chains'
+import { getChainPriority, L1_CHAIN_IDS, L2_CHAIN_IDS, TESTNET_CHAIN_IDS, ZEPHYR_CHAIN_ID } from 'constants/chains'
 import { useOnClickOutside } from 'hooks/useOnClickOutside'
 import useSelectChain from 'hooks/useSelectChain'
 import useSyncChainQuery from 'hooks/useSyncChainQuery'
@@ -27,7 +27,7 @@ interface ChainSelectorProps {
   leftAlign?: boolean
 }
 
-function useWalletSupportedChains(): ChainId[] {
+function useWalletSupportedChains(): number[] {
   return NETWORK_SELECTOR_CHAINS
 }
 
@@ -42,8 +42,8 @@ export const ChainSelector = ({ leftAlign }: ChainSelectorProps) => {
   const walletSupportsChain = useWalletSupportedChains()
 
   const [supportedChains, unsupportedChains] = useMemo(() => {
-    const { supported, unsupported } = NETWORK_SELECTOR_CHAINS.filter((chain: number) => {
-      return showTestnets || !TESTNET_CHAIN_IDS.includes(chain)
+    const { supported, unsupported } = NETWORK_SELECTOR_CHAINS.filter((chain) => {
+      return showTestnets || !TESTNET_CHAIN_IDS.includes(chain as typeof ZEPHYR_CHAIN_ID)
     })
       .sort((a, b) => getChainPriority(a) - getChainPriority(b))
       .reduce(
@@ -55,7 +55,7 @@ export const ChainSelector = ({ leftAlign }: ChainSelectorProps) => {
           }
           return acc
         },
-        { supported: [], unsupported: [] } as Record<string, ChainId[]>
+        { supported: [], unsupported: [] } as Record<string, number[]>
       )
     return [supported, unsupported]
   }, [showTestnets, walletSupportsChain])
