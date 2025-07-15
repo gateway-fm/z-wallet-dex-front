@@ -1,7 +1,5 @@
-import { ChainId, Currency, Ether, NativeCurrency, Token, UNI_ADDRESSES, WETH9 } from '@uniswap/sdk-core'
+import { ChainId, Currency, Ether, NativeCurrency, Token, UNI_ADDRESSES } from '@uniswap/sdk-core'
 import invariant from 'tiny-invariant'
-
-import { ZEPHYR_CHAIN_ID } from './chains'
 
 export const NATIVE_CHAIN_ID = 'NATIVE'
 
@@ -264,116 +262,45 @@ export const OP = new Token(ChainId.OPTIMISM, '0x4200000000000000000000000000000
 
 export const LDO = new Token(ChainId.MAINNET, '0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32', 18, 'LDO', 'Lido DAO Token')
 
-// Zephyr Network Tokens
+import { NETWORK_CONFIG, TOKENS_CONFIG } from '../config/zephyr'
+
+// Zephyr Network Tokens - using configuration system
 // eslint-disable-next-line import/no-unused-modules
 export const WRAPPED_ZERO = new Token(
-  ZEPHYR_CHAIN_ID,
-  '0x08a19Ce4b93E957aDD175F61e022b81894e66720',
-  18,
-  'WZERO',
-  'Wrapped ZERO'
+  NETWORK_CONFIG.CHAIN_ID,
+  TOKENS_CONFIG.WRAPPED_ZERO.ADDRESS,
+  TOKENS_CONFIG.WRAPPED_ZERO.DECIMALS,
+  TOKENS_CONFIG.WRAPPED_ZERO.SYMBOL,
+  TOKENS_CONFIG.WRAPPED_ZERO.NAME
 )
 
 export const USDC_ZEPHYR = new Token(
-  ZEPHYR_CHAIN_ID,
-  '0xDF4BDAC4Ba259127D1c53C07cdd005AD54CCAfb0',
-  6,
-  'USDC',
-  'USD Coin'
+  NETWORK_CONFIG.CHAIN_ID,
+  TOKENS_CONFIG.USDC.ADDRESS,
+  TOKENS_CONFIG.USDC.DECIMALS,
+  TOKENS_CONFIG.USDC.SYMBOL,
+  TOKENS_CONFIG.USDC.NAME
 )
 
 // Zephyr Protocol native tokens (addresses will be updated when available)
 export const ZSD_ZEPHYR = new Token(
-  ZEPHYR_CHAIN_ID,
-  '0x0000000000000000000000000000000000000000', // Placeholder - update when deployed
-  18,
-  'ZSD',
-  'Zephyr Stable Dollar'
+  NETWORK_CONFIG.CHAIN_ID,
+  TOKENS_CONFIG.ZSD.ADDRESS,
+  TOKENS_CONFIG.ZSD.DECIMALS,
+  TOKENS_CONFIG.ZSD.SYMBOL,
+  TOKENS_CONFIG.ZSD.NAME
 )
 
 export const ZRS_ZEPHYR = new Token(
-  ZEPHYR_CHAIN_ID,
-  '0x0000000000000000000000000000000000000000', // Placeholder - update when deployed
-  18,
-  'ZRS',
-  'Zephyr Reserve Share'
+  NETWORK_CONFIG.CHAIN_ID,
+  TOKENS_CONFIG.ZRS.ADDRESS,
+  TOKENS_CONFIG.ZRS.DECIMALS,
+  TOKENS_CONFIG.ZRS.SYMBOL,
+  TOKENS_CONFIG.ZRS.NAME
 )
 
 export const WRAPPED_NATIVE_CURRENCY: { [chainId: number]: Token | undefined } = {
-  ...(WETH9 as Record<ChainId, Token>),
-  [ChainId.OPTIMISM]: new Token(
-    ChainId.OPTIMISM,
-    '0x4200000000000000000000000000000000000006',
-    18,
-    'WETH',
-    'Wrapped Ether'
-  ),
-  [ChainId.OPTIMISM_GOERLI]: new Token(
-    ChainId.OPTIMISM_GOERLI,
-    '0x4200000000000000000000000000000000000006',
-    18,
-    'WETH',
-    'Wrapped Ether'
-  ),
-  [ChainId.BASE]: new Token(ChainId.BASE, '0x4200000000000000000000000000000000000006', 18, 'WETH', 'Wrapped Ether'),
-  [ChainId.ARBITRUM_ONE]: new Token(
-    ChainId.ARBITRUM_ONE,
-    '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
-    18,
-    'WETH',
-    'Wrapped Ether'
-  ),
-  [ChainId.ARBITRUM_GOERLI]: new Token(
-    ChainId.ARBITRUM_GOERLI,
-    '0xe39Ab88f8A4777030A534146A9Ca3B52bd5D43A3',
-    18,
-    'WETH',
-    'Wrapped Ether'
-  ),
-  [ChainId.SEPOLIA]: new Token(
-    ChainId.SEPOLIA,
-    '0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14',
-    18,
-    'WETH',
-    'Wrapped Ether'
-  ),
-  [ChainId.POLYGON]: new Token(
-    ChainId.POLYGON,
-    '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
-    18,
-    'WMATIC',
-    'Wrapped MATIC'
-  ),
-  [ChainId.POLYGON_MUMBAI]: new Token(
-    ChainId.POLYGON_MUMBAI,
-    '0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889',
-    18,
-    'WMATIC',
-    'Wrapped MATIC'
-  ),
-  [ChainId.CELO]: new Token(
-    ChainId.CELO,
-    '0x471ece3750da237f93b8e339c536989b8978a438',
-    18,
-    'CELO',
-    'Celo native asset'
-  ),
-  [ChainId.CELO_ALFAJORES]: new Token(
-    ChainId.CELO_ALFAJORES,
-    '0xf194afdf50b03e69bd7d057c1aa9e10c9954e4c9',
-    18,
-    'CELO',
-    'Celo native asset'
-  ),
-  [ChainId.BNB]: new Token(ChainId.BNB, '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c', 18, 'WBNB', 'Wrapped BNB'),
-  [ChainId.AVALANCHE]: new Token(
-    ChainId.AVALANCHE,
-    '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7',
-    18,
-    'WAVAX',
-    'Wrapped AVAX'
-  ),
-  [ZEPHYR_CHAIN_ID]: WRAPPED_ZERO,
+  [NETWORK_CONFIG.CHAIN_ID]: WRAPPED_ZERO,
 }
 
 export function isCelo(chainId: number): chainId is ChainId.CELO | ChainId.CELO_ALFAJORES {
@@ -498,19 +425,6 @@ export function getSwapCurrencyId(currency: Currency): string {
 
 export const TOKEN_SHORTHANDS: { [shorthand: string]: { [chainId in ChainId | number]?: string } } = {
   USDC: {
-    [ChainId.MAINNET]: USDC_MAINNET.address,
-    [ChainId.ARBITRUM_ONE]: BRIDGED_USDC_ARBITRUM.address,
-    [ChainId.ARBITRUM_GOERLI]: USDC_ARBITRUM_GOERLI.address,
-    [ChainId.OPTIMISM]: USDC_OPTIMISM.address,
-    [ChainId.OPTIMISM_GOERLI]: USDC_OPTIMISM_GOERLI.address,
-    [ChainId.POLYGON]: USDC_POLYGON.address,
-    [ChainId.POLYGON_MUMBAI]: USDC_POLYGON_MUMBAI.address,
-    [ChainId.BNB]: USDC_BSC.address,
-    [ChainId.CELO]: PORTAL_USDC_CELO.address,
-    [ChainId.CELO_ALFAJORES]: PORTAL_USDC_CELO.address,
-    [ChainId.GOERLI]: USDC_GOERLI.address,
-    [ChainId.SEPOLIA]: USDC_SEPOLIA.address,
-    [ChainId.AVALANCHE]: USDC_AVALANCHE.address,
-    [ZEPHYR_CHAIN_ID]: USDC_ZEPHYR.address,
+    [NETWORK_CONFIG.CHAIN_ID]: USDC_ZEPHYR.address,
   },
 }
