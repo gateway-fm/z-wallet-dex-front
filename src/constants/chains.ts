@@ -26,7 +26,7 @@ export const SUPPORTED_GAS_ESTIMATE_CHAIN_IDS = [ZEPHYR_CHAIN_ID] as const
  */
 export const SUPPORTED_V2POOL_CHAIN_IDS = [] as const
 
-export const TESTNET_CHAIN_IDS = [ZEPHYR_CHAIN_ID] as const
+export const TESTNET_CHAIN_IDS = [] as const
 
 /**
  * All the chain IDs that are running the Ethereum protocol.

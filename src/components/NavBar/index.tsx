@@ -4,7 +4,7 @@ import Web3Status from 'components/Web3Status'
 import { useIsPoolsPage } from 'hooks/useIsPoolsPage'
 import { Box } from 'nft/components/Box'
 import { Row } from 'nft/components/Flex'
-import { HorIcon } from 'nft/components/icons'
+import { GatewayIcon } from 'nft/components/icons'
 import { ReactNode, useCallback } from 'react'
 import { NavLink, NavLinkProps, useLocation, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
@@ -12,7 +12,6 @@ import styled from 'styled-components'
 import { useIsNavSearchInputVisible } from '../../nft/hooks/useIsNavSearchInputVisible'
 import Blur from './Blur'
 import { ChainSelector } from './ChainSelector'
-import { MenuDropdown } from './MenuDropdown'
 import * as styles from './style.css'
 
 const Nav = styled.nav`
@@ -57,12 +56,6 @@ export const PageTabs = () => {
       <MenuItem href="/pools" dataTestId="pool-nav-link" isActive={isPoolActive}>
         <Trans>Pools</Trans>
       </MenuItem>
-      <MenuItem href="/whatishorswap">
-        <Trans>What is Horswap?</Trans>
-      </MenuItem>
-      <Box marginY="4">
-        <MenuDropdown />
-      </Box>
     </>
   )
 }
@@ -73,7 +66,7 @@ const Navbar = ({ blur }: { blur: boolean }) => {
 
   const [accountDrawerOpen, toggleAccountDrawer] = useAccountDrawer()
 
-  const handleHorIconClick = useCallback(() => {
+  const handleIconClick = useCallback(() => {
     if (accountDrawerOpen) {
       toggleAccountDrawer()
     }
@@ -90,12 +83,12 @@ const Navbar = ({ blur }: { blur: boolean }) => {
         <Box display="flex" height="full" flexWrap="nowrap">
           <Box className={styles.leftSideContainer}>
             <Box className={styles.logoContainer}>
-              <HorIcon
+              <GatewayIcon
                 width="48"
                 height="48"
                 data-testid="horswap-logo"
                 className={styles.logo}
-                onClick={handleHorIconClick}
+                onClick={handleIconClick}
               />
             </Box>
             <Box display={{ sm: 'flex', lg: 'none' }}>
@@ -105,12 +98,6 @@ const Navbar = ({ blur }: { blur: boolean }) => {
               <PageTabs />
             </Row>
           </Box>
-          <Box
-            className={styles.searchContainer}
-            {...(isNavSearchInputVisible && {
-              display: 'flex',
-            })}
-          ></Box>
           <Box className={styles.rightSideContainer}>
             <Row gap="12">
               <Box position="relative" display={isNavSearchInputVisible ? 'none' : { sm: 'flex' }}></Box>
