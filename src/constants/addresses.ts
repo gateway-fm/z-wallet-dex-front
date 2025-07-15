@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable import/no-unused-modules */
+
 import { ChainId } from '@uniswap/sdk-core'
 
 import { ZEPHYR_CHAIN_ID } from './chains'

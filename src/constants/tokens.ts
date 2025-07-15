@@ -265,6 +265,7 @@ export const OP = new Token(ChainId.OPTIMISM, '0x4200000000000000000000000000000
 export const LDO = new Token(ChainId.MAINNET, '0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32', 18, 'LDO', 'Lido DAO Token')
 
 // Zephyr Network Tokens
+// eslint-disable-next-line import/no-unused-modules
 export const WRAPPED_ZERO = new Token(
   ZEPHYR_CHAIN_ID,
   '0x08a19Ce4b93E957aDD175F61e022b81894e66720',
@@ -495,7 +496,7 @@ export function getSwapCurrencyId(currency: Currency): string {
   return NATIVE_CHAIN_ID
 }
 
-export const TOKEN_SHORTHANDS: { [shorthand: string]: { [chainId in ChainId]?: string } } = {
+export const TOKEN_SHORTHANDS: { [shorthand: string]: { [chainId in ChainId | number]?: string } } = {
   USDC: {
     [ChainId.MAINNET]: USDC_MAINNET.address,
     [ChainId.ARBITRUM_ONE]: BRIDGED_USDC_ARBITRUM.address,
