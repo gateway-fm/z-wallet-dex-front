@@ -1,4 +1,3 @@
-
 import { ZEPHYR_CHAIN_ID } from '../constants/chains'
 
 const BLOCK_EXPLORER_PREFIXES: { [chainId: number]: string } = {
