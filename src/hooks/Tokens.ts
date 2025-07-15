@@ -110,7 +110,10 @@ export function useUnsupportedTokens(): { [address: string]: Token } {
       return {}
     }
 
-    const listUrl = getChainInfo(chainId).defaultListUrl
+    const listUrl = getChainInfo(chainId)?.defaultListUrl
+    if (!listUrl) {
+      return {}
+    }
 
     const list = listsByUrl[listUrl]?.current
     if (!list) {
@@ -119,7 +122,7 @@ export function useUnsupportedTokens(): { [address: string]: Token } {
 
     const unsupportedSet = new Set(Object.keys(unsupportedTokens))
 
-    return list.tokens.reduce((acc, tokenInfo) => {
+    return list.tokens.reduce((acc: { [address: string]: Token }, tokenInfo: any) => {
       const bridgeInfo = tokenInfo.extensions?.bridgeInfo as unknown as BridgeInfo
       if (
         bridgeInfo &&

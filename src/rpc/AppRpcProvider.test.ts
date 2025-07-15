@@ -1,6 +1,6 @@
 import { TransactionResponse } from '@ethersproject/abstract-provider'
 import { JsonRpcProvider, Network, Provider } from '@ethersproject/providers'
-import { ChainId } from '@uniswap/sdk-core'
+import { ZEPHYR_CHAIN_ID } from 'constants/chains'
 
 import AppRpcProvider from './AppRpcProvider'
 
@@ -36,27 +36,27 @@ describe('AppRpcProvider', () => {
   })
 
   test('constructor initializes with valid providers', () => {
-    expect(() => new AppRpcProvider(ChainId.MAINNET, mockProviders)).not.toThrow()
+    expect(() => new AppRpcProvider(ZEPHYR_CHAIN_ID, mockProviders)).not.toThrow()
   })
 
   test('constructor throws with empty providers array', () => {
-    expect(() => new AppRpcProvider(ChainId.MAINNET, [])).toThrow('providers array empty')
+    expect(() => new AppRpcProvider(ZEPHYR_CHAIN_ID, [])).toThrow('providers array empty')
   })
 
   test('constructor throws with network mismatch', () => {
     mockProviders[0].network.chainId = 2
-    expect(() => new AppRpcProvider(ChainId.MAINNET, mockProviders)).toThrow('networks mismatch')
+    expect(() => new AppRpcProvider(ZEPHYR_CHAIN_ID, mockProviders)).toThrow('networks mismatch')
   })
 
   test('constructor throws with invalid providers', () => {
     mockIsProvider.mockReturnValueOnce(false)
-    expect(() => new AppRpcProvider(ChainId.MAINNET, [{} as JsonRpcProvider])).toThrow('invalid provider')
+    expect(() => new AppRpcProvider(ZEPHYR_CHAIN_ID, [{} as JsonRpcProvider])).toThrow('invalid provider')
   })
 
   test('handles sendTransaction', async () => {
     const hash = '0x123'
     mockProvider1.sendTransaction.mockResolvedValue({ hash } as TransactionResponse)
-    const provider = new AppRpcProvider(ChainId.MAINNET, [mockProvider1])
+    const provider = new AppRpcProvider(ZEPHYR_CHAIN_ID, [mockProvider1])
 
     const result = await provider.perform('sendTransaction', { signedTransaction: '0xabc' })
     expect(result).toBe(hash)
@@ -65,7 +65,7 @@ describe('AppRpcProvider', () => {
   test('handles call', async () => {
     const hash = '0x123'
     mockProvider1.perform.mockResolvedValue({ hash } as TransactionResponse)
-    const provider = new AppRpcProvider(ChainId.MAINNET, [mockProvider1])
+    const provider = new AppRpcProvider(ZEPHYR_CHAIN_ID, [mockProvider1])
 
     const { hash: result } = await provider.perform('call', [{ hash }])
     expect(result).toBe(hash)
@@ -78,7 +78,7 @@ describe('AppRpcProvider', () => {
     const FAST = 1
     mockProvider2.getBlockNumber = jest.fn(() => new Promise((resolve) => setTimeout(() => resolve(1), FAST)))
 
-    const appRpcProvider = new AppRpcProvider(ChainId.MAINNET, mockProviders)
+    const appRpcProvider = new AppRpcProvider(ZEPHYR_CHAIN_ID, mockProviders)
 
     // Evaluate all providers
     const evaluationPromises = appRpcProvider.providerEvaluations.map(appRpcProvider.evaluateProvider)
@@ -96,7 +96,7 @@ describe('AppRpcProvider', () => {
     )
     mockProvider2.getBlockNumber = jest.fn(() => new Promise((resolve) => setTimeout(() => resolve(1), 50)))
 
-    const appRpcProvider = new AppRpcProvider(ChainId.MAINNET, mockProviders)
+    const appRpcProvider = new AppRpcProvider(ZEPHYR_CHAIN_ID, mockProviders)
 
     // Evaluate all providers
     const evaluationPromises = appRpcProvider.providerEvaluations.map(appRpcProvider.evaluateProvider)
@@ -110,7 +110,7 @@ describe('AppRpcProvider', () => {
   test('should increment failureCount on provider failure', async () => {
     mockProvider1.getBlockNumber.mockRejectedValue(new Error('Failed'))
 
-    const appRpcProvider = new AppRpcProvider(ChainId.MAINNET, mockProviders)
+    const appRpcProvider = new AppRpcProvider(ZEPHYR_CHAIN_ID, mockProviders)
 
     // Evaluate the failing provider
     await appRpcProvider.evaluateProvider(appRpcProvider.providerEvaluations[0])

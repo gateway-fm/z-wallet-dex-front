@@ -2,7 +2,7 @@ import { Trans } from '@lingui/macro'
 import Column from 'components/Column'
 import RoutingDiagram from 'components/RoutingDiagram/RoutingDiagram'
 import { RowBetween } from 'components/Row'
-import { SUPPORTED_GAS_ESTIMATE_CHAIN_IDS } from 'constants/chains'
+import { ZEPHYR_CHAIN_ID } from 'constants/chains'
 import useAutoRouterSupported from 'hooks/useAutoRouterSupported'
 import { ClassicTrade, SubmittableTrade } from 'state/routing/types'
 import { isClassicTrade } from 'state/routing/utils'
@@ -16,7 +16,7 @@ import RouterLabel from '../RouterLabel'
 // Can `trade.gasUseEstimateUSD` be defined when `chainId` is not in `SUPPORTED_GAS_ESTIMATE_CHAIN_IDS`?
 function useGasPrice({ gasUseEstimateUSD, inputAmount }: ClassicTrade) {
   const { formatNumber } = useFormatter()
-  if (!gasUseEstimateUSD || !SUPPORTED_GAS_ESTIMATE_CHAIN_IDS.includes(inputAmount.currency.chainId)) return undefined
+  if (!gasUseEstimateUSD || inputAmount.currency.chainId !== ZEPHYR_CHAIN_ID) return undefined
 
   return gasUseEstimateUSD === 0 ? '<$0.01' : formatNumber({ input: gasUseEstimateUSD, type: NumberType.FiatGasPrice })
 }

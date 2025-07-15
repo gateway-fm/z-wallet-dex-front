@@ -3,7 +3,7 @@ import { Gas } from 'components/Icons/Gas'
 import { LoadingOpacityContainer } from 'components/Loader/styled'
 import Row, { RowFixed } from 'components/Row'
 import { MouseoverTooltip, TooltipSize } from 'components/Tooltip'
-import { SUPPORTED_GAS_ESTIMATE_CHAIN_IDS } from 'constants/chains'
+import { SUPPORTED_GAS_ESTIMATE_CHAIN_IDS, ZEPHYR_CHAIN_ID } from 'constants/chains'
 import { SubmittableTrade } from 'state/routing/types'
 import styled from 'styled-components'
 import { ThemedText } from 'theme/components'
@@ -24,7 +24,7 @@ export default function GasEstimateTooltip({ trade, loading }: { trade?: Submitt
   const { chainId } = useWeb3React()
   const { formatNumber } = useFormatter()
 
-  if (!trade || !chainId || !SUPPORTED_GAS_ESTIMATE_CHAIN_IDS.includes(chainId)) {
+  if (!trade || !chainId || !SUPPORTED_GAS_ESTIMATE_CHAIN_IDS.includes(chainId as typeof ZEPHYR_CHAIN_ID)) {
     return null
   }
 
