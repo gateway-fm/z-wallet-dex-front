@@ -7,6 +7,7 @@ import { useRoutingAPITrade } from 'state/routing/useRoutingAPITrade'
 
 import { ZEPHYR_CHAIN_ID } from '../constants/chains'
 import { USDC_ZEPHYR } from '../constants/tokens'
+import { useGraphQLTokenPrice } from './useTokenPricesFromGraphQL'
 
 // Stablecoin amounts used when calculating spot price for a given currency.
 // The amount is large enough to filter low liquidity pairs.
@@ -23,13 +24,16 @@ export default function useStablecoinPrice(currency?: Currency): Price<Currency,
   const amountOut = chainId ? STABLECOIN_AMOUNT_OUT[chainId] : undefined
   const stablecoin = amountOut?.currency
 
+  const graphQLPrice = useGraphQLTokenPrice(currency)
+
   const { trade } = useRoutingAPITrade(
-    false /* skip */,
+    chainId === ZEPHYR_CHAIN_ID /* skip for Zephyr - use GraphQL */,
     TradeType.EXACT_OUTPUT,
     amountOut,
     currency,
     INTERNAL_ROUTER_PREFERENCE_PRICE
   )
+
   const price = useMemo(() => {
     if (!currency || !stablecoin) {
       return undefined
@@ -40,13 +44,19 @@ export default function useStablecoinPrice(currency?: Currency): Price<Currency,
       return new Price(stablecoin, stablecoin, '1', '1')
     }
 
+    // For Zephyr network, use GraphQL price if available
+    if (chainId === ZEPHYR_CHAIN_ID && graphQLPrice) {
+      return graphQLPrice as Price<Currency, Token>
+    }
+
+    // Fallback to routing API for other networks
     if (trade) {
       const { numerator, denominator } = trade.routes[0].midPrice
       return new Price(currency, stablecoin, denominator, numerator)
     }
 
     return undefined
-  }, [currency, stablecoin, trade])
+  }, [currency, stablecoin, trade, chainId, graphQLPrice])
 
   const lastPrice = useRef(price)
   if (
