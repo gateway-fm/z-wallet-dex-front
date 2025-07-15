@@ -1,6 +1,4 @@
-// Centralized configuration system for Zephyr Network
-// Based on environment variables for flexible deployment
-// Variable names aligned with existing .env.example
+/* eslint-disable import/no-unused-modules */
 
 export const NETWORK_CONFIG = {
   CHAIN_ID: Number(process.env.REACT_APP_CUSTOM_NETWORK_CHAIN_ID) || 1417429182,
@@ -64,7 +62,7 @@ export const API_CONFIG = {
     URL:
       process.env.GRAPHQL_URL_OVERRIDE ||
       process.env.REACT_APP_AWS_API_ENDPOINT ||
-      'https://api.dex-zephyr.cloudbuilder.ru/subgraphs/name/v3-tokens-mainnet',
+      'https://api-zephyr-dex.platform-dev.gateway.fm/subgraphs/name/v3-tokens-mainnet',
     TIMEOUT: Number(process.env.REACT_APP_GRAPHQL_TIMEOUT) || 30000,
     RETRY_COUNT: Number(process.env.REACT_APP_GRAPHQL_RETRY_COUNT) || 3,
   },
@@ -72,13 +70,13 @@ export const API_CONFIG = {
     URL:
       process.env.API_BASE_URL_V2_OVERRIDE ||
       process.env.REACT_APP_API_BASE_URL_V2_OVERRIDE ||
-      'https://api.dex-zephyr.cloudbuilder.ru/subgraphs/name/v2',
+      'https://api-zephyr-dex.platform-dev.gateway.fm/subgraphs/name/v2',
   },
   GATEWAY: {
     URL:
       process.env.REACT_APP_UNISWAP_GATEWAY_DNS ||
       process.env.API_BASE_URL_OVERRIDE ||
-      'https://api.dex-zephyr.cloudbuilder.ru',
+      'https://api-zephyr-dex.platform-dev.gateway.fm',
   },
   CACHE: {
     TTL: Number(process.env.REACT_APP_CACHE_TTL) || 5 * 60 * 1000, // 5 minutes
