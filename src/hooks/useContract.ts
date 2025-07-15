@@ -24,6 +24,7 @@ import ERC721_ABI from 'abis/erc721.json'
 import ERC1155_ABI from 'abis/erc1155.json'
 import { ArgentWalletDetector, EnsPublicResolver, EnsRegistrar, Erc20, Erc721, Erc1155, Weth } from 'abis/types'
 import WETH_ABI from 'abis/weth.json'
+import { ZEPHYR_CHAIN_ID } from 'constants/chains'
 import { RPC_PROVIDERS } from 'constants/providers'
 import { WRAPPED_NATIVE_CURRENCY } from 'constants/tokens'
 import { useMemo } from 'react'
@@ -65,7 +66,7 @@ function useMainnetContract<T extends Contract = Contract>(address: string | und
   const isMainnet = chainId === ChainId.MAINNET
   const contract = useContract(isMainnet ? address : undefined, ABI, false)
   const mainnetProvider =
-    chainId === ChainId.MAINNET && provider !== undefined ? provider : RPC_PROVIDERS[ChainId.MAINNET]
+    chainId === ChainId.MAINNET && provider !== undefined ? provider : RPC_PROVIDERS[ZEPHYR_CHAIN_ID]
 
   return useMemo(() => {
     if (isMainnet) return contract

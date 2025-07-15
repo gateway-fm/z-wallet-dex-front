@@ -1,10 +1,37 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable import/no-unused-modules */
 
+import { UNIVERSAL_ROUTER_ADDRESS } from '@uniswap/universal-router-sdk'
+
 import { CONTRACTS_CONFIG, TOKENS_CONFIG } from '../config/zephyr'
 import { ZEPHYR_CHAIN_ID } from './chains'
 
 type AddressMap = { [chainId: number]: string }
+
+/**
+ * Custom Universal Router Address function that supports Zephyr
+ * Falls back to Swap Router 02 for Zephyr chain, uses official Universal Router for others
+ */
+export function getUniversalRouterAddress(chainId: number): string {
+  if (chainId === ZEPHYR_CHAIN_ID) {
+    // For Zephyr, use Swap Router 02 as Universal Router is not deployed
+    return CONTRACTS_CONFIG.SWAP_ROUTER_02
+  }
+
+  // For other chains, use the official Universal Router
+  try {
+    return UNIVERSAL_ROUTER_ADDRESS(chainId)
+  } catch (error) {
+    throw new Error(`Universal Router not deployed on chain ${chainId}`)
+  }
+}
+
+/**
+ * Universal Router addresses mapping
+ */
+export const UNIVERSAL_ROUTER_ADDRESSES: AddressMap = {
+  [ZEPHYR_CHAIN_ID]: CONTRACTS_CONFIG.SWAP_ROUTER_02,
+}
 
 /**
  * Known contract addresses for Zephyr network - using configuration system

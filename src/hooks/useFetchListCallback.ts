@@ -1,7 +1,7 @@
 import { nanoid } from '@reduxjs/toolkit'
-import { ChainId } from '@uniswap/sdk-core'
 import { TokenList } from '@uniswap/token-lists'
 import { useWeb3React } from '@web3-react/core'
+import { ZEPHYR_CHAIN_ID } from 'constants/chains'
 import { RPC_PROVIDERS } from 'constants/providers'
 import getTokenList from 'lib/hooks/useTokenList/fetchTokenList'
 import resolveENSContentHash from 'lib/utils/resolveENSContentHash'
@@ -13,12 +13,12 @@ import { fetchTokenList } from '../state/lists/actions'
 export function useFetchListCallback(): (listUrl: string, skipValidation?: boolean) => Promise<TokenList> {
   const dispatch = useAppDispatch()
   const { provider, chainId } = useWeb3React()
-  const mainnetProvider = chainId === ChainId.MAINNET && provider ? provider : RPC_PROVIDERS[ChainId.MAINNET]
+  const zephyrProvider = chainId === ZEPHYR_CHAIN_ID && provider ? provider : RPC_PROVIDERS[ZEPHYR_CHAIN_ID]
   return useCallback(
     async (listUrl: string, skipValidation?: boolean) => {
       const requestId = nanoid()
       dispatch(fetchTokenList.pending({ requestId, url: listUrl }))
-      return getTokenList(listUrl, (ensName: string) => resolveENSContentHash(ensName, mainnetProvider), skipValidation)
+      return getTokenList(listUrl, (ensName: string) => resolveENSContentHash(ensName, zephyrProvider), skipValidation)
         .then((tokenList) => {
           dispatch(fetchTokenList.fulfilled({ url: listUrl, tokenList, requestId }))
           return tokenList
@@ -29,6 +29,6 @@ export function useFetchListCallback(): (listUrl: string, skipValidation?: boole
           throw error
         })
     },
-    [dispatch, mainnetProvider]
+    [dispatch, zephyrProvider]
   )
 }

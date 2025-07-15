@@ -1,5 +1,5 @@
-import { ChainId } from '@uniswap/sdk-core'
 import { useWeb3React } from '@web3-react/core'
+import { ZEPHYR_CHAIN_ID } from 'constants/chains'
 import { RPC_PROVIDERS } from 'constants/providers'
 import useIsWindowVisible from 'hooks/useIsWindowVisible'
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react'
@@ -48,9 +48,9 @@ export function BlockNumberProvider({ children }: { children: ReactNode }) {
     setChainBlock((chainBlock) => {
       if (chainBlock.chainId === chainId) {
         if (!chainBlock.block || chainBlock.block < block) {
-          return { chainId, block, mainnetBlock: chainId === ChainId.MAINNET ? block : chainBlock.mainnetBlock }
+          return { chainId, block, mainnetBlock: chainId === ZEPHYR_CHAIN_ID ? block : chainBlock.mainnetBlock }
         }
-      } else if (chainId === ChainId.MAINNET) {
+      } else if (chainId === ZEPHYR_CHAIN_ID) {
         if (!chainBlock.mainnetBlock || chainBlock.mainnetBlock < block) {
           return { ...chainBlock, mainnetBlock: block }
         }
@@ -94,11 +94,11 @@ export function BlockNumberProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (mainnetBlock === undefined) {
-      const mainnetProvider = chainId === ChainId.MAINNET && provider ? provider : RPC_PROVIDERS[ChainId.MAINNET]
-      mainnetProvider
+      const zephyrProvider = chainId === ZEPHYR_CHAIN_ID && provider ? provider : RPC_PROVIDERS[ZEPHYR_CHAIN_ID]
+      zephyrProvider
         .getBlockNumber()
         .then((block) => {
-          onChainBlock(ChainId.MAINNET, block)
+          onChainBlock(ZEPHYR_CHAIN_ID, block)
         })
         // swallow errors - it's ok if this fails, as we'll try again if we activate mainnet
         .catch(() => undefined)
@@ -112,7 +112,7 @@ export function BlockNumberProvider({ children }: { children: ReactNode }) {
           setChainBlock({
             chainId: activeChainId,
             block: update,
-            mainnetBlock: activeChainId === ChainId.MAINNET ? update : mainnetBlock,
+            mainnetBlock: activeChainId === ZEPHYR_CHAIN_ID ? update : mainnetBlock,
           })
         }
       },

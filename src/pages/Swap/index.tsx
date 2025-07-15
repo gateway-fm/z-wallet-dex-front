@@ -1,6 +1,5 @@
 import { Trans } from '@lingui/macro'
 import { ChainId, Currency, CurrencyAmount, Percent, Token } from '@uniswap/sdk-core'
-import { UNIVERSAL_ROUTER_ADDRESS } from '@uniswap/universal-router-sdk'
 import { useWeb3React } from '@web3-react/core'
 import { useToggleAccountDrawer } from 'components/AccountDrawer'
 import AddressInputPanel from 'components/AddressInputPanel'
@@ -20,6 +19,7 @@ import SwapHeader from 'components/swap/SwapHeader'
 import { SwitchLocaleLink } from 'components/SwitchLocaleLink'
 import TokenSafetyModal from 'components/TokenSafety/TokenSafetyModal'
 import { useConnectionReady } from 'connection/eagerlyConnect'
+import { getUniversalRouterAddress } from 'constants/addresses'
 import { getChainInfo } from 'constants/chainInfo'
 import { asSupportedChain, isSupportedChain } from 'constants/chains'
 import { getSwapCurrencyId, TOKEN_SHORTHANDS } from 'constants/tokens'
@@ -139,7 +139,7 @@ export default function SwapPage({ className }: { className?: string }) {
       <PageWrapper>
         <Swap
           className={className}
-          chainId={supportedChainId ?? ChainId.MAINNET}
+          chainId={(supportedChainId ?? ChainId.MAINNET) as ChainId}
           initialInputCurrencyId={loadedUrlParams?.[Field.INPUT]?.currencyId}
           initialOutputCurrencyId={loadedUrlParams?.[Field.OUTPUT]?.currencyId}
           disableTokenInputs={supportedChainId === undefined}
@@ -407,7 +407,7 @@ function Swap({
       (parsedAmounts[Field.INPUT]?.currency.isToken
         ? (parsedAmounts[Field.INPUT] as CurrencyAmount<Token>)
         : undefined),
-    isSupportedChain(chainId) ? UNIVERSAL_ROUTER_ADDRESS(chainId) : undefined,
+    isSupportedChain(chainId) ? getUniversalRouterAddress(chainId) : undefined,
     trade?.fillType
   )
 
