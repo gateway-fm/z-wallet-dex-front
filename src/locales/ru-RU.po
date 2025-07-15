@@ -559,7 +559,7 @@ msgstr "Торгуйте криптовалютой с уверенностью"
 
 #: src/pages/Pool/PositionPage.tsx
 msgid "Back to Pools"
-msgstr "Назад к бассейны"
+msgstr "Назад к пулам"
 
 #: src/components/AccountDrawer/MiniPortfolio/constants.tsx
 msgid "Your account had insufficent funds to complete this swap."
@@ -1074,7 +1074,7 @@ msgstr "Отменено"
 
 #: src/nft/components/profile/view/EmptyWalletContent.tsx
 msgid "No pools yet"
-msgstr "бассейнов пока нет"
+msgstr "пулов пока нет"
 
 #: src/components/PositionList/index.tsx
 #: src/components/PositionList/index.tsx
@@ -2802,7 +2802,7 @@ msgstr "Подтвердите обмен"
 #: src/pages/Pool/index.tsx
 #: src/pages/Pool/index.tsx
 msgid "Pools"
-msgstr "Бассейны"
+msgstr "Пулы"
 
 #: src/components/Tokens/TokenTable/TokenTable.tsx
 msgid "An error occurred loading tokens. Please try again."
@@ -2814,7 +2814,7 @@ msgstr "Ты в!"
 
 #: src/pages/PoolFinder/index.tsx
 msgid "Pool found!"
-msgstr "Бассейн найден!"
+msgstr "Пул найден!"
 
 #: src/components/AccountDetails/TransactionSummary.tsx
 msgid "Vote to abstain on proposal {proposalKey} with reason \"{0}\""
@@ -3187,7 +3187,7 @@ msgstr "Изучите Uniswap Analytics."
 
 #: src/pages/Pool/PositionPage.tsx
 msgid "← Back to Pools"
-msgstr "← Назад к Бассейны"
+msgstr "← Назад к Пулам"
 
 #: src/nft/utils/time.ts
 msgid "{i, plural, one {day} other {days}}"
