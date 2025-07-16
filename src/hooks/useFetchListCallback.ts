@@ -16,6 +16,18 @@ export function useFetchListCallback(): (listUrl: string, skipValidation?: boole
   const zephyrProvider = chainId === ZEPHYR_CHAIN_ID && provider ? provider : RPC_PROVIDERS[ZEPHYR_CHAIN_ID]
   return useCallback(
     async (listUrl: string, skipValidation?: boolean) => {
+      // NOTE: Disabled for Zephyr network
+      if (chainId === ZEPHYR_CHAIN_ID) {
+        const emptyTokenList: TokenList = {
+          name: 'Zephyr Dynamic Tokens',
+          timestamp: new Date().toISOString(),
+          version: { major: 1, minor: 0, patch: 0 },
+          tokens: [],
+          logoURI: '',
+        }
+        return emptyTokenList
+      }
+
       const requestId = nanoid()
       dispatch(fetchTokenList.pending({ requestId, url: listUrl }))
       return getTokenList(listUrl, (ensName: string) => resolveENSContentHash(ensName, zephyrProvider), skipValidation)
@@ -29,6 +41,6 @@ export function useFetchListCallback(): (listUrl: string, skipValidation?: boole
           throw error
         })
     },
-    [dispatch, zephyrProvider]
+    [dispatch, zephyrProvider, chainId]
   )
 }

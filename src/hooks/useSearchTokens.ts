@@ -44,6 +44,19 @@ const TRENDING_TOKENS_QUERY = gql`
   }
 `
 
+const ALL_TOKENS_QUERY = gql`
+  query AllTokens($first: Int) {
+    tokens(first: $first, orderBy: id, orderDirection: asc) {
+      id
+      name
+      symbol
+      decimals
+      volumeUSD
+      totalValueLocked
+    }
+  }
+`
+
 function graphqlTokenToTokenResult(token: {
   id: string
   name?: string
@@ -109,6 +122,34 @@ export function useSearchTokens({ searchQuery, skip = false }: { searchQuery?: s
 
 export function useTrendingTokens(limit = 10) {
   const { data, loading, error, refetch } = useQuery(TRENDING_TOKENS_QUERY, {
+    client: zephyrGraphQLClient,
+    variables: {
+      first: limit,
+    },
+    errorPolicy: 'all',
+  })
+
+  const tokens = useMemo(() => {
+    if (!data?.tokens) return []
+
+    return data.tokens
+      .map((token: any) => graphqlTokenToTokenResult(token))
+      .filter((token: TokenSearchResult | null): token is TokenSearchResult => token !== null)
+  }, [data])
+
+  return useMemo(
+    () => ({
+      data: tokens,
+      loading,
+      error: error || undefined,
+      refetch,
+    }),
+    [tokens, loading, error, refetch]
+  )
+}
+
+export function useAllTokens(limit = 1000) {
+  const { data, loading, error, refetch } = useQuery(ALL_TOKENS_QUERY, {
     client: zephyrGraphQLClient,
     variables: {
       first: limit,
