@@ -70,10 +70,7 @@ const Navbar = ({ blur }: { blur: boolean }) => {
     if (accountDrawerOpen) {
       toggleAccountDrawer()
     }
-    navigate({
-      pathname: '/',
-      search: '?intro=true',
-    })
+    navigate('/swap')
   }, [accountDrawerOpen, navigate, toggleAccountDrawer])
 
   return (
@@ -84,9 +81,9 @@ const Navbar = ({ blur }: { blur: boolean }) => {
           <Box className={styles.leftSideContainer}>
             <Box className={styles.logoContainer}>
               <GatewayIcon
-                width="48"
-                height="48"
-                data-testid="horswap-logo"
+                width="36"
+                height="36"
+                data-testid="main-logo"
                 className={styles.logo}
                 onClick={handleIconClick}
               />
