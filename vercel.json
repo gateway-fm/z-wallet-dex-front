@@ -2,7 +2,6 @@
   "version": 2,
   "name": "horswap-zephyr",
   "framework": null,
-  "rootDirectory": ".",
   "buildCommand": "yarn install && yarn prepare && yarn build",
   "devCommand": "yarn start",
   "installCommand": "yarn install",
