@@ -2,7 +2,7 @@
   "version": 2,
   "name": "gateway-dex",
   "framework": null,
-  "buildCommand": "npm run prepare && npm run build",
+  "buildCommand": "npm run prepare:ci && npm run build",
   "outputDirectory": "build",
   "installCommand": "yarn install",
   "env": {

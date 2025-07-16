@@ -6,20 +6,23 @@ const isCI = process.env.CI === 'true' || process.env.VERCEL === '1'
 if (isCI) {
   console.log('Preparing for CI/CD environment...')
 
-  const swcrcPath = path.join(process.cwd(), '.swcrc')
-  const backupPath = path.join(process.cwd(), '.swcrc.backup')
-
-  // Backup original .swcrc
-  if (fs.existsSync(swcrcPath)) {
-    fs.copyFileSync(swcrcPath, backupPath)
-    console.log('Original .swcrc backed up as .swcrc.backup')
+  // Create .babelrc to force babel usage instead of SWC
+  const babelrcPath = path.join(process.cwd(), '.babelrc')
+  const babelConfig = {
+    "presets": [
+      ["@babel/preset-env", { "targets": "> 0.5%, not dead" }],
+      ["@babel/preset-react", { "runtime": "automatic" }],
+      "@babel/preset-typescript"
+    ],
+    "plugins": [
+      "@babel/plugin-proposal-class-properties",
+      "@babel/plugin-transform-runtime",
+      "macros"
+    ]
   }
-
-  // Remove .swcrc completely to force craco to use babel instead
-  if (fs.existsSync(swcrcPath)) {
-    fs.unlinkSync(swcrcPath)
-    console.log('Removed .swcrc - will use babel for CI/CD')
-  }
+  
+  fs.writeFileSync(babelrcPath, JSON.stringify(babelConfig, null, 2))
+  console.log('Created .babelrc for CI/CD - SWC will be disabled')
 } else {
-  console.log('Local development detected, keeping original .swcrc')
+  console.log('Local development detected, keeping SWC configuration')
 }
