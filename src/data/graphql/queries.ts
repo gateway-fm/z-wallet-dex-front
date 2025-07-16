@@ -29,7 +29,7 @@ export const SEARCH_TOKENS = gql`
 
 export const TRENDING_TOKENS = gql`
   query TrendingTokens($first: Int = 10) {
-    tokens(first: $first, orderBy: volumeUSD, orderDirection: desc, where: { volumeUSD_gt: "1000" }) {
+    tokens(first: $first, orderBy: volumeUSD, orderDirection: desc) {
       id
       symbol
       name
