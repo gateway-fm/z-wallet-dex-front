@@ -7,30 +7,32 @@
     "ajv": "node scripts/compile-ajv-validators.js",
     "contracts:compile:abi": "typechain --target ethers-v5 --out-dir src/abis/types \"./src/abis/**/*.json\"",
     "contracts:compile:v3": "typechain --target ethers-v5 --out-dir src/types/v3 \"./node_modules/@uniswap/**/artifacts/contracts/**/*[!dbg].json\"",
-    "contracts": "yarn contracts:compile:abi && yarn contracts:compile:v3",
+    "contracts": "npm run contracts:compile:abi && npm run contracts:compile:v3",
     "i18n:extract": "lingui extract --locale en-US",
     "i18n:compile": "lingui compile",
-    "i18n": "yarn i18n:extract --clean && yarn i18n:compile",
+    "i18n": "npm run i18n:extract -- --clean && npm run i18n:compile",
     "prepare": "concurrently \"npm:ajv\" \"npm:contracts\" \"npm:i18n\"",
+    "prepare:ci": "node scripts/prepare-for-ci.js && npm run prepare",
     "start": "craco start",
-    "start:cloud": "NODE_OPTIONS=--dns-result-order=ipv4first PORT=3001 npx wrangler pages dev --compatibility-flags=nodejs_compat --compatibility-date=2023-08-01 --proxy=3001 --port=3000 -- yarn start",
+    "start:cloud": "NODE_OPTIONS=--dns-result-order=ipv4first PORT=3001 npx wrangler pages dev --compatibility-flags=nodejs_compat --compatibility-date=2023-08-01 --proxy=3001 --port=3000 -- npm start",
     "build": "craco build",
+    "build:ci": "npm run prepare:ci && npm run build",
     "analyze": "source-map-explorer 'build/static/js/*.js' --no-border-checks --gzip",
     "serve": "serve build -s -l 3000",
-    "lint": "yarn eslint --ignore-path .gitignore --cache --cache-location node_modules/.cache/eslint/ .",
+    "lint": "npx eslint --ignore-path .gitignore --cache --cache-location node_modules/.cache/eslint/ .",
     "typecheck": "tsc",
     "typecheck:cloud": "tsc -p functions/tsconfig.json",
     "typecheck:cypress": "tsc -p cypress/tsconfig.json",
     "test": "craco test",
-    "test:cloud": "yarn jest functions --config=functions/jest.config.json",
+    "test:cloud": "npx jest functions --config=functions/jest.config.json",
     "cypress:open": "cypress open --browser chrome --e2e",
     "cypress:run": "cypress run --browser chrome --e2e",
-    "deduplicate": "yarn-deduplicate --strategy=highest",
-    "postinstall": "yarn patch-package"
+    "deduplicate": "npx yarn-deduplicate --strategy=highest",
+    "postinstall": "npx patch-package"
   },
   "lint-staged": {
-    "yarn.lock": [
-      "yarn deduplicate"
+    "package-lock.json": [
+      "npm run deduplicate"
     ]
   },
   "jest": {

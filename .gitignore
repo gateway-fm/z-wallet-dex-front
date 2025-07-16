@@ -11,6 +11,9 @@
 # generated files
 /src/**/__generated__
 
+# CI backup files
+.swcrc.backup
+
 # dependencies
 /node_modules
 
