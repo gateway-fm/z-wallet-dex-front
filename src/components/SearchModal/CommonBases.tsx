@@ -3,9 +3,13 @@ import CurrencyLogo from 'components/Logo/CurrencyLogo'
 import { AutoRow } from 'components/Row'
 import { COMMON_BASES } from 'constants/routing'
 import { useTokenInfoFromActiveList } from 'hooks/useTokenInfoFromActiveList'
+import { useMemo } from 'react'
 import { Text } from 'rebass'
 import styled from 'styled-components'
 import { currencyId } from 'utils/currencyId'
+
+import { ZEPHYR_CHAIN_ID } from '../../constants/chains'
+import { useZephyrTokens } from '../../hooks/useZephyrTokens'
 
 const BaseWrapper = styled.div<{ disable?: boolean }>`
   border: 1px solid ${({ theme }) => theme.surface3};
@@ -34,9 +38,16 @@ export default function CommonBases({
 }: {
   chainId?: number
   selectedCurrency?: Currency | null
-  onSelect: (currency: Currency) => void
+  onSelect: (currency: Currency, hasWarning?: boolean) => void
 }) {
-  const bases = chainId !== undefined ? COMMON_BASES[chainId] ?? [] : []
+  const tokens = useZephyrTokens()
+
+  const bases = useMemo(() => {
+    if (chainId === ZEPHYR_CHAIN_ID) {
+      return Object.values(tokens).slice(0, 3)
+    }
+    return chainId !== undefined ? COMMON_BASES[chainId] ?? [] : []
+  }, [chainId, tokens])
 
   return bases.length > 0 ? (
     <AutoRow gap="4px">
@@ -46,8 +57,8 @@ export default function CommonBases({
         return (
           <BaseWrapper
             tabIndex={0}
-            onKeyPress={(e) => !isSelected && e.key === 'Enter' && onSelect(currency)}
-            onClick={() => !isSelected && onSelect(currency)}
+            onKeyPress={(e) => !isSelected && e.key === 'Enter' && onSelect(currency, false)}
+            onClick={() => !isSelected && onSelect(currency, false)}
             disable={isSelected}
             key={currencyId(currency)}
             data-testid={`common-base-${currency.symbol}`}

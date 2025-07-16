@@ -513,7 +513,7 @@ function Swap({
   }, [trade])
 
   const handleInputSelect = useCallback(
-    (inputCurrency: Currency) => {
+    (inputCurrency: Currency, _hasWarning?: boolean) => {
       onCurrencySelection(Field.INPUT, inputCurrency)
       onCurrencyChange?.({
         [Field.INPUT]: {
@@ -531,7 +531,7 @@ function Swap({
   }, [maxInputAmount, onUserInput])
 
   const handleOutputSelect = useCallback(
-    (outputCurrency: Currency) => {
+    (outputCurrency: Currency, _hasWarning?: boolean) => {
       onCurrencySelection(Field.OUTPUT, outputCurrency)
       onCurrencyChange?.({
         [Field.INPUT]: state[Field.INPUT],

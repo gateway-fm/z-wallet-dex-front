@@ -70,9 +70,8 @@ export function CurrencySearch({
   const searchToken = useToken(debouncedQuery)
   const searchTokenIsAdded = useIsUserAddedToken(searchToken)
 
-  // Use Zephyr tokens for Zephyr network, default tokens for others
-  const defaultTokens = useZephyrTokens(chainId)
-  const { tokens: searchTokens, loading: searchLoading } = useZephyrTokenSearch(debouncedQuery, chainId)
+  const defaultTokens = useZephyrTokens()
+  const { tokens: searchTokens } = useZephyrTokenSearch(debouncedQuery, chainId)
 
   const filteredTokens: Token[] = useMemo(() => {
     const tokensToUse = debouncedQuery && chainId === ZEPHYR_CHAIN_ID ? searchTokens : defaultTokens

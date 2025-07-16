@@ -12,7 +12,7 @@ interface CurrencySearchModalProps {
   isOpen: boolean
   onDismiss: () => void
   selectedCurrency?: Currency | null
-  onCurrencySelect: (currency: Currency) => void
+  onCurrencySelect: (currency: Currency, hasWarning?: boolean) => void
   otherSelectedCurrency?: Currency | null
   showCommonBases?: boolean
   showCurrencyAmount?: boolean

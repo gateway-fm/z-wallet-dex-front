@@ -218,7 +218,7 @@ interface SwapCurrencyInputPanelProps {
   onMax?: () => void
   showMaxButton: boolean
   label: ReactNode
-  onCurrencySelect?: (currency: Currency) => void
+  onCurrencySelect?: (currency: Currency, hasWarning?: boolean) => void
   currency?: Currency | null
   hideBalance?: boolean
   pair?: Pair | null
