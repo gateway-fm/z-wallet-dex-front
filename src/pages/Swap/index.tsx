@@ -146,7 +146,7 @@ export default function SwapPage({ className }: { className?: string }) {
         />
         <NetworkAlert />
       </PageWrapper>
-      {location.pathname === '/swap' && <SwitchLocaleLink />}
+      {(location.pathname === '/swap' || location.pathname === '/') && <SwitchLocaleLink />}
     </>
   )
 }

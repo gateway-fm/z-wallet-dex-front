@@ -59,8 +59,12 @@ export const routes: RouteDefinition[] = [
   createRouteDefinition({
     path: '/',
     getElement: (args) => {
-      return args.hash ? <Navigate to={args.hash.replace('#', '')} replace /> : <Landing />
+      return args.hash ? <Navigate to={args.hash.replace('#', '')} replace /> : <Swap />
     },
+  }),
+  createRouteDefinition({
+    path: '/landing',
+    getElement: () => <Landing />,
   }),
   createRouteDefinition({
     path: '/send',

@@ -1,29 +1,30 @@
 import { getTestSelector } from '../utils'
 import { CONNECTED_WALLET_USER_STATE, DISCONNECTED_WALLET_USER_STATE } from '../utils/user-state'
 
-describe('Landing Page', () => {
-  it('shows landing page when no user state exists', () => {
+describe('Home Page', () => {
+  it('shows swap page when no user state exists', () => {
     cy.visit('/', { userState: DISCONNECTED_WALLET_USER_STATE })
-    cy.get(getTestSelector('landing-page'))
+    cy.get('#swap-page')
+    cy.url().should('include', '/swap')
     cy.screenshot()
   })
 
-  it('redirects to swap page when a user has already connected a wallet', () => {
+  it('shows swap page when a user has already connected a wallet', () => {
     cy.visit('/', { userState: CONNECTED_WALLET_USER_STATE })
     cy.get('#swap-page')
     cy.url().should('include', '/swap')
     cy.screenshot()
   })
 
-  it('shows landing page when a user has already connected a wallet but ?intro=true is in query', () => {
-    cy.visit('/?intro=true', { userState: CONNECTED_WALLET_USER_STATE })
+  it('shows landing page when visiting /landing', () => {
+    cy.visit('/landing', { userState: CONNECTED_WALLET_USER_STATE })
     cy.get(getTestSelector('landing-page'))
   })
 
-  it('shows landing page when the unicorn icon in nav is selected', () => {
-    cy.visit('/swap')
-    cy.get(getTestSelector('uniswap-logo')).click()
-    cy.get(getTestSelector('landing-page'))
+  it('shows swap page when the unicorn icon in nav is selected', () => {
+    cy.visit('/landing')
+    cy.get(getTestSelector('horswap-logo')).click()
+    cy.url().should('include', '/swap')
   })
 
   it('allows navigation to pool', () => {
