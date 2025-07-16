@@ -1,3 +1,5 @@
+import { useWeb3React } from '@web3-react/core'
+import { ZEPHYR_CHAIN_ID } from 'constants/chains'
 import { TokenAddressMap, tokensToChainTokenMap } from 'lib/hooks/useTokenList/utils'
 import { useMemo } from 'react'
 import { useAppSelector } from 'state/hooks'
@@ -66,7 +68,14 @@ export function useCombinedTokenMapFromUrls(urls: string[] | undefined): TokenAd
 
 // get all the tokens from active lists, combine with local default tokens
 export function useCombinedActiveList(): TokenAddressMap {
+  const { chainId } = useWeb3React()
   const activeTokens = useCombinedTokenMapFromUrls(DEFAULT_ACTIVE_LIST_URLS)
+
+  // NOTE: Disabled for Zephyr network
+  if (chainId === ZEPHYR_CHAIN_ID) {
+    return {}
+  }
+
   return activeTokens
 }
 
