@@ -2,9 +2,10 @@
   "version": 2,
   "name": "horswap-zephyr",
   "framework": null,
-  "buildCommand": "npm run prepare && npm run build",
-  "devCommand": "npm start",
-  "installCommand": "npm ci",
+  "rootDirectory": ".",
+  "buildCommand": "yarn install && yarn prepare && yarn build",
+  "devCommand": "yarn start",
+  "installCommand": "yarn install",
   "outputDirectory": "build",
   "trailingSlash": false,
   "public": false,
@@ -52,4 +53,4 @@
       "destination": "/index.html"
     }
   ]
-} 
+}

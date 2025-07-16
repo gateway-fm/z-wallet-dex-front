@@ -14,6 +14,8 @@ export interface TokenPriceData {
   priceUSD: number
 }
 
+const POOLS_REFRESH_INTERVAL = 30000 // 30 seconds
+
 // Query to get token prices from pools (relative to USDC)
 const TOKEN_POOLS_QUERY = gql`
   query TokenPools($tokenIds: [String!]!) {
@@ -103,7 +105,7 @@ export function useTokenPricesFromGraphQL(tokenAddresses: string[]): {
     skip: normalizedAddresses.length === 0,
     errorPolicy: 'all',
     fetchPolicy: 'cache-first',
-    pollInterval: 30000, // Update prices every 30 seconds
+    pollInterval: POOLS_REFRESH_INTERVAL,
   })
 
   const pricesMap = useMemo(() => {
