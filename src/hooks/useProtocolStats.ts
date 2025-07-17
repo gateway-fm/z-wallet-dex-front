@@ -31,7 +31,6 @@ interface Pool {
   totalValueLockedUSD: string
   volumeUSD: string
   txCount: string
-  aprFee?: string
 }
 
 interface UseProtocolStatsResult {
@@ -46,6 +45,8 @@ interface UseTopPoolsResult {
   error: any
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// eslint-disable-next-line import/no-unused-modules
 export function useProtocolStats(): UseProtocolStatsResult {
   const { data, loading, error } = useQuery(PROTOCOL_STATS, {
     client: zephyrGraphQLClient,

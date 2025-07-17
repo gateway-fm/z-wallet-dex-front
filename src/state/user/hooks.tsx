@@ -8,8 +8,10 @@ import { useCallback, useMemo } from 'react'
 import { useAppDispatch, useAppSelector } from 'state/hooks'
 import { UserAddedToken } from 'types/tokens'
 
+import { ZEPHYR_CHAIN_ID } from '../../constants/chains'
 import { BASES_TO_TRACK_LIQUIDITY_FOR, PINNED_PAIRS } from '../../constants/routing'
 import { useDefaultActiveTokens } from '../../hooks/Tokens'
+import { useBasesToTrackLiquidityFor, usePinnedPairs } from '../../hooks/useDynamicRouting'
 import {
   addSerializedPair,
   addSerializedToken,
@@ -212,8 +214,17 @@ export function useTrackedTokenPairs(): [Token, Token][] {
   const { chainId } = useWeb3React()
   const tokens = useDefaultActiveTokens(chainId)
 
+  // Dynamic hooks for Zephyr
+  const zephyrPinnedPairs = usePinnedPairs()
+  const zephyrBasesToTrack = useBasesToTrackLiquidityFor()
+
   // pinned pairs
-  const pinnedPairs = useMemo(() => (chainId ? PINNED_PAIRS[chainId] ?? [] : []), [chainId])
+  const pinnedPairs = useMemo(() => {
+    if (chainId === ZEPHYR_CHAIN_ID) {
+      return zephyrPinnedPairs
+    }
+    return chainId ? PINNED_PAIRS[chainId] ?? [] : []
+  }, [chainId, zephyrPinnedPairs])
 
   // pairs for every token against every base
   const generatedPairs: [Token, Token][] = useMemo(
@@ -222,9 +233,11 @@ export function useTrackedTokenPairs(): [Token, Token][] {
         ? Object.keys(tokens).flatMap((tokenAddress) => {
             const token = tokens[tokenAddress]
             // for each token on the current chain,
+            const basesToUse =
+              chainId === ZEPHYR_CHAIN_ID ? zephyrBasesToTrack : BASES_TO_TRACK_LIQUIDITY_FOR[chainId] ?? []
             return (
               // loop though all bases on the current chain
-              (BASES_TO_TRACK_LIQUIDITY_FOR[chainId] ?? [])
+              basesToUse
                 // to construct pairs of the given token with each base
                 .map((base) => {
                   if (base.address === token.address) {
@@ -237,7 +250,7 @@ export function useTrackedTokenPairs(): [Token, Token][] {
             )
           })
         : [],
-    [tokens, chainId]
+    [tokens, chainId, zephyrBasesToTrack]
   )
 
   // pairs saved by users

@@ -87,16 +87,30 @@ export function CurrencySearch({
     const s = debouncedQuery.toLowerCase().trim()
 
     const tokens = filteredSortedTokens.filter((t) => !(t.equals(wrapped) || (disableNonToken && t.isNative)))
+
+    // For Zephyr network, use only GraphQL tokens (no native tokens)
+    if (chainId === ZEPHYR_CHAIN_ID) {
+      return tokens
+    }
+
     const shouldShowWrapped = !onlyShowCurrenciesWithBalance
     const natives = (
       disableNonToken || native.equals(wrapped) ? [wrapped] : shouldShowWrapped ? [native, wrapped] : [native]
     ).filter((n) => n.symbol?.toLowerCase()?.indexOf(s) !== -1 || n.name?.toLowerCase()?.indexOf(s) !== -1)
 
     return [...natives, ...tokens]
-  }, [debouncedQuery, filteredSortedTokens, onlyShowCurrenciesWithBalance, wrapped, disableNonToken, native])
+  }, [debouncedQuery, filteredSortedTokens, onlyShowCurrenciesWithBalance, wrapped, disableNonToken, native, chainId])
 
   const handleCurrencySelect = useCallback(
     (currency: Currency, hasWarning?: boolean) => {
+      if (currency.symbol === 'USDC') {
+        console.log('[CurrencySearch handleCurrencySelect USDC]', {
+          symbol: currency.symbol,
+          hasWarning,
+          willCallOnCurrencySelect: 'YES',
+          willCallOnDismiss: !hasWarning ? 'YES' : 'NO',
+        })
+      }
       onCurrencySelect(currency, hasWarning)
       if (!hasWarning) onDismiss()
     },

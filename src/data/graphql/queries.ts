@@ -64,12 +64,7 @@ export const PROTOCOL_STATS = gql`
 
 export const TOP_POOLS = gql`
   query TopPools($first: Int = 10) {
-    pools(
-      first: $first
-      orderBy: totalValueLockedUSD
-      orderDirection: desc
-      where: { totalValueLockedUSD_gt: "1000" }
-    ) {
+    pools(first: $first, orderBy: totalValueLockedUSD, orderDirection: desc) {
       id
       token0 {
         id
@@ -87,7 +82,6 @@ export const TOP_POOLS = gql`
       totalValueLockedUSD
       volumeUSD
       txCount
-      aprFee
     }
   }
 `
@@ -219,6 +213,7 @@ export const USER_TRANSACTIONS = gql`
 `
 
 // Token Details Query
+// eslint-disable-next-line import/no-unused-modules
 export const TOKEN_DETAILS = gql`
   query TokenDetails($id: ID!) {
     token(id: $id) {
@@ -257,6 +252,7 @@ export const TOKEN_DETAILS = gql`
 `
 
 // Pool Details Query
+// eslint-disable-next-line import/no-unused-modules
 export const POOL_DETAILS = gql`
   query PoolDetails($id: ID!) {
     pool(id: $id) {

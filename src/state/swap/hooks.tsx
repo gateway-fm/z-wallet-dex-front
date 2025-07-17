@@ -14,6 +14,7 @@ import { InterfaceTrade, TradeState } from 'state/routing/types'
 import { isClassicTrade } from 'state/routing/utils'
 import { useUserSlippageToleranceWithDefault } from 'state/user/hooks'
 
+import { ZEPHYR_CHAIN_ID } from '../../constants/chains'
 import { TOKEN_SHORTHANDS } from '../../constants/tokens'
 import { useCurrency } from '../../hooks/Tokens'
 import useENS from '../../hooks/useENS'
@@ -31,6 +32,16 @@ export function useSwapActionHandlers(dispatch: React.Dispatch<AnyAction>): {
 } {
   const onCurrencySelection = useCallback(
     (field: Field, currency: Currency) => {
+      if (currency.symbol === 'USDC') {
+        console.debug('[useSwapActionHandlers onCurrencySelection USDC]', {
+          symbol: currency.symbol,
+          field,
+          currencyId: currency.isToken ? currency.address : currency.isNative ? 'ETH' : '',
+          isToken: currency.isToken,
+          isNative: currency.isNative,
+          willDispatch: 'selectCurrency action',
+        })
+      }
       dispatch(
         selectCurrency({
           field,
@@ -244,15 +255,17 @@ function validatedRecipient(recipient: any): string | null {
   return null
 }
 
-export function queryParametersToSwapState(parsedQs: ParsedQs): SwapState {
+export function queryParametersToSwapState(parsedQs: ParsedQs, chainId?: number): SwapState {
   let inputCurrency = parseCurrencyFromURLParameter(parsedQs.inputCurrency)
   let outputCurrency = parseCurrencyFromURLParameter(parsedQs.outputCurrency)
   const typedValue = parseTokenAmountURLParameter(parsedQs.exactAmount)
   const independentField = parseIndependentFieldURLParameter(parsedQs.exactField)
 
   if (inputCurrency === '' && outputCurrency === '' && typedValue === '' && independentField === Field.INPUT) {
-    // Defaults to having the native currency selected
-    inputCurrency = 'ETH'
+    // Defaults to having the native currency selected (except for Zephyr - handled in SwapPage)
+    if (chainId !== ZEPHYR_CHAIN_ID) {
+      inputCurrency = 'ETH'
+    }
   } else if (inputCurrency === outputCurrency) {
     // clear output if identical
     outputCurrency = ''
@@ -280,8 +293,8 @@ export function useDefaultsFromURLSearch(): SwapState {
   const parsedQs = useParsedQueryString()
 
   const parsedSwapState = useMemo(() => {
-    return queryParametersToSwapState(parsedQs)
-  }, [parsedQs])
+    return queryParametersToSwapState(parsedQs, chainId)
+  }, [parsedQs, chainId])
 
   useEffect(() => {
     if (!chainId) return
