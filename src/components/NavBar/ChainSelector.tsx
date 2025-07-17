@@ -39,7 +39,7 @@ export const ChainSelector = ({ leftAlign }: ChainSelectorProps) => {
   const walletSupportsChain = useWalletSupportedChains()
 
   const [supportedChains, unsupportedChains] = useMemo(() => {
-    const { supported, unsupported } = NETWORK_SELECTOR_CHAINS.filter((chain) => {
+    const { supported, unsupported } = NETWORK_SELECTOR_CHAINS.filter(() => {
       // Since TESTNET_CHAIN_IDS is empty, all chains in NETWORK_SELECTOR_CHAINS are main networks
       return true
     })

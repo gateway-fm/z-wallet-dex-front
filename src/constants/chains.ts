@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable import/no-unused-modules */
+
 import { ChainId } from '@uniswap/sdk-core'
 
 // Custom Chain ID for Zephyr network

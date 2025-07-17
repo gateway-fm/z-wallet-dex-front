@@ -2,38 +2,17 @@ import { useQuery } from '@apollo/client'
 import { useMemo } from 'react'
 
 import { handleGraphQLError, zephyrGraphQLClient } from '../data/graphql/client'
+import { CACHE_POLICIES, POLLING_INTERVALS, QUERY_LIMITS } from '../data/graphql/constants'
 import { SEARCH_TOKENS, TRENDING_TOKENS } from '../data/graphql/queries'
+import { UseTokenSearchResult } from '../data/graphql/types'
 
-interface Token {
-  id: string
-  symbol: string
-  name: string
-  decimals: number
-  volumeUSD: string
-  txCount: string
-  totalValueLocked: string
-  priceUSD: string
-  pools: Array<{
-    id: string
-    feeTier: string
-    volumeUSD: string
-    totalValueLockedUSD: string
-  }>
-}
-
-interface UseTokenSearchResult {
-  tokens: Token[]
-  loading: boolean
-  error: any
-}
-
-export function useTokenSearch(searchTerm: string, first = 20): UseTokenSearchResult {
+export function useTokenSearch(searchTerm: string, first = QUERY_LIMITS.DEFAULT_TOKEN_SEARCH): UseTokenSearchResult {
   const { data, loading, error } = useQuery(SEARCH_TOKENS, {
     variables: { search: searchTerm, first },
     skip: !searchTerm || searchTerm.length < 2,
     client: zephyrGraphQLClient,
-    errorPolicy: 'all',
-    fetchPolicy: 'cache-first',
+    errorPolicy: CACHE_POLICIES.ERROR_POLICY,
+    fetchPolicy: CACHE_POLICIES.DEFAULT,
   })
 
   const tokens = useMemo(() => {
@@ -50,13 +29,14 @@ export function useTokenSearch(searchTerm: string, first = 20): UseTokenSearchRe
   }
 }
 
-export function useTrendingTokens(first = 10): UseTokenSearchResult {
+// eslint-disable-next-line import/no-unused-modules
+export function useTrendingTokens(first: number = QUERY_LIMITS.DEFAULT_TRENDING_TOKENS): UseTokenSearchResult {
   const { data, loading, error } = useQuery(TRENDING_TOKENS, {
     variables: { first },
     client: zephyrGraphQLClient,
-    errorPolicy: 'all',
-    fetchPolicy: 'cache-first',
-    pollInterval: 5 * 60 * 1000, // Update every 5 minutes
+    errorPolicy: CACHE_POLICIES.ERROR_POLICY,
+    fetchPolicy: CACHE_POLICIES.DEFAULT,
+    pollInterval: POLLING_INTERVALS.ANALYTICS,
   })
 
   const tokens = useMemo(() => {

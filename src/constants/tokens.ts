@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable import/no-unused-modules */
+
 import { ChainId, Currency, Ether, NativeCurrency, Token, UNI_ADDRESSES } from '@uniswap/sdk-core'
 import invariant from 'tiny-invariant'
 

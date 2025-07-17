@@ -4,6 +4,7 @@ import { atomWithStorage } from 'jotai/utils'
 
 import { SettingsToggle } from './SettingsToggle'
 
+// eslint-disable-next-line import/no-unused-modules
 export const showTestnetsAtom = atomWithStorage<boolean>('showTestnets', false)
 
 export function TestnetsToggle() {
