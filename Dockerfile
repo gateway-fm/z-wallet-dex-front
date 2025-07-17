@@ -1,28 +1,33 @@
-FROM nginx:alpine AS production
+FROM node:18-alpine AS production
 
 # Install packages and create user
 RUN apk add --no-cache tzdata && \
     addgroup -g 1001 -S nodejs && \
-    adduser -S appuser -u 1001
+    adduser -S appuser -u 1001 -G nodejs
 
-# Copy built application and config
-COPY build /usr/share/nginx/html
-COPY nginx/default.conf /etc/nginx/conf.d/default.conf
+WORKDIR /app
 
-# Set proper permissions
-RUN chown -R appuser:nodejs /usr/share/nginx/html && \
- chown -R appuser:nodejs /var/cache/nginx && \
- chown -R appuser:nodejs /var/log/nginx && \
- chown -R appuser:nodejs /etc/nginx/conf.d && \
- touch /var/run/nginx.pid && \
- chown -R appuser:nodejs /var/run/nginx.pid
+# Copy package files and application
+COPY package.json package-lock.json ./
+COPY build ./build
+
+# Install only prod dependencies
+RUN npm ci --only=production && npm cache clean --force
+
+# Simple health check endpoint script
+RUN echo 'const http = require("http"); \
+http.get("http://localhost:3000/", (res) => { \
+  process.exit(res.statusCode === 200 ? 0 : 1); \
+}).on("error", () => process.exit(1));' > health-check.js
+
+RUN chown -R appuser:nodejs /app
 
 USER appuser
 
-EXPOSE 80
+EXPOSE 3000
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
- CMD wget --no-verbose --tries=1 --spider http://localhost:80/health || exit 1
+  CMD node health-check.js
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["npm", "run", "serve"]
 
