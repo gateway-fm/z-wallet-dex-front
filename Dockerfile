@@ -1,24 +1,28 @@
-# 1) Build Stage
-FROM node:20.18 AS builder
-WORKDIR /source
+FROM nginx:alpine AS production
 
-# Copy package manifests
-COPY ./scripts/ /source/scripts/
-COPY ./src/ /source/src/
-COPY ./lingui.config.ts /source/lingui.config.ts
-COPY ./package.json /source/package.json
-COPY ./yarn.lock /source/yarn.lock
+# Install packages and create user
+RUN apk add --no-cache tzdata && \
+    addgroup -g 1001 -S nodejs && \
+    adduser -S appuser -u 1001
 
-# Install dependencies (no --frozen-lockfile)
-RUN yarn install
+# Copy built application and config
+COPY build /usr/share/nginx/html
+COPY nginx/default.conf /etc/nginx/conf.d/default.conf
 
-# Copy app source & build
-COPY . .
-RUN yarn prepare && yarn build
+# Set proper permissions
+RUN chown -R appuser:nodejs /usr/share/nginx/html && \
+ chown -R appuser:nodejs /var/cache/nginx && \
+ chown -R appuser:nodejs /var/log/nginx && \
+ chown -R appuser:nodejs /etc/nginx/conf.d && \
+ touch /var/run/nginx.pid && \
+ chown -R appuser:nodejs /var/run/nginx.pid
 
-# 2) Production Stage
-FROM nginx:alpine
-COPY --from=builder /app/build /usr/share/nginx/html
+USER appuser
+
 EXPOSE 80
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+ CMD wget --no-verbose --tries=1 --spider http://localhost:80/health || exit 1
+
 CMD ["nginx", "-g", "daemon off;"]
 
