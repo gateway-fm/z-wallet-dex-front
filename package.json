@@ -279,5 +279,5 @@
     "npm": "please-use-yarn"
   },
   "packageManager": "yarn@1.22.0",
-  "homepage": "./"
+  "homepage": "/"
 }
