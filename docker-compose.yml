@@ -1,12 +1,12 @@
 version: '3.8'
 
 services:
-  gateway-dex:
+  zephyr-dex:
     build:
       context: .
       dockerfile: Dockerfile
-    image: gateway-dex:latest
-    container_name: gateway-dex-frontend
+    image: gatewayfm/zephyr-dex:latest
+    container_name: zephyr-dex-frontend
     ports:
       - "8080:80"
     restart: unless-stopped
@@ -20,12 +20,12 @@ services:
       start_period: 5s
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.gateway-dex.rule=Host(`gateway-dex.local`)"
-      - "traefik.http.services.gateway-dex.loadbalancer.server.port=80"
-      - "com.docker.compose.project=gateway-dex"
+      - "traefik.http.routers.zephyr-dex.rule=Host(`zephyr-dex.local`)"
+      - "traefik.http.services.zephyr-dex.loadbalancer.server.port=80"
+      - "com.docker.compose.project=zephyr-dex"
     networks:
-      - gateway-dex-network
+      - zephyr-dex-network
 
 networks:
-  gateway-dex-network:
+  zephyr-dex-network:
     driver: bridge 

@@ -28,11 +28,11 @@
     "cypress:run": "cypress run --browser chrome --e2e",
     "deduplicate": "yarn-deduplicate --strategy=highest",
     "postinstall": "yarn patch-package",
-    "docker:build": "docker build -t gateway-dex:latest .",
-    "docker:build:tag": "docker build -t gateway-dex:latest -t gateway-dex:$(date +%Y%m%d) .",
-    "docker:run": "docker run --rm -p 8080:80 gateway-dex:latest",
-    "docker:push": "docker tag gateway-dex:latest $DOCKER_REGISTRY/gateway-dex:latest && docker push $DOCKER_REGISTRY/gateway-dex:latest",
-    "docker:push:versioned": "docker tag gateway-dex:latest $DOCKER_REGISTRY/gateway-dex:$(date +%Y%m%d) && docker push $DOCKER_REGISTRY/gateway-dex:$(date +%Y%m%d) && docker push $DOCKER_REGISTRY/gateway-dex:latest"
+    "docker:build": "docker build -t gatewayfm/zephyr-dex:latest .",
+    "docker:build:tag": "docker build -t gatewayfm/zephyr-dex:latest -t gatewayfm/zephyr-dex:$(date +%Y%m%d) .",
+    "docker:run": "docker run --rm -p 8080:80 gatewayfm/zephyr-dex:latest",
+    "docker:push": "docker push gatewayfm/zephyr-dex:latest",
+    "docker:push:versioned": "docker tag gatewayfm/zephyr-dex:latest gatewayfm/zephyr-dex:$(date +%Y%m%d) && docker push gatewayfm/zephyr-dex:$(date +%Y%m%d) && docker push gatewayfm/zephyr-dex:latest"
   },
   "lint-staged": {
     "yarn.lock": [
