@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  gateway-dex:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: gateway-dex:latest
+    container_name: gateway-dex-frontend
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.gateway-dex.rule=Host(`gateway-dex.local`)"
+      - "traefik.http.services.gateway-dex.loadbalancer.server.port=80"
+      - "com.docker.compose.project=gateway-dex"
+    networks:
+      - gateway-dex-network
+
+networks:
+  gateway-dex-network:
+    driver: bridge 
