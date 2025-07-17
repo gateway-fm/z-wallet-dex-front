@@ -2,29 +2,22 @@ version: '3.8'
 
 services:
   zephyr-dex:
+    image: nekrasovgfm/zephyr-dex:latest
     build:
       context: .
       dockerfile: Dockerfile
-      platforms:
-        - linux/amd64
-    image: nekrasovgfm/zephyr-dex:latest
-    container_name: zephyr-dex-frontend
+      platform: linux/amd64
     ports:
-      - "8080:80"
+      - "3000:80"
+    env_file:
+      - .env
     restart: unless-stopped
-    environment:
-      - NODE_ENV=production
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health"]
+      test: ["CMD", "node", "health-check.js"]
       interval: 30s
-      timeout: 3s
+      timeout: 10s
       retries: 3
-      start_period: 5s
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.zephyr-dex.rule=Host(`zephyr-dex.local`)"
-      - "traefik.http.services.zephyr-dex.loadbalancer.server.port=80"
-      - "com.docker.compose.project=zephyr-dex"
+      start_period: 40s
     networks:
       - zephyr-dex-network
 

@@ -30,7 +30,7 @@
     "postinstall": "yarn patch-package",
     "docker:build": "docker build --platform linux/amd64 -t nekrasovgfm/zephyr-dex:latest .",
     "docker:build:tag": "docker build --platform linux/amd64 -t nekrasovgfm/zephyr-dex:latest -t nekrasovgfm/zephyr-dex:$(date +%Y%m%d) .",
-    "docker:run": "docker run --rm -p 8080:80 nekrasovgfm/zephyr-dex:latest",
+    "docker:run": "docker run --rm -p 3000:80 nekrasovgfm/zephyr-dex:latest",
     "docker:push": "docker push nekrasovgfm/zephyr-dex:latest",
     "docker:push:versioned": "docker tag nekrasovgfm/zephyr-dex:latest nekrasovgfm/zephyr-dex:$(date +%Y%m%d) && docker push nekrasovgfm/zephyr-dex:$(date +%Y%m%d) && docker push nekrasovgfm/zephyr-dex:latest",
     "docker:build:multi": "docker buildx build --platform linux/amd64,linux/arm64 -t nekrasovgfm/zephyr-dex:latest --push .",
