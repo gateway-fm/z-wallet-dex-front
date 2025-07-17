@@ -6,6 +6,7 @@ import { useMemo } from 'react'
 import { ZEPHYR_CHAIN_ID } from '../constants/chains'
 import { zephyrGraphQLClient } from '../data/graphql/client'
 
+// eslint-disable-next-line import/no-unused-modules
 export interface TokenSearchResult {
   currency: Token
   currencyId: string
@@ -148,6 +149,8 @@ export function useTrendingTokens(limit = 10) {
   )
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// eslint-disable-next-line import/no-unused-modules
 export function useAllTokens(limit = 1000) {
   const { data, loading, error, refetch } = useQuery(ALL_TOKENS_QUERY, {
     client: zephyrGraphQLClient,

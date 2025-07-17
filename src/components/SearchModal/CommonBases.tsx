@@ -9,7 +9,7 @@ import styled from 'styled-components'
 import { currencyId } from 'utils/currencyId'
 
 import { ZEPHYR_CHAIN_ID } from '../../constants/chains'
-import { useZephyrTokens } from '../../hooks/useZephyrTokens'
+import { useCommonBases } from '../../hooks/useDynamicRouting'
 
 const BaseWrapper = styled.div<{ disable?: boolean }>`
   border: 1px solid ${({ theme }) => theme.surface3};
@@ -40,14 +40,14 @@ export default function CommonBases({
   selectedCurrency?: Currency | null
   onSelect: (currency: Currency, hasWarning?: boolean) => void
 }) {
-  const tokens = useZephyrTokens()
+  const zephyrCommonBases = useCommonBases()
 
   const bases = useMemo(() => {
     if (chainId === ZEPHYR_CHAIN_ID) {
-      return Object.values(tokens).slice(0, 3)
+      return zephyrCommonBases // Dynamic tokens from top pools
     }
     return chainId !== undefined ? COMMON_BASES[chainId] ?? [] : []
-  }, [chainId, tokens])
+  }, [chainId, zephyrCommonBases])
 
   return bases.length > 0 ? (
     <AutoRow gap="4px">
