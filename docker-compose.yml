@@ -5,7 +5,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: gatewayfm/zephyr-dex:latest
+      platforms:
+        - linux/amd64
+    image: nekrasovgfm/zephyr-dex:latest
     container_name: zephyr-dex-frontend
     ports:
       - "8080:80"
