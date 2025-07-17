@@ -3,6 +3,7 @@ import { onError } from '@apollo/client/link/error'
 import { RetryLink } from '@apollo/client/link/retry'
 
 import { API_CONFIG, FEATURES_CONFIG } from '../../config/zephyr'
+import { CACHE_POLICIES } from './constants'
 
 // Error handling link for graceful degradation
 const errorLink = onError(({ graphQLErrors, networkError }) => {
@@ -68,29 +69,34 @@ export const zephyrGraphQLClient = new ApolloClient({
   }),
   defaultOptions: {
     watchQuery: {
-      errorPolicy: 'all',
-      fetchPolicy: 'cache-first',
+      errorPolicy: CACHE_POLICIES.ERROR_POLICY,
+      fetchPolicy: CACHE_POLICIES.DEFAULT,
       notifyOnNetworkStatusChange: true,
     },
     query: {
-      errorPolicy: 'all',
-      fetchPolicy: 'cache-first',
+      errorPolicy: CACHE_POLICIES.ERROR_POLICY,
+      fetchPolicy: CACHE_POLICIES.DEFAULT,
     },
   },
   connectToDevTools: process.env.NODE_ENV === 'development',
 })
 
-// Utility function to check if GraphQL is enabled and available
+/**
+ * Check if GraphQL is enabled in the current environment
+ */
 // eslint-disable-next-line import/no-unused-modules
 export function isGraphQLEnabled(): boolean {
-  return FEATURES_CONFIG.GRAPHQL_ENABLED
+  return FEATURES_CONFIG.GRAPHQL_ENABLED && !!API_CONFIG.GRAPHQL.URL
 }
 
-// Utility function to handle GraphQL errors gracefully
-// eslint-disable-next-line import/no-unused-modules
-export function handleGraphQLError(error: any, fallbackValue: any = null) {
+/**
+ * Handle GraphQL errors with graceful degradation
+ * @param error The GraphQL error
+ * @param fallbackValue The fallback value to return
+ */
+export function handleGraphQLError<T>(error: any, fallbackValue: T): T {
   if (!isGraphQLEnabled()) {
-    console.log('GraphQL is disabled, using fallback')
+    console.info('GraphQL disabled, using fallback value')
     return fallbackValue
   }
 
@@ -116,7 +122,7 @@ export async function checkGraphQLHealth(): Promise<boolean> {
   try {
     const result = await zephyrGraphQLClient.query({
       query: HEALTH_CHECK_QUERY,
-      fetchPolicy: 'network-only',
+      fetchPolicy: CACHE_POLICIES.NETWORK_ONLY,
     })
     return !!result.data
   } catch (error) {

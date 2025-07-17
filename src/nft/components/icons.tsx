@@ -23,6 +23,7 @@ export const GatewayIcon = (props: SVGProps) => (
   </svg>
 )
 
+// eslint-disable-next-line import/no-unused-modules
 export const HorIcon = (props: SVGProps) => (
   <svg {...props} viewBox="0 0 215 215" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path

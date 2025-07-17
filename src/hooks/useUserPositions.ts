@@ -2,116 +2,19 @@ import { useQuery } from '@apollo/client'
 import { useMemo } from 'react'
 
 import { handleGraphQLError, zephyrGraphQLClient } from '../data/graphql/client'
+import { CACHE_POLICIES, POLLING_INTERVALS, QUERY_LIMITS } from '../data/graphql/constants'
 import { USER_POSITIONS, USER_TRANSACTIONS } from '../data/graphql/queries'
+import { Position, UseUserPositionsResult, UseUserTransactionsResult } from '../data/graphql/types'
 
-interface Token {
-  id: string
-  symbol: string
-  name: string
-  decimals: number
-}
-
-interface Pool {
-  id: string
-  token0: Token
-  token1: Token
-  feeTier: string
-}
-
-interface Position {
-  id: string
-  pool: Pool
-  range: {
-    tickLower: number
-    tickUpper: number
-  }
-  liquidity: string
-  tokens: {
-    deposited: {
-      token0: string
-      token1: string
-    }
-    withdrawn: {
-      token0: string
-      token1: string
-    }
-    fees: {
-      token0: string
-      token1: string
-    }
-  }
-  timestamp: string
-}
-
-interface Transaction {
-  id: string
-  timestamp: string
-  gasUsed: string
-  gasPrice: string
-  swaps: Array<{
-    id: string
-    amount0: string
-    amount1: string
-    amountUSD: string
-    token0: { symbol: string }
-    token1: { symbol: string }
-    pool: { feeTier: string }
-  }>
-  mints: Array<{
-    id: string
-    amount0: string
-    amount1: string
-    amountUSD: string
-    pool: {
-      token0: { symbol: string }
-      token1: { symbol: string }
-      feeTier: string
-    }
-  }>
-  burns: Array<{
-    id: string
-    amount0: string
-    amount1: string
-    amountUSD: string
-    pool: {
-      token0: { symbol: string }
-      token1: { symbol: string }
-      feeTier: string
-    }
-  }>
-  collects: Array<{
-    id: string
-    amount0: string
-    amount1: string
-    amountUSD: string
-    pool: {
-      token0: { symbol: string }
-      token1: { symbol: string }
-      feeTier: string
-    }
-  }>
-}
-
-interface UseUserPositionsResult {
-  positions: Position[]
-  loading: boolean
-  error: any
-}
-
-interface UseUserTransactionsResult {
-  transactions: Transaction[]
-  loading: boolean
-  error: any
-}
-
+// eslint-disable-next-line import/no-unused-modules
 export function useUserPositions(account?: string): UseUserPositionsResult {
   const { data, loading, error } = useQuery(USER_POSITIONS, {
     variables: { owner: account?.toLowerCase() },
     skip: !account,
     client: zephyrGraphQLClient,
-    errorPolicy: 'all',
-    fetchPolicy: 'cache-first',
-    pollInterval: 30 * 1000, // Update every 30 seconds for positions
+    errorPolicy: CACHE_POLICIES.ERROR_POLICY,
+    fetchPolicy: CACHE_POLICIES.DEFAULT,
+    pollInterval: POLLING_INTERVALS.USER_POSITIONS,
   })
 
   const positions = useMemo(() => {
@@ -156,13 +59,18 @@ export function useUserPositions(account?: string): UseUserPositionsResult {
   }
 }
 
-export function useUserTransactions(account?: string, first = 50, skip = 0): UseUserTransactionsResult {
+// eslint-disable-next-line import/no-unused-modules
+export function useUserTransactions(
+  account?: string,
+  first = QUERY_LIMITS.DEFAULT_USER_TRANSACTIONS,
+  skip = 0
+): UseUserTransactionsResult {
   const { data, loading, error } = useQuery(USER_TRANSACTIONS, {
     variables: { user: account?.toLowerCase(), first, skip },
     skip: !account,
     client: zephyrGraphQLClient,
-    errorPolicy: 'all',
-    fetchPolicy: 'cache-first',
+    errorPolicy: CACHE_POLICIES.ERROR_POLICY,
+    fetchPolicy: CACHE_POLICIES.DEFAULT,
   })
 
   const transactions = useMemo(() => {
@@ -180,38 +88,53 @@ export function useUserTransactions(account?: string, first = 50, skip = 0): Use
 }
 
 // Helper function to calculate active positions
+// eslint-disable-next-line import/no-unused-modules
 export function calculateActivePositions(positions: Position[]): Position[] {
   // Group positions by pool + tick range
   const positionGroups = new Map<string, Position[]>()
 
   positions.forEach((position) => {
     const key = `${position.pool.id}-${position.range.tickLower}-${position.range.tickUpper}`
-    if (!positionGroups.has(key)) {
-      positionGroups.set(key, [])
-    }
-    positionGroups.get(key)!.push(position)
+    const group = positionGroups.get(key) || []
+    group.push(position)
+    positionGroups.set(key, group)
   })
 
-  // Calculate net liquidity for each group
+  // Calculate net positions (deposits - withdrawals)
   const activePositions: Position[] = []
 
-  positionGroups.forEach((groupPositions) => {
-    let netLiquidity = 0
-    let latestPosition = groupPositions[0]
+  positionGroups.forEach((group) => {
+    let netDepositedToken0 = 0
+    let netDepositedToken1 = 0
+    let totalFeesToken0 = 0
+    let totalFeesToken1 = 0
 
-    groupPositions.forEach((position) => {
-      netLiquidity += parseFloat(position.liquidity)
-      // Keep track of the latest position for metadata
-      if (parseInt(position.timestamp) > parseInt(latestPosition.timestamp)) {
-        latestPosition = position
-      }
+    group.forEach((position) => {
+      netDepositedToken0 += parseFloat(position.tokens.deposited.token0) - parseFloat(position.tokens.withdrawn.token0)
+      netDepositedToken1 += parseFloat(position.tokens.deposited.token1) - parseFloat(position.tokens.withdrawn.token1)
+      totalFeesToken0 += parseFloat(position.tokens.fees.token0)
+      totalFeesToken1 += parseFloat(position.tokens.fees.token1)
     })
 
-    // Only include positions with positive net liquidity
-    if (netLiquidity > 0) {
+    // Only include positions with net deposits > 0
+    if (netDepositedToken0 > 0 || netDepositedToken1 > 0) {
+      const latestPosition = group[group.length - 1] // Use latest position as template
       activePositions.push({
         ...latestPosition,
-        liquidity: netLiquidity.toString(),
+        tokens: {
+          deposited: {
+            token0: netDepositedToken0.toString(),
+            token1: netDepositedToken1.toString(),
+          },
+          withdrawn: {
+            token0: '0',
+            token1: '0',
+          },
+          fees: {
+            token0: totalFeesToken0.toString(),
+            token1: totalFeesToken1.toString(),
+          },
+        },
       })
     }
   })

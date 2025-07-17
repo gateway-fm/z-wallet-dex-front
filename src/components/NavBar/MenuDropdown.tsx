@@ -101,6 +101,7 @@ const Icon = ({ href, children }: { href?: string; children: ReactNode }) => {
   )
 }
 
+// eslint-disable-next-line import/no-unused-modules
 export const MenuDropdown = () => {
   const [isOpen, toggleOpen] = useReducer((s) => !s, false)
   const ref = useRef<HTMLDivElement>(null)
