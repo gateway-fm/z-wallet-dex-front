@@ -18,6 +18,7 @@ const WarningIcon = styled(AlertTriangle)`
   color: ${({ theme }) => theme.neutral3};
 `
 
+// eslint-disable-next-line import/no-unused-modules
 export default function TokenSafetyIcon({ warning }: { warning: Warning | null }) {
   switch (warning?.level) {
     case WARNING_LEVEL.UNKNOWN:

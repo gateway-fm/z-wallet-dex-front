@@ -198,20 +198,6 @@ export default function CurrencyList({
         return currency && onCurrencySelect(currency, hasWarning)
       }
 
-      // Debug logging for USDC selection issue
-      if (currency?.symbol === 'USDC') {
-        console.log('[CurrencyRow USDC Debug]', {
-          symbol: currency.symbol,
-          address: 'address' in currency ? currency.address : 'N/A',
-          isSelected,
-          otherSelected,
-          selectedCurrency: selectedCurrency?.symbol,
-          selectedCurrencyAddress: selectedCurrency && 'address' in selectedCurrency ? selectedCurrency.address : 'N/A',
-          otherCurrency: otherCurrency?.symbol,
-          otherCurrencyAddress: otherCurrency && 'address' in otherCurrency ? otherCurrency.address : 'N/A',
-        })
-      }
-
       if (currency) {
         return (
           <CurrencyRow

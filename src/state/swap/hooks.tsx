@@ -32,16 +32,6 @@ export function useSwapActionHandlers(dispatch: React.Dispatch<AnyAction>): {
 } {
   const onCurrencySelection = useCallback(
     (field: Field, currency: Currency) => {
-      if (currency.symbol === 'USDC') {
-        console.debug('[useSwapActionHandlers onCurrencySelection USDC]', {
-          symbol: currency.symbol,
-          field,
-          currencyId: currency.isToken ? currency.address : currency.isNative ? 'ETH' : '',
-          isToken: currency.isToken,
-          isNative: currency.isNative,
-          willDispatch: 'selectCurrency action',
-        })
-      }
       dispatch(
         selectCurrency({
           field,
