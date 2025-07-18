@@ -16,7 +16,6 @@ export const SEARCH_TOKENS = gql`
       volumeUSD
       txCount
       totalValueLocked
-      priceUSD
       pools(first: 3, orderBy: volumeUSD, orderDirection: desc) {
         id
         feeTier
@@ -35,7 +34,6 @@ export const TRENDING_TOKENS = gql`
       name
       decimals
       volumeUSD
-      priceUSD
       totalValueLocked
       poolCount
     }
@@ -79,6 +77,8 @@ export const TOP_POOLS = gql`
         decimals
       }
       feeTier
+      token0Price
+      token1Price
       totalValueLockedUSD
       volumeUSD
       txCount
@@ -226,12 +226,10 @@ export const TOKEN_DETAILS = gql`
       totalValueLockedUSD
       volume
       volumeUSD
-      priceUSD
       txCount
       poolCount
       tokenDayData(first: 30, orderBy: date, orderDirection: desc) {
         date
-        priceUSD
         volumeUSD
         totalValueLockedUSD
       }

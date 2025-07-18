@@ -43,9 +43,6 @@ export const zephyrGraphQLClient = new ApolloClient({
         keyFields: ['id'],
         fields: {
           // Cache token data for 5 minutes
-          priceUSD: {
-            merge: true,
-          },
           volumeUSD: {
             merge: true,
           },

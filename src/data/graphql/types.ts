@@ -6,11 +6,10 @@ export interface GraphQLToken {
   id: string
   symbol: string
   name: string
-  decimals: number
+  decimals: string | number
   volumeUSD?: string
   txCount?: string
   totalValueLocked?: string
-  priceUSD?: string
   pools?: Array<{
     id: string
     feeTier: string
@@ -52,6 +51,8 @@ export interface PoolInfo {
     decimals: number
   }
   feeTier: string
+  token0Price?: string
+  token1Price?: string
   totalValueLockedUSD: string
   volumeUSD: string
   txCount: string
