@@ -240,7 +240,7 @@ export function useTrackedTokenPairs(): [Token, Token][] {
               basesToUse
                 // to construct pairs of the given token with each base
                 .map((base) => {
-                  if (base.address === token.address) {
+                  if (base.address.toLowerCase() === token.address.toLowerCase()) {
                     return null
                   } else {
                     return [base, token]

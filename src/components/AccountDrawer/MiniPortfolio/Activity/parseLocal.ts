@@ -28,7 +28,7 @@ import { Activity, ActivityMap } from './types'
 type FormatNumberFunctionType = ReturnType<typeof useFormatter>['formatNumber']
 
 function getCurrency(currencyId: string, chainId: ChainId, tokens: ChainTokenMap): Currency | undefined {
-  return currencyId === 'ETH' ? nativeOnChain(chainId) : tokens[chainId]?.[currencyId]
+  return currencyId === 'ETH' ? nativeOnChain(chainId) : tokens[chainId]?.[currencyId.toLowerCase()]
 }
 
 function buildCurrencyDescriptor(

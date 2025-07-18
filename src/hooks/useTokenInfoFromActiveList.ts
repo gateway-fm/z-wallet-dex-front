@@ -13,7 +13,7 @@ export function useTokenInfoFromActiveList(currency: Currency) {
     if (currency.isNative) return currency
 
     try {
-      return activeList[chainId][currency.wrapped.address].token
+      return activeList[chainId][currency.wrapped.address.toLowerCase()].token
     } catch (e) {
       return currency
     }
