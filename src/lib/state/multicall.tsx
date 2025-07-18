@@ -5,6 +5,8 @@ import { useInterfaceMulticall, useMainnetInterfaceMulticall } from 'hooks/useCo
 import useBlockNumber, { useMainnetBlockNumber } from 'lib/hooks/useBlockNumber'
 import { useMemo } from 'react'
 
+import { ZEPHYR_CHAIN_ID } from '../../constants/chains'
+
 const multicall = createMulticall()
 
 export default multicall
@@ -25,6 +27,9 @@ function getBlocksPerFetchForChainId(chainId: number | undefined): number {
     case ChainId.CELO:
     case ChainId.CELO_ALFAJORES:
       return 5
+    case ZEPHYR_CHAIN_ID:
+      // Conservative setting for Zephyr network to reduce multicall load
+      return 1
     default:
       return 1
   }
@@ -57,7 +62,7 @@ export function MulticallUpdater() {
         contract={mainnetContract}
         listenerOptions={mainnetListener}
       />
-      {chainId !== ChainId.MAINNET && (
+      {chainId !== ChainId.MAINNET && chainId && (
         <multicall.Updater
           chainId={chainId}
           latestBlockNumber={latestBlockNumber}
