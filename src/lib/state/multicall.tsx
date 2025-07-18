@@ -62,7 +62,7 @@ export function MulticallUpdater() {
         contract={mainnetContract}
         listenerOptions={mainnetListener}
       />
-      {chainId !== ChainId.MAINNET && chainId && (
+      {chainId !== ChainId.MAINNET && chainId && chainId !== ZEPHYR_CHAIN_ID && (
         <multicall.Updater
           chainId={chainId}
           latestBlockNumber={latestBlockNumber}
