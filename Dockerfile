@@ -1,21 +1,24 @@
-FROM node:20-alpine AS production
+FROM node:18-slim AS production
 
 # Install packages and create user
-RUN apk add --no-cache tzdata && \
-    addgroup -g 1001 -S nodejs && \
-    adduser -S appuser -u 1001 -G nodejs
+RUN apt-get update && apt-get install -y tzdata && \
+    groupadd -g 1001 nodejs && \
+    useradd -m -u 1001 -g nodejs appuser && \
+    rm -rf /var/lib/apt/lists/*
 
 # Use Yarn 1.22
 RUN npm install -g --force yarn@1.22.0
 
 WORKDIR /app
 
-# Copy package files and app
-COPY package.json yarn.lock ./
+# Copy package files, built app, and node_modules
+COPY package.json ./
 COPY build ./build
+COPY node_modules ./node_modules
 
 # Install only prod deps
-RUN yarn install --production
+# NOTE: это дерьмо не ставится
+# RUN yarn install --production
 
 # Simple health check endpoint script
 RUN echo 'const http = require("http"); \

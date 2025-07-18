@@ -8,7 +8,10 @@ services:
       dockerfile: Dockerfile
       platform: linux/amd64
     ports:
-      - "3000:80"
+      - target: 3000
+        published: 80
+        protocol: tcp
+        mode: host
     env_file:
       - .env
     restart: unless-stopped
