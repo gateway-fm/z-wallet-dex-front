@@ -51,7 +51,6 @@ import { maxAmountSpend } from 'utils/maxAmountSpend'
 import { computeRealizedPriceImpact, warningSeverity } from 'utils/prices'
 import { didUserReject } from 'utils/swapErrorToUserReadableMessage'
 
-import { TokenDebugInfo } from '../../components/TokenDebugInfo'
 import { useZephyrDataPreloader } from '../../hooks/useZephyrData'
 import { useZephyrDefaultToken } from '../../hooks/useZephyrDefaults'
 import { useIsDarkMode } from '../../theme/components/ThemeToggle'
@@ -155,7 +154,6 @@ export default function SwapPage({ className }: { className?: string }) {
   return (
     <>
       <PageWrapper>
-        {process.env.NODE_ENV === 'development' && <TokenDebugInfo />}
         <Swap
           className={className}
           chainId={(supportedChainId ?? ChainId.MAINNET) as ChainId}

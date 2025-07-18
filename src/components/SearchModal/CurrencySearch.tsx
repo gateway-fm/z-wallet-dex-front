@@ -103,14 +103,6 @@ export function CurrencySearch({
 
   const handleCurrencySelect = useCallback(
     (currency: Currency, hasWarning?: boolean) => {
-      if (currency.symbol === 'USDC') {
-        console.log('[CurrencySearch handleCurrencySelect USDC]', {
-          symbol: currency.symbol,
-          hasWarning,
-          willCallOnCurrencySelect: 'YES',
-          willCallOnDismiss: !hasWarning ? 'YES' : 'NO',
-        })
-      }
       onCurrencySelect(currency, hasWarning)
       if (!hasWarning) onDismiss()
     },
