@@ -14,8 +14,8 @@ export function useIsSwapUnsupported(currencyIn?: Currency | null, currencyOut?:
     if (!unsupportedTokens) {
       return false
     }
-    const currencyInUnsupported = Boolean(currencyIn?.isToken && unsupportedTokens[currencyIn.address])
-    const currencyOutUnsupported = Boolean(currencyOut?.isToken && unsupportedTokens[currencyOut.address])
+    const currencyInUnsupported = Boolean(currencyIn?.isToken && unsupportedTokens[currencyIn.address.toLowerCase()])
+    const currencyOutUnsupported = Boolean(currencyOut?.isToken && unsupportedTokens[currencyOut.address.toLowerCase()])
     return currencyInUnsupported || currencyOutUnsupported
   }, [currencyIn, currencyOut, unsupportedTokens])
 }

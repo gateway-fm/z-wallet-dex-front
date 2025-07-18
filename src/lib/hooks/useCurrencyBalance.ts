@@ -105,7 +105,7 @@ export function useTokenBalance(account?: string, token?: Token): CurrencyAmount
     useMemo(() => [token], [token])
   )
   if (!token) return undefined
-  return tokenBalances[token.address]
+  return tokenBalances[token.address.toLowerCase()]
 }
 
 export function useCurrencyBalances(
@@ -126,7 +126,7 @@ export function useCurrencyBalances(
     () =>
       currencies?.map((currency) => {
         if (!account || !currency || currency.chainId !== chainId) return undefined
-        if (currency.isToken) return tokenBalances[currency.address]
+        if (currency.isToken) return tokenBalances[currency.address.toLowerCase()]
         if (currency.isNative) return ethBalance[account]
         return undefined
       }) ?? [],
