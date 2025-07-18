@@ -99,9 +99,9 @@ const Web3StatusConnecting = styled(Web3StatusConnected)`
   }
 `
 
-const AddressAndChevronContainer = styled.div<{ loading?: boolean }>`
+const AddressAndChevronContainer = styled.div<{ $loading?: boolean }>`
   display: flex;
-  opacity: ${({ loading, theme }) => loading && theme.opacity.disabled};
+  opacity: ${({ $loading, theme }) => $loading && theme.opacity.disabled};
 
   @media only screen and (max-width: ${navSearchInputVisibleSize}px) {
     display: none;
@@ -184,7 +184,7 @@ function Web3StatusInner() {
         <IconWrapper size={24}>
           <LoaderV3 size="24px" />
         </IconWrapper>
-        <AddressAndChevronContainer loading={true}>
+        <AddressAndChevronContainer $loading={true}>
           <Text>{initialConnection.current?.ENSName ?? shortenAddress(initialConnection.current?.address)}</Text>
         </AddressAndChevronContainer>
       </Web3StatusConnecting>
