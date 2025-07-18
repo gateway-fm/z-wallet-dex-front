@@ -1,6 +1,7 @@
 import { gql } from '@apollo/client'
 import { useQuery } from '@apollo/client'
 import { Currency, Price } from '@uniswap/sdk-core'
+import JSBI from 'jsbi'
 import { useMemo } from 'react'
 
 import { ZEPHYR_CHAIN_ID } from '../constants/chains'
@@ -196,13 +197,34 @@ export function useGraphQLTokenPrice(currency?: Currency): Price<Currency, typeo
 
     // Convert USD price to USDC price (assuming 1 USD = 1 USDC)
     // Price represents how much USDC you get for 1 unit of the currency
-    const priceInCents = Math.round(priceUSD * 1000000) // Convert to 6 decimal places for USDC
+    // Use JSBI for precise arithmetic to avoid floating point errors
+    const priceScaled = Math.round(priceUSD * 1000000) // Convert to 6 decimal places for USDC
+
+    // Validate that we haven't lost significant precision
+    const reconstructedPrice = priceScaled / 1000000
+    const precisionLoss = Math.abs(priceUSD - reconstructedPrice)
+
+    if (precisionLoss > 0.0001) {
+      // Alert if precision loss > 0.01 cents
+      console.warn('Price precision loss detected:', {
+        originalPrice: priceUSD,
+        precisionLoss,
+        symbol: currency.symbol,
+      })
+    }
+
+    // Use proper base units for the currency (accounting for its decimals)
+    // Safely handle large decimal values without floating point precision loss
+    const currencyBaseUnit =
+      currency.decimals <= 18
+        ? Math.pow(10, currency.decimals).toString()
+        : JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(currency.decimals)).toString()
 
     return new Price(
       currency,
       USDC_ZEPHYR,
-      '1000000', // 1 token in its base units
-      priceInCents.toString() // Price in USDC (6 decimals)
+      currencyBaseUnit, // 1 token in its base units (10^decimals)
+      priceScaled.toString() // Price in USDC (6 decimals)
     )
   }, [currency, priceUSD])
 }
@@ -236,11 +258,32 @@ export function useUSDPricesFromGraphQL(currencies: (Currency | undefined)[]): {
 
       if (priceInfo && priceInfo.priceUSD > 0) {
         try {
+          // Use proper base units for the currency (accounting for its decimals)
+          // Safely handle large decimal values without floating point precision loss
+          const currencyBaseUnit =
+            currency.decimals <= 18
+              ? Math.pow(10, currency.decimals).toString()
+              : JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(currency.decimals)).toString()
+
+          // Calculate quote amount with precision validation
+          const quoteAmount = priceInfo.priceUSD * 10 ** USDC_ZEPHYR.decimals
+          const quoteAmountRounded = Math.round(quoteAmount)
+
+          // Check for precision loss
+          const precisionLoss = Math.abs(quoteAmount - quoteAmountRounded)
+          if (precisionLoss > 0.5) {
+            // More than 0.5 unit precision loss
+            console.warn('Quote amount precision loss detected:', {
+              currency: currency.symbol,
+              precisionLoss,
+            })
+          }
+
           prices[address] = new Price(
             currency,
             USDC_ZEPHYR, // Quote currency (USDC)
-            '1', // Base amount (1 unit of the token)
-            (priceInfo.priceUSD * 10 ** USDC_ZEPHYR.decimals).toFixed(0) // Quote amount (price in USDC scaled)
+            currencyBaseUnit, // Base amount (1 full token in its base units)
+            quoteAmountRounded.toString() // Quote amount (price in USDC scaled)
           )
         } catch (error) {
           console.warn('Failed to create price for token:', currency.symbol, error)

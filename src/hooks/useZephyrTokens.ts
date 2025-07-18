@@ -11,10 +11,13 @@ function createTokenFromGraphQL(tokenData: {
   id: string
   symbol: string
   name: string
-  decimals: number
+  decimals: string | number
 }): Token | null {
   try {
-    return new Token(ZEPHYR_CHAIN_ID, tokenData.id, tokenData.decimals, tokenData.symbol, tokenData.name)
+    // Convert decimals to number if it's a string
+    const decimals = typeof tokenData.decimals === 'string' ? parseInt(tokenData.decimals, 10) : tokenData.decimals
+
+    return new Token(ZEPHYR_CHAIN_ID, tokenData.id, decimals, tokenData.symbol, tokenData.name)
   } catch (error) {
     console.warn('Failed to create token from GraphQL data:', tokenData, error)
     return null

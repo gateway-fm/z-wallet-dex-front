@@ -9,10 +9,12 @@ import { useMemo } from 'react'
 import { useAppSelector } from 'state/hooks'
 import { isL2ChainId } from 'utils/chains'
 
+import { ZEPHYR_CHAIN_ID } from '../constants/chains'
 import { useAllLists, useCombinedActiveList, useCombinedTokenMapFromUrls } from '../state/lists/hooks'
 import { WrappedTokenInfo } from '../state/lists/wrappedTokenInfo'
 import { deserializeToken, useUserAddedTokens } from '../state/user/hooks'
 import { useUnsupportedTokenList } from './../state/lists/hooks'
+import { useZephyrTokens } from './useZephyrTokens'
 
 type Maybe<T> = T | null | undefined
 
@@ -68,21 +70,31 @@ export function useDefaultActiveTokens(chainId: Maybe<ChainId>): { [address: str
   const defaultListTokens = useCombinedActiveList()
   const tokensFromMap = useTokensFromMap(defaultListTokens, chainId)
   const userAddedTokens = useUserAddedTokens()
+
+  const zephyrTokens = useZephyrTokens()
+
   return useMemo(() => {
-    return (
-      userAddedTokens
-        // reduce into all ALL_TOKENS filtered by the current chain
-        .reduce<{ [address: string]: Token }>(
-          (tokenMap, token) => {
-            tokenMap[token.address] = token
-            return tokenMap
-          },
-          // must make a copy because reduce modifies the map, and we do not
-          // want to make a copy in every iteration
-          { ...tokensFromMap }
-        )
-    )
-  }, [tokensFromMap, userAddedTokens])
+    let baseTokens = { ...tokensFromMap }
+
+    // For Zephyr network, merge GraphQL tokens
+    if (chainId && chainId === (ZEPHYR_CHAIN_ID as number)) {
+      baseTokens = { ...baseTokens, ...zephyrTokens }
+    }
+
+    const result = userAddedTokens
+      // reduce into all ALL_TOKENS filtered by the current chain
+      .reduce<{ [address: string]: Token }>(
+        (tokenMap, token) => {
+          tokenMap[token.address] = token
+          return tokenMap
+        },
+        // must make a copy because reduce modifies the map, and we do not
+        // want to make a copy in every iteration
+        baseTokens
+      )
+
+    return result
+  }, [tokensFromMap, userAddedTokens, chainId, zephyrTokens])
 }
 
 type BridgeInfo = Record<
@@ -196,5 +208,6 @@ export function useToken(tokenAddress?: string | null): Token | null | undefined
 export function useCurrency(currencyId: Maybe<string>, chainId?: ChainId): Currency | undefined {
   const { chainId: connectedChainId } = useWeb3React()
   const tokens = useDefaultActiveTokens(chainId ?? connectedChainId)
-  return useCurrencyFromMap(tokens, chainId ?? connectedChainId, currencyId)
+  const result = useCurrencyFromMap(tokens, chainId ?? connectedChainId, currencyId)
+  return result
 }
