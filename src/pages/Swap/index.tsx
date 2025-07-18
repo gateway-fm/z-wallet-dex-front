@@ -156,7 +156,7 @@ export default function SwapPage({ className }: { className?: string }) {
       <PageWrapper>
         <Swap
           className={className}
-          chainId={(supportedChainId ?? ChainId.MAINNET) as ChainId}
+          chainId={(supportedChainId ?? ZEPHYR_CHAIN_ID) as ChainId}
           initialInputCurrencyId={inputCurrencyId}
           initialOutputCurrencyId={loadedUrlParams?.[Field.OUTPUT]?.currencyId}
           disableTokenInputs={supportedChainId === undefined}
