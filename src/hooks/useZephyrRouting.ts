@@ -148,16 +148,59 @@ function calculateDirectTrade(
 
       if (isToken0Input) {
         // Input is token0, need to calculate how much token0 for given token1
+        // If token0Price = amount of token1 per 1 token0, then 1/token0Price = amount of token0 per 1 token1
         exchangeRate = 1 / token0Price
       } else {
         // Input is token1, need to calculate how much token1 for given token0
+        // If token1Price = amount of token0 per 1 token1, then 1/token1Price = amount of token1 per 1 token0
         exchangeRate = 1 / token1Price
       }
 
-      const exchangeRateScaled = Math.floor(exchangeRate * 1e18)
-      const inputAmountRaw = amountSpecified.multiply(exchangeRateScaled).divide(1e18)
+      // The desired output amount is amountSpecified
+      // We need to calculate the required input amount
+      const outputAmountBigInt = amountSpecified.quotient
 
+      // Get decimal difference between tokens
+      const inputDecimals = inputCurrency.decimals
+      const outputDecimals = otherCurrency.decimals
+      const decimalDifference = inputDecimals - outputDecimals
+
+      // Convert the floating point exchange rate to a ratio with proper scaling
+      // Use high precision arithmetic to avoid floating point errors
+      const PRECISION = 1e18
+      const exchangeRateNumerator = JSBI.BigInt(Math.round(exchangeRate * PRECISION))
+      const exchangeRateDenominator = JSBI.BigInt(PRECISION)
+
+      // Apply exchange rate to get input amount
+      let inputAmountRaw = JSBI.divide(
+        JSBI.multiply(outputAmountBigInt, exchangeRateNumerator),
+        exchangeRateDenominator
+      )
+
+      // Adjust for decimal difference if necessary
+      if (decimalDifference > 0) {
+        // Input token has more decimals, multiply by 10^difference
+        inputAmountRaw = JSBI.multiply(
+          inputAmountRaw,
+          JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(decimalDifference))
+        )
+      } else if (decimalDifference < 0) {
+        // Input token has fewer decimals, divide by 10^|difference|
+        inputAmountRaw = JSBI.divide(
+          inputAmountRaw,
+          JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(-decimalDifference))
+        )
+      }
+
+      const calculatedInputAmount = CurrencyAmount.fromRawAmount(inputCurrency, inputAmountRaw)
       outputAmount = amountSpecified
+
+      return {
+        inputAmount: calculatedInputAmount,
+        outputAmount,
+        route: `${inputCurrency.symbol} → ${otherCurrency.symbol}`,
+        loading: false,
+      }
     }
 
     return {
