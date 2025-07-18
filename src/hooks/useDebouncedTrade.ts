@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import { Currency, CurrencyAmount, Percent, TradeType } from '@uniswap/sdk-core'
-import { Route as V3Route } from '@uniswap/v3-sdk'
+import { FeeAmount, Pool, Route as V3Route } from '@uniswap/v3-sdk'
 import { useWeb3React } from '@web3-react/core'
 import { WRAPPED_NATIVE_CURRENCY } from 'constants/tokens'
 import { useMemo } from 'react'
@@ -93,17 +93,17 @@ export function useDebouncedTrade(
       }
 
       try {
-        // Create a minimal V3Route for ClassicTrade
-        // We don't have real pools, so create a mock structure
-        const mockPool = {
-          token0: zephyrRouting.inputAmount.currency.wrapped,
-          token1: zephyrRouting.outputAmount.currency.wrapped,
-          fee: 3000, // 0.3% fee
-          liquidity: '1000000000000000000', // Mock liquidity
-          sqrtPriceX96: '79228162514264337593543950336', // 1:1 price
-        } as any
+        // TODO: get real price from pool
+        const pool = new Pool(
+          zephyrRouting.inputAmount.currency.wrapped,
+          zephyrRouting.outputAmount.currency.wrapped,
+          FeeAmount.MEDIUM, // 0.3% fee
+          '79228162514264337593543950336', // 1:1 price (sqrtPriceX96)
+          '1000000000000000000', // Mock liquidity
+          0 // tickCurrent
+        )
 
-        const v3Route = new V3Route([mockPool], zephyrRouting.inputAmount.currency, zephyrRouting.outputAmount.currency)
+        const v3Route = new V3Route([pool], zephyrRouting.inputAmount.currency, zephyrRouting.outputAmount.currency)
 
         // Calculate gas estimate
         let gasUseEstimateUSD = 0.1 // fallback
@@ -174,15 +174,17 @@ export function useDebouncedTrade(
 
     // For now, return a synchronous result with fallback values
     try {
-      const mockPool = {
-        token0: zephyrRouting.inputAmount.currency.wrapped,
-        token1: zephyrRouting.outputAmount.currency.wrapped,
-        fee: 3000,
-        liquidity: '1000000000000000000',
-        sqrtPriceX96: '79228162514264337593543950336',
-      } as any
+      const pool = new Pool(
+        zephyrRouting.inputAmount.currency.wrapped,
+        zephyrRouting.outputAmount.currency.wrapped,
+        FeeAmount.MEDIUM,
+        // TODO: get real price from pool
+        '79228162514264337593543950336', // 1:1 price
+        '1000000000000000000', // Mock liquidity
+        0 // tickCurrent
+      )
 
-      const v3Route = new V3Route([mockPool], zephyrRouting.inputAmount.currency, zephyrRouting.outputAmount.currency)
+      const v3Route = new V3Route([pool], zephyrRouting.inputAmount.currency, zephyrRouting.outputAmount.currency)
 
       const classicTrade = new ClassicTrade({
         v3Routes: [
