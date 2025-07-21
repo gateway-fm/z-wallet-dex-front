@@ -1,17 +1,10 @@
 version: '3.8'
 
 services:
-  zephyr-dex:
+  frontend:
     image: nekrasovgfm/zephyr-dex:latest
-    build:
-      context: .
-      dockerfile: Dockerfile
-      platform: linux/amd64
     ports:
-      - target: 3000
-        published: 80
-        protocol: tcp
-        mode: host
+      - "3000:80"
     env_file:
       - .env
     restart: unless-stopped
@@ -21,9 +14,3 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-    networks:
-      - zephyr-dex-network
-
-networks:
-  zephyr-dex-network:
-    driver: bridge 
