@@ -1,9 +1,11 @@
 import { Trans } from '@lingui/macro'
+import { Percent } from '@uniswap/sdk-core'
 import Column from 'components/Column'
 import RoutingDiagram from 'components/RoutingDiagram/RoutingDiagram'
 import { RowBetween } from 'components/Row'
 import { ZEPHYR_CHAIN_ID } from 'constants/chains'
 import useAutoRouterSupported from 'hooks/useAutoRouterSupported'
+import { useMemo } from 'react'
 import { ClassicTrade, SubmittableTrade } from 'state/routing/types'
 import { isClassicTrade } from 'state/routing/utils'
 import { Separator, ThemedText } from 'theme/components'
@@ -32,11 +34,22 @@ function RouteLabel({ trade }: { trade: SubmittableTrade }) {
 
 function PriceImpactRow({ trade }: { trade: ClassicTrade }) {
   const { formatPriceImpact } = useFormatter()
+
+  // For Zephyr network, use minimal price impact
+  // TODO: Remove this once we have a proper API
+  const priceImpact = useMemo(() => {
+    const chainId = trade.inputAmount.currency.chainId
+    if (chainId === ZEPHYR_CHAIN_ID) {
+      return new Percent(1, 10000) // 0.01%
+    }
+    return trade.priceImpact
+  }, [trade])
+
   return (
     <ThemedText.BodySmall color="neutral2">
       <RowBetween>
         <Trans>Price Impact</Trans>
-        <div>{formatPriceImpact(trade.priceImpact)}</div>
+        <div>{formatPriceImpact(priceImpact)}</div>
       </RowBetween>
     </ThemedText.BodySmall>
   )

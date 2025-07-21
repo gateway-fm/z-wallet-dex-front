@@ -9,6 +9,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { TradeFillType } from 'state/routing/types'
 import { useHasPendingApproval, useHasPendingRevocation, useTransactionAdder } from 'state/transactions/hooks'
 
+import { ZEPHYR_CHAIN_ID } from '../constants/chains'
+
 enum ApprovalState {
   PENDING,
   SYNCING,
@@ -49,7 +51,7 @@ export default function usePermit2Allowance(
   spender?: string,
   tradeFillType?: TradeFillType
 ): Allowance {
-  const { account } = useWeb3React()
+  const { account, chainId } = useWeb3React()
   const token = amount?.currency
 
   const { tokenAllowance, isSyncing: isApprovalSyncing } = useTokenAllowance(token, account, PERMIT2_ADDRESS)
@@ -130,6 +132,15 @@ export default function usePermit2Allowance(
   }, [addTransaction, revokeTokenAllowance])
 
   return useMemo(() => {
+    // For Zephyr network, bypass all permit2 checks and return ALLOWED state
+    // since we can't use multicall for allowance checks
+    if (chainId === ZEPHYR_CHAIN_ID) {
+      return {
+        state: AllowanceState.ALLOWED,
+        permitSignature: undefined,
+      }
+    }
+
     if (token) {
       if (!tokenAllowance || !permitAllowance) {
         return { state: AllowanceState.LOADING }
@@ -175,6 +186,7 @@ export default function usePermit2Allowance(
   }, [
     approve,
     approveAndPermit,
+    chainId,
     isApprovalLoading,
     isApprovalPending,
     isApproved,
