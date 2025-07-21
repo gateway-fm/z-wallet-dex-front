@@ -49,6 +49,12 @@ export default function Updater(): null {
   useEffect(() => {
     if (!rehydrated) return // loaded lists will not be available until state is rehydrated
 
+    // Skip external token list fetching for Zephyr network
+    if (chainId === ZEPHYR_CHAIN_ID) {
+      console.debug('Skipping external token list fetching for Zephyr network')
+      return
+    }
+
     // whenever a list is not loaded and not loading, try again to load it
     Object.keys(lists).forEach((listUrl) => {
       const list = lists[listUrl]
@@ -56,7 +62,7 @@ export default function Updater(): null {
         fetchList(listUrl).catch((error) => console.debug('list added fetching error', error))
       }
     })
-  }, [dispatch, fetchList, lists, rehydrated])
+  }, [dispatch, fetchList, lists, rehydrated, chainId])
 
   // automatically update lists if versions are minor/patch
   useEffect(() => {

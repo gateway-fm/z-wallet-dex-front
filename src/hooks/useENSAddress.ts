@@ -15,11 +15,13 @@ export default function useENSAddress(ensName?: string | null): { loading: boole
   const { chainId } = useWeb3React()
   const debouncedName = useDebounce(ensName, 200)
 
+  const isZephyrNetwork = chainId === ZEPHYR_CHAIN_ID
+
   // Disable ENS for Zephyr network since it doesn't support ENS
   const ensNodeArgument = useMemo(() => [debouncedName ? safeNamehash(debouncedName) : undefined], [debouncedName])
   const registrarContract = useENSRegistrarContract()
   const resolverAddress = useMainnetSingleCallResult(
-    chainId === ZEPHYR_CHAIN_ID ? null : registrarContract,
+    isZephyrNetwork ? null : registrarContract,
     'resolver',
     ensNodeArgument,
     NEVER_RELOAD
@@ -29,18 +31,22 @@ export default function useENSAddress(ensName?: string | null): { loading: boole
     resolverAddressResult && !isZero(resolverAddressResult) ? resolverAddressResult : undefined
   )
   const addr = useMainnetSingleCallResult(
-    chainId === ZEPHYR_CHAIN_ID ? null : resolverContract,
+    isZephyrNetwork ? null : resolverContract,
     'addr',
     ensNodeArgument,
     NEVER_RELOAD
   )
 
   const changed = debouncedName !== ensName
-  return useMemo(
-    () => ({
-      address: changed || chainId === ZEPHYR_CHAIN_ID ? null : addr.result?.[0] ?? null,
-      loading: changed || (chainId !== ZEPHYR_CHAIN_ID && (resolverAddress.loading || addr.loading)),
-    }),
-    [addr.loading, addr.result, changed, resolverAddress.loading, chainId]
-  )
+
+  return useMemo(() => {
+    if (isZephyrNetwork) {
+      return { address: null, loading: false }
+    }
+
+    return {
+      address: changed ? null : addr.result?.[0] ?? null,
+      loading: changed || resolverAddress.loading || addr.loading,
+    }
+  }, [addr.loading, addr.result, changed, resolverAddress.loading, isZephyrNetwork])
 }

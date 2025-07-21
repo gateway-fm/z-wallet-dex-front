@@ -1,11 +1,13 @@
 import { BigNumber } from '@ethersproject/bignumber'
 import { Currency, CurrencyAmount } from '@uniswap/sdk-core'
 import { Pool } from '@uniswap/v3-sdk'
+import { useWeb3React } from '@web3-react/core'
 import { useSingleCallResult } from 'lib/hooks/multicall'
 import useBlockNumber from 'lib/hooks/useBlockNumber'
 import { useEffect, useState } from 'react'
 import { unwrappedToken } from 'utils/unwrappedToken'
 
+import { ZEPHYR_CHAIN_ID } from '../constants/chains'
 import { useV3NFTPositionManagerContract } from './useContract'
 
 const MAX_UINT128 = BigNumber.from(2).pow(128).sub(1)
@@ -16,9 +18,17 @@ export function useV3PositionFees(
   tokenId?: BigNumber,
   asWETH = false
 ): [CurrencyAmount<Currency>, CurrencyAmount<Currency>] | [undefined, undefined] {
+  const { chainId } = useWeb3React()
   const positionManager = useV3NFTPositionManagerContract(false)
-  const owner: string | undefined = useSingleCallResult(tokenId ? positionManager : null, 'ownerOf', [tokenId])
-    .result?.[0]
+
+  // Skip fee fetching for Zephyr network since position manager contract is not available
+  const skipFeeFetching = chainId === ZEPHYR_CHAIN_ID
+
+  const owner: string | undefined = useSingleCallResult(
+    tokenId && !skipFeeFetching ? positionManager : null,
+    'ownerOf',
+    [tokenId]
+  ).result?.[0]
 
   const tokenIdHexString = tokenId?.toHexString()
   const latestBlockNumber = useBlockNumber()
@@ -27,6 +37,12 @@ export function useV3PositionFees(
   // latestBlockNumber is included to ensure data stays up-to-date every block
   const [amounts, setAmounts] = useState<[BigNumber, BigNumber] | undefined>()
   useEffect(() => {
+    if (skipFeeFetching) {
+      // TODO: Add fees once we have a proper API
+      setAmounts(undefined)
+      return
+    }
+
     ;(async function getFees() {
       if (positionManager && tokenIdHexString && owner) {
         try {
@@ -47,7 +63,7 @@ export function useV3PositionFees(
         }
       }
     })()
-  }, [positionManager, tokenIdHexString, owner, latestBlockNumber])
+  }, [positionManager, tokenIdHexString, owner, latestBlockNumber, skipFeeFetching])
 
   if (pool && amounts) {
     return [

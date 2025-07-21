@@ -20,6 +20,7 @@ import { useSearchParams } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from 'state/hooks'
 import { getTickToPrice } from 'utils/getTickToPrice'
 
+import { ZEPHYR_CHAIN_ID } from '../../../constants/chains'
 import { BIG_INT_ZERO } from '../../../constants/misc'
 import { PoolState } from '../../../hooks/usePools'
 import { useCurrencyBalances } from '../../connection/hooks'
@@ -137,7 +138,7 @@ export function useV3DerivedMintInfo(
   invertPrice: boolean
   ticksAtLimit: { [bound in Bound]?: boolean | undefined }
 } {
-  const { account } = useWeb3React()
+  const { account, chainId } = useWeb3React()
 
   const { independentField, typedValue, leftRangeTypedValue, rightRangeTypedValue, startPriceTypedValue } =
     useV3MintState()
@@ -177,7 +178,7 @@ export function useV3DerivedMintInfo(
 
   // pool
   const [poolState, pool] = usePool(currencies[Field.CURRENCY_A], currencies[Field.CURRENCY_B], feeAmount)
-  const noLiquidity = poolState === PoolState.NOT_EXISTS
+  const noLiquidity = poolState === PoolState.NOT_EXISTS || (chainId === ZEPHYR_CHAIN_ID && !pool)
 
   // note to parse inputs in reverse
   const invertPrice = Boolean(baseToken && token0 && !baseToken.equals(token0))
@@ -200,12 +201,29 @@ export function useV3DerivedMintInfo(
             : undefined
         return (invertPrice ? price?.invert() : price) ?? undefined
       }
+
+      // For Zephyr network, default to 1:1 price if no start price is set
+      if (chainId === ZEPHYR_CHAIN_ID && token0 && token1 && !startPriceTypedValue) {
+        // For 1:1 price in human-readable terms: 1 token0 = 1 token1
+        // We need to account for different decimals properly
+
+        // Use 1 unit in human terms for both tokens
+        const amount0 = JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(token0.decimals)) // 1 full token0
+        const amount1 = JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(token1.decimals)) // 1 full token1
+
+        // Create 1:1 price: 1 token0 = 1 token1 (in human readable terms)
+        const price = new Price(token0, token1, amount0, amount1)
+        const finalPrice = (invertPrice ? price?.invert() : price) ?? undefined
+
+        return finalPrice
+      }
+
       return undefined
     } else {
       // get the amount of quote currency
       return pool && token0 ? pool.priceOf(token0) : undefined
     }
-  }, [noLiquidity, startPriceTypedValue, invertPrice, token1, token0, pool])
+  }, [noLiquidity, startPriceTypedValue, invertPrice, token1, token0, pool, chainId])
 
   // check for invalid price input (converts to invalid ratio)
   const invalidPrice = useMemo(() => {
@@ -225,7 +243,9 @@ export function useV3DerivedMintInfo(
     if (tokenA && tokenB && feeAmount && price && !invalidPrice) {
       const currentTick = priceToClosestTick(price)
       const currentSqrt = TickMath.getSqrtRatioAtTick(currentTick)
-      return new Pool(tokenA, tokenB, feeAmount, currentSqrt, JSBI.BigInt(0), currentTick, [])
+      const pool = new Pool(tokenA, tokenB, feeAmount, currentSqrt, JSBI.BigInt(0), currentTick, [])
+
+      return pool
     } else {
       return undefined
     }
@@ -322,6 +342,7 @@ export function useV3DerivedMintInfo(
     // we wrap the currencies just to get the price in terms of the other token
     const wrappedIndependentAmount = independentAmount?.wrapped
     const dependentCurrency = dependentField === Field.CURRENCY_B ? currencyB : currencyA
+
     if (
       independentAmount &&
       wrappedIndependentAmount &&
@@ -397,6 +418,10 @@ export function useV3DerivedMintInfo(
         (deposit1Disabled && poolForPosition && tokenB && poolForPosition.token1.equals(tokenB))
     )
 
+  // For Zephyr new pools, allow both deposits even if out of range
+  const finalDepositADisabled = chainId === ZEPHYR_CHAIN_ID && noLiquidity ? false : depositADisabled
+  const finalDepositBDisabled = chainId === ZEPHYR_CHAIN_ID && noLiquidity ? false : depositBDisabled
+
   // create position entity based on users selection
   const position: Position | undefined = useMemo(() => {
     if (
@@ -456,10 +481,17 @@ export function useV3DerivedMintInfo(
   }
 
   if (
-    (!parsedAmounts[Field.CURRENCY_A] && !depositADisabled) ||
-    (!parsedAmounts[Field.CURRENCY_B] && !depositBDisabled)
+    (!parsedAmounts[Field.CURRENCY_A] && !finalDepositADisabled) ||
+    (!parsedAmounts[Field.CURRENCY_B] && !finalDepositBDisabled)
   ) {
-    errorMessage = errorMessage ?? <Trans>Enter an amount</Trans>
+    // For Zephyr new pools, allow single-sided initial deposit
+    if (chainId === ZEPHYR_CHAIN_ID && noLiquidity) {
+      if (!parsedAmounts[Field.CURRENCY_A] && !parsedAmounts[Field.CURRENCY_B]) {
+        errorMessage = errorMessage ?? <Trans>Enter an amount</Trans>
+      }
+    } else {
+      errorMessage = errorMessage ?? <Trans>Enter an amount</Trans>
+    }
   }
 
   const { [Field.CURRENCY_A]: currencyAAmount, [Field.CURRENCY_B]: currencyBAmount } = parsedAmounts
@@ -491,8 +523,8 @@ export function useV3DerivedMintInfo(
     invalidPool,
     invalidRange,
     outOfRange,
-    depositADisabled,
-    depositBDisabled,
+    depositADisabled: finalDepositADisabled,
+    depositBDisabled: finalDepositBDisabled,
     invertPrice,
     ticksAtLimit,
   }

@@ -8,6 +8,7 @@ import { NEVER_RELOAD, useSingleCallResult } from 'lib/hooks/multicall'
 import useNativeCurrency from 'lib/hooks/useNativeCurrency'
 import { useMemo } from 'react'
 
+import { ZEPHYR_CHAIN_ID } from '../../constants/chains'
 import { DEFAULT_ERC20_DECIMALS } from '../../constants/tokens'
 import { TOKEN_SHORTHANDS } from '../../constants/tokens'
 import { isAddress } from '../../utils'
@@ -33,8 +34,14 @@ function useTokenFromActiveNetwork(tokenAddress: string | undefined): Token | nu
   const { chainId } = useWeb3React()
 
   const formattedAddress = isAddress(tokenAddress)
-  const tokenContract = useTokenContract(formattedAddress ? formattedAddress : undefined, false)
-  const tokenContractBytes32 = useBytes32TokenContract(formattedAddress ? formattedAddress : undefined, false)
+  const isZephyrNetwork = chainId === ZEPHYR_CHAIN_ID
+
+  // Skip contract calls for Zephyr network - we'll use token data from GraphQL instead
+  const tokenContract = useTokenContract(formattedAddress && !isZephyrNetwork ? formattedAddress : undefined, false)
+  const tokenContractBytes32 = useBytes32TokenContract(
+    formattedAddress && !isZephyrNetwork ? formattedAddress : undefined,
+    false
+  )
 
   // TODO (WEB-1709): reduce this to one RPC call instead of 5
   // TODO: Fix redux-multicall so that these values do not reload.
@@ -45,8 +52,8 @@ function useTokenFromActiveNetwork(tokenAddress: string | undefined): Token | nu
   const decimals = useSingleCallResult(tokenContract, 'decimals', undefined, NEVER_RELOAD)
 
   const isLoading = useMemo(
-    () => decimals.loading || symbol.loading || tokenName.loading,
-    [decimals.loading, symbol.loading, tokenName.loading]
+    () => !isZephyrNetwork && (decimals.loading || symbol.loading || tokenName.loading),
+    [decimals.loading, symbol.loading, tokenName.loading, isZephyrNetwork]
   )
   const parsedDecimals = useMemo(() => decimals?.result?.[0] ?? DEFAULT_ERC20_DECIMALS, [decimals.result])
 
@@ -64,8 +71,13 @@ function useTokenFromActiveNetwork(tokenAddress: string | undefined): Token | nu
     if (typeof tokenAddress !== 'string' || !isSupportedChain(chainId) || !formattedAddress) return undefined
     if (isLoading || !chainId) return null
 
+    // For Zephyr network, create token with minimal information since we get it from GraphQL
+    if (isZephyrNetwork) {
+      return new Token(chainId, formattedAddress, DEFAULT_ERC20_DECIMALS, 'UNKNOWN', 'Unknown Token')
+    }
+
     return new Token(chainId, formattedAddress, parsedDecimals, parsedSymbol, parsedName)
-  }, [chainId, tokenAddress, formattedAddress, isLoading, parsedDecimals, parsedSymbol, parsedName])
+  }, [chainId, tokenAddress, formattedAddress, isLoading, parsedDecimals, parsedSymbol, parsedName, isZephyrNetwork])
 }
 
 type TokenMap = { [address: string]: Token }

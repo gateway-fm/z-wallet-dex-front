@@ -4,6 +4,8 @@ import useBlockNumber, { useMainnetBlockNumber } from 'lib/hooks/useBlockNumber'
 import multicall from 'lib/state/multicall'
 import { SkipFirst } from 'types/tuple'
 
+import { ZEPHYR_CHAIN_ID } from '../../constants/chains'
+
 export type { CallStateResult } from '@uniswap/redux-multicall' // re-export for convenience
 export { NEVER_RELOAD } from '@uniswap/redux-multicall' // re-export for convenience
 
@@ -38,5 +40,11 @@ export function useSingleContractMultipleData(
 function useCallContext() {
   const { chainId } = useWeb3React()
   const latestBlock = useBlockNumber()
-  return { chainId, latestBlock }
+
+  // For Zephyr network, return undefined chainId to disable multicall
+  // redux-multicall will skip calls when chainId is undefined
+  return {
+    chainId: chainId === ZEPHYR_CHAIN_ID ? undefined : chainId,
+    latestBlock,
+  }
 }

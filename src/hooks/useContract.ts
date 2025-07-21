@@ -4,7 +4,6 @@ import {
   ChainId,
   ENS_REGISTRAR_ADDRESSES,
   MULTICALL_ADDRESSES,
-  NONFUNGIBLE_POSITION_MANAGER_ADDRESSES,
   V2_ROUTER_ADDRESS,
   V3_MIGRATOR_ADDRESSES,
 } from '@uniswap/sdk-core'
@@ -24,6 +23,7 @@ import ERC721_ABI from 'abis/erc721.json'
 import ERC1155_ABI from 'abis/erc1155.json'
 import { ArgentWalletDetector, EnsPublicResolver, EnsRegistrar, Erc20, Erc721, Erc1155, Weth } from 'abis/types'
 import WETH_ABI from 'abis/weth.json'
+import { NONFUNGIBLE_POSITION_MANAGER_ADDRESSES } from 'constants/addresses'
 import { ZEPHYR_CHAIN_ID } from 'constants/chains'
 import { RPC_PROVIDERS } from 'constants/providers'
 import { WRAPPED_NATIVE_CURRENCY } from 'constants/tokens'
@@ -65,23 +65,25 @@ function useMainnetContract<T extends Contract = Contract>(address: string | und
   const { chainId, provider } = useWeb3React()
   const isMainnet = chainId === ChainId.MAINNET
   const contract = useContract(isMainnet ? address : undefined, ABI, false)
-  const mainnetProvider =
-    chainId === ChainId.MAINNET && provider !== undefined ? provider : RPC_PROVIDERS[ZEPHYR_CHAIN_ID]
 
   return useMemo(() => {
     if (isMainnet) return contract
     if (!address) return null
+
+    // For Zephyr network, skip mainnet contract calls entirely
+    if (chainId === ZEPHYR_CHAIN_ID) {
+      console.debug('Skipping mainnet contract for Zephyr network to avoid ENS errors')
+      return null
+    }
+
+    // Use actual mainnet provider for other non-mainnet chains
     try {
-      return getContract(address, ABI, mainnetProvider)
+      return getContract(address, ABI, RPC_PROVIDERS[ChainId.MAINNET])
     } catch (error) {
       console.error('Failed to get mainnet contract', error)
       return null
     }
-  }, [isMainnet, contract, address, ABI, mainnetProvider]) as T
-}
-
-export function useV2MigratorContract() {
-  return useContract<V3Migrator>(V3_MIGRATOR_ADDRESSES, V2MigratorABI, true)
+  }, [isMainnet, contract, address, ABI, chainId]) as T
 }
 
 export function useTokenContract(tokenAddress?: string, withSignerIfPossible?: boolean) {
@@ -134,21 +136,32 @@ export function useV2RouterContract(): Contract | null {
 }
 
 export function useInterfaceMulticall() {
-  return useContract<UniswapInterfaceMulticall>(MULTICALL_ADDRESSES, MulticallABI, false) as UniswapInterfaceMulticall
+  const { chainId } = useWeb3React()
+
+  // Disable multicall for Zephyr network by passing null addresses
+  const addresses = chainId === ZEPHYR_CHAIN_ID ? undefined : MULTICALL_ADDRESSES
+
+  return useContract<UniswapInterfaceMulticall>(addresses, MulticallABI, false) as UniswapInterfaceMulticall
 }
 
 export function useMainnetInterfaceMulticall() {
-  return useMainnetContract<UniswapInterfaceMulticall>(
-    MULTICALL_ADDRESSES[ChainId.MAINNET],
-    MulticallABI
-  ) as UniswapInterfaceMulticall
+  return useMainnetContract<UniswapInterfaceMulticall>(MULTICALL_ADDRESSES[ChainId.MAINNET], MulticallABI)
 }
 
 export function useV3NFTPositionManagerContract(withSignerIfPossible?: boolean): NonfungiblePositionManager | null {
-  const contract = useContract<NonfungiblePositionManager>(
-    NONFUNGIBLE_POSITION_MANAGER_ADDRESSES,
-    NFTPositionManagerABI,
-    withSignerIfPossible
-  )
-  return contract
+  const { chainId } = useWeb3React()
+  const address = chainId ? NONFUNGIBLE_POSITION_MANAGER_ADDRESSES[chainId] : undefined
+
+  return useContract<NonfungiblePositionManager>(address, NFTPositionManagerABI, withSignerIfPossible)
+}
+
+// eslint-disable-next-line import/no-unused-modules
+export function useV2MigratorContract() {
+  return useContract<V3Migrator>(V3_MIGRATOR_ADDRESSES, V2MigratorABI, true)
+}
+
+// eslint-disable-next-line import/no-unused-modules
+export function useV3Migrator(): V3Migrator | null {
+  const { chainId } = useWeb3React()
+  return useContract<V3Migrator>(chainId ? V3_MIGRATOR_ADDRESSES[chainId] : undefined, V2MigratorABI, true)
 }

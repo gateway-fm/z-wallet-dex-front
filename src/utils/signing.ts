@@ -2,6 +2,8 @@ import type { TypedDataDomain, TypedDataField } from '@ethersproject/abstract-si
 import { _TypedDataEncoder } from '@ethersproject/hash'
 import type { JsonRpcSigner } from '@ethersproject/providers'
 
+import { ZEPHYR_CHAIN_ID } from '../constants/chains'
+
 /**
  * Signs TypedData with EIP-712, if available, or else by falling back to eth_sign.
  * Calls eth_signTypedData_v4, or eth_signTypedData for wallets with incomplete EIP-712 support.
@@ -16,8 +18,15 @@ export async function signTypedData(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value: Record<string, any>
 ) {
-  // Populate any ENS names (in-place)
+  // Get chain ID to check if it's Zephyr network
+  const chainId = await signer.getChainId()
+
+  // Populate any ENS names (in-place) - skip ENS resolution for Zephyr network
   const populated = await _TypedDataEncoder.resolveNames(domain, types, value, (name: string) => {
+    // Skip ENS resolution for Zephyr network since it doesn't support ENS
+    if (chainId === ZEPHYR_CHAIN_ID) {
+      return Promise.resolve(name) // Return the name as-is without resolution
+    }
     return signer.provider.resolveName(name) as Promise<string>
   })
 

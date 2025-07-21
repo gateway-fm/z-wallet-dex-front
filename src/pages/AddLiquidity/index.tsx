@@ -1,7 +1,7 @@
 import { BigNumber } from '@ethersproject/bignumber'
 import type { TransactionResponse } from '@ethersproject/providers'
 import { Trans } from '@lingui/macro'
-import { Currency, CurrencyAmount, NONFUNGIBLE_POSITION_MANAGER_ADDRESSES, Percent } from '@uniswap/sdk-core'
+import { Currency, CurrencyAmount, Percent } from '@uniswap/sdk-core'
 import { FeeAmount, NonfungiblePositionManager } from '@uniswap/v3-sdk'
 import { useWeb3React } from '@web3-react/core'
 import { useToggleAccountDrawer } from 'components/AccountDrawer'
@@ -41,6 +41,8 @@ import RateToggle from '../../components/RateToggle'
 import Row, { RowBetween, RowFixed } from '../../components/Row'
 import { SwitchLocaleLink } from '../../components/SwitchLocaleLink'
 import TransactionConfirmationModal, { ConfirmationModalContent } from '../../components/TransactionConfirmationModal'
+import { NONFUNGIBLE_POSITION_MANAGER_ADDRESSES } from '../../constants/addresses'
+import { ZEPHYR_CHAIN_ID } from '../../constants/chains'
 import { ZERO_PERCENT } from '../../constants/misc'
 import { WRAPPED_NATIVE_CURRENCY } from '../../constants/tokens'
 import { useCurrency } from '../../hooks/Tokens'
@@ -108,9 +110,12 @@ function AddLiquidity() {
   const { position: existingPosition } = useDerivedPositionInfo(existingPositionDetails)
 
   // fee selection from url
+  // TODO: Remove mock fee once we have a proper API
   const feeAmount: FeeAmount | undefined =
     feeAmountFromUrl && Object.values(FeeAmount).includes(parseFloat(feeAmountFromUrl))
       ? parseFloat(feeAmountFromUrl)
+      : chainId === ZEPHYR_CHAIN_ID
+      ? FeeAmount.MEDIUM // Default to 0.3% fee for Zephyr network
       : undefined
 
   const baseCurrency = useCurrency(currencyIdA)
@@ -207,6 +212,10 @@ function AddLiquidity() {
     argentWalletContract ? undefined : parsedAmounts[Field.CURRENCY_B],
     chainId ? NONFUNGIBLE_POSITION_MANAGER_ADDRESSES[chainId] : undefined
   )
+
+  // For Zephyr network, override approvals to bypass approval requirements
+  const finalApprovalA = chainId === ZEPHYR_CHAIN_ID ? ApprovalState.APPROVED : approvalA
+  const finalApprovalB = chainId === ZEPHYR_CHAIN_ID ? ApprovalState.APPROVED : approvalB
 
   const allowedSlippage = useUserSlippageToleranceWithDefault(
     outOfRange ? ZERO_PERCENT : DEFAULT_ADD_IN_RANGE_SLIPPAGE_TOLERANCE
@@ -402,9 +411,9 @@ function AddLiquidity() {
 
   // we need an existence check on parsed amounts for single-asset deposits
   const showApprovalA =
-    !argentWalletContract && approvalA !== ApprovalState.APPROVED && !!parsedAmounts[Field.CURRENCY_A]
+    !argentWalletContract && finalApprovalA !== ApprovalState.APPROVED && !!parsedAmounts[Field.CURRENCY_A]
   const showApprovalB =
-    !argentWalletContract && approvalB !== ApprovalState.APPROVED && !!parsedAmounts[Field.CURRENCY_B]
+    !argentWalletContract && finalApprovalB !== ApprovalState.APPROVED && !!parsedAmounts[Field.CURRENCY_B]
 
   const pendingText = `Supplying ${!depositADisabled ? parsedAmounts[Field.CURRENCY_A]?.toSignificant(6) : ''} ${
     !depositADisabled ? currencies[Field.CURRENCY_A]?.symbol : ''
@@ -472,19 +481,19 @@ function AddLiquidity() {
       </ButtonLight>
     ) : (
       <AutoColumn gap="md">
-        {(approvalA === ApprovalState.NOT_APPROVED ||
-          approvalA === ApprovalState.PENDING ||
-          approvalB === ApprovalState.NOT_APPROVED ||
-          approvalB === ApprovalState.PENDING) &&
+        {(finalApprovalA === ApprovalState.NOT_APPROVED ||
+          finalApprovalA === ApprovalState.PENDING ||
+          finalApprovalB === ApprovalState.NOT_APPROVED ||
+          finalApprovalB === ApprovalState.PENDING) &&
           isValid && (
             <RowBetween>
               {showApprovalA && (
                 <ButtonPrimary
                   onClick={approveACallback}
-                  disabled={approvalA === ApprovalState.PENDING}
+                  disabled={finalApprovalA === ApprovalState.PENDING}
                   width={showApprovalB ? '48%' : '100%'}
                 >
-                  {approvalA === ApprovalState.PENDING ? (
+                  {finalApprovalA === ApprovalState.PENDING ? (
                     <Dots>
                       <Trans>Approving {currencies[Field.CURRENCY_A]?.symbol}</Trans>
                     </Dots>
@@ -496,10 +505,10 @@ function AddLiquidity() {
               {showApprovalB && (
                 <ButtonPrimary
                   onClick={approveBCallback}
-                  disabled={approvalB === ApprovalState.PENDING}
+                  disabled={finalApprovalB === ApprovalState.PENDING}
                   width={showApprovalA ? '48%' : '100%'}
                 >
-                  {approvalB === ApprovalState.PENDING ? (
+                  {finalApprovalB === ApprovalState.PENDING ? (
                     <Dots>
                       <Trans>Approving {currencies[Field.CURRENCY_B]?.symbol}</Trans>
                     </Dots>
@@ -516,8 +525,8 @@ function AddLiquidity() {
           }}
           disabled={
             !isValid ||
-            (!argentWalletContract && approvalA !== ApprovalState.APPROVED && !depositADisabled) ||
-            (!argentWalletContract && approvalB !== ApprovalState.APPROVED && !depositBDisabled) ||
+            (!argentWalletContract && finalApprovalA !== ApprovalState.APPROVED && !depositADisabled) ||
+            (!argentWalletContract && finalApprovalB !== ApprovalState.APPROVED && !depositBDisabled) ||
             priceLower === undefined ||
             priceUpper === undefined
           }
