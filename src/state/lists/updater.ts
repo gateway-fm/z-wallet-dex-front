@@ -32,9 +32,8 @@ export default function Updater(): null {
   const fetchList = useFetchListCallback()
   const fetchAllListsCallback = useCallback(() => {
     if (!isWindowVisible) return
-    // Skip external token list fetching for Zephyr network
+    // NOTE: Skip external token list fetching for Zephyr network
     if (chainId === ZEPHYR_CHAIN_ID) {
-      console.debug('Skipping external token list fetching for Zephyr network')
       return
     }
     DEFAULT_LIST_OF_LISTS.forEach((url) => {
@@ -49,9 +48,8 @@ export default function Updater(): null {
   useEffect(() => {
     if (!rehydrated) return // loaded lists will not be available until state is rehydrated
 
-    // Skip external token list fetching for Zephyr network
+    // NOTE: Skip external token list fetching for Zephyr network
     if (chainId === ZEPHYR_CHAIN_ID) {
-      console.debug('Skipping external token list fetching for Zephyr network')
       return
     }
 

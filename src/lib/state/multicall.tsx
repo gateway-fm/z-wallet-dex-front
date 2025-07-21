@@ -54,9 +54,8 @@ export function MulticallUpdater() {
     []
   )
 
-  // Completely disable multicall for Zephyr network
+  // NOTE: Completely disable multicall for Zephyr network
   if (chainId === ZEPHYR_CHAIN_ID) {
-    console.debug('MulticallUpdater: Skipping multicall setup for Zephyr network')
     return null
   }
 

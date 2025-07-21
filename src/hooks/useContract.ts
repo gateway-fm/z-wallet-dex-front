@@ -62,7 +62,7 @@ export function useContract<T extends Contract = Contract>(
 }
 
 function useMainnetContract<T extends Contract = Contract>(address: string | undefined, ABI: any): T | null {
-  const { chainId, provider } = useWeb3React()
+  const { chainId } = useWeb3React()
   const isMainnet = chainId === ChainId.MAINNET
   const contract = useContract(isMainnet ? address : undefined, ABI, false)
 
