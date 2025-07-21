@@ -72,7 +72,6 @@ function useMainnetContract<T extends Contract = Contract>(address: string | und
 
     // For Zephyr network, skip mainnet contract calls entirely
     if (chainId === ZEPHYR_CHAIN_ID) {
-      console.debug('Skipping mainnet contract for Zephyr network to avoid ENS errors')
       return null
     }
 

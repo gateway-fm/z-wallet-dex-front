@@ -39,8 +39,9 @@ export function useTokenAllowance(
     if (!token) return undefined
 
     // For Zephyr network, return a large allowance to bypass approval requirements
+    // TODO: Remove this once we have a proper API
     if (skipMulticall) {
-      return CurrencyAmount.fromRawAmount(token, Math.pow(2, 256) - 1)
+      return CurrencyAmount.fromRawAmount(token, MAX_ALLOWANCE)
     }
 
     if (!result || isSyncing) return undefined
