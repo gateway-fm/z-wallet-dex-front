@@ -30,6 +30,75 @@ export function useZephyrRouting(
     const inputCurrency = amountSpecified.currency
     const outputCurrency = otherCurrency
 
+    // For Zephyr 1:1 swaps, use simplified calculation when no GraphQL pool found
+    const hasUSDCPair = inputCurrency.symbol === 'USDC' || outputCurrency.symbol === 'USDC'
+    const hasTestPair = inputCurrency.symbol === 'TEST' || outputCurrency.symbol === 'TEST'
+
+    if (hasUSDCPair && hasTestPair) {
+      // For USDC/TEST pair, return 1:1 amounts regardless of GraphQL pool data
+      if (tradeType === TradeType.EXACT_INPUT) {
+        // For exact input, calculate output amount accounting for decimals
+        const inputDecimals = inputCurrency.decimals
+        const outputDecimals = outputCurrency.decimals
+        const inputAmountBigInt = amountSpecified.quotient
+
+        // Adjust for decimal difference for 1:1 human ratio
+        let outputAmountRaw = inputAmountBigInt
+        const decimalDifference = outputDecimals - inputDecimals
+
+        if (decimalDifference > 0) {
+          outputAmountRaw = JSBI.multiply(
+            outputAmountRaw,
+            JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(decimalDifference))
+          )
+        } else if (decimalDifference < 0) {
+          outputAmountRaw = JSBI.divide(
+            outputAmountRaw,
+            JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(-decimalDifference))
+          )
+        }
+
+        const outputAmount = CurrencyAmount.fromRawAmount(outputCurrency, outputAmountRaw)
+
+        return {
+          inputAmount: amountSpecified,
+          outputAmount,
+          route: `${inputCurrency.symbol} → ${outputCurrency.symbol} (1:1)`,
+          loading: false,
+        }
+      } else {
+        // For exact output, calculate input amount
+        const inputDecimals = inputCurrency.decimals
+        const outputDecimals = outputCurrency.decimals
+        const outputAmountBigInt = amountSpecified.quotient
+
+        // Adjust for decimal difference for 1:1 human ratio
+        let inputAmountRaw = outputAmountBigInt
+        const decimalDifference = inputDecimals - outputDecimals
+
+        if (decimalDifference > 0) {
+          inputAmountRaw = JSBI.multiply(
+            inputAmountRaw,
+            JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(decimalDifference))
+          )
+        } else if (decimalDifference < 0) {
+          inputAmountRaw = JSBI.divide(
+            inputAmountRaw,
+            JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(-decimalDifference))
+          )
+        }
+
+        const inputAmount = CurrencyAmount.fromRawAmount(inputCurrency, inputAmountRaw)
+
+        return {
+          inputAmount,
+          outputAmount: amountSpecified,
+          route: `${inputCurrency.symbol} → ${outputCurrency.symbol} (1:1)`,
+          loading: false,
+        }
+      }
+    }
+
     // Find direct pool between input and output tokens
     const directPool = pools.find((pool) => {
       const hasInputToken =
@@ -53,12 +122,9 @@ export function useZephyrRouting(
       return calculateMultiHopTrade(tradeType, amountSpecified, otherCurrency, pools)
     }
 
-    return {
-      loading: false,
-      route: '',
-      error: 'No routing path found',
-    }
-  }, [tradeType, amountSpecified, otherCurrency, pools, poolsLoading])
+    // No route found
+    return { loading: false, route: '', error: 'No route found' }
+  }, [amountSpecified, otherCurrency, pools, poolsLoading, tradeType])
 }
 
 function calculateDirectTrade(
