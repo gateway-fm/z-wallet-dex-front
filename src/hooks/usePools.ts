@@ -97,7 +97,6 @@ function usePools(
 
     return poolKeys.map(([currencyA, currencyB, feeAmount]) => {
       // For Zephyr network, use default fee if not specified
-      // TODO: Add support for actual fee amounts, from new API probably
       const actualFeeAmount = feeAmount || (isZephyrNetwork ? FeeAmount.MEDIUM : undefined)
 
       if (currencyA && currencyB && actualFeeAmount) {
@@ -141,7 +140,6 @@ function usePools(
       const [token0, token1, fee] = tokens
 
       // For Zephyr network, use GraphQL data or create mock pool
-      // TODO: Remove mock pool once we have a proper API
       if (isZephyrNetwork) {
         if (graphqlLoading) return [PoolState.LOADING, null]
 

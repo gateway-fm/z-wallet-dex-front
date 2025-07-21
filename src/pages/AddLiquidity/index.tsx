@@ -281,9 +281,14 @@ function AddLiquidity() {
 
       setAttemptingTxn(true)
 
-      provider
-        .getSigner()
-        .estimateGas(txn)
+      // For Zephyr network, skip estimateGas and use fixed value
+      // TODO: Rewrite this once we have a proper API
+      const estimatePromise =
+        chainId === ZEPHYR_CHAIN_ID
+          ? Promise.resolve(BigNumber.from(500000)) // Fixed gas limit for Zephyr
+          : provider.getSigner().estimateGas(txn)
+
+      estimatePromise
         .then((estimate) => {
           const newTxn = {
             ...txn,

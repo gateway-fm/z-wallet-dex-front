@@ -1,7 +1,7 @@
 /* eslint-disable import/no-unused-modules */
 
 import { Token } from '@uniswap/sdk-core'
-import { encodeSqrtRatioX96 } from '@uniswap/v3-sdk'
+import { encodeSqrtRatioX96, TickMath } from '@uniswap/v3-sdk'
 import JSBI from 'jsbi'
 
 /**
@@ -12,28 +12,27 @@ import JSBI from 'jsbi'
 
 /**
  * Calculate sqrtPriceX96 for 1:1 human-readable price between two tokens
- * Takes into account different token decimals
+ * Takes into account different token decimals to ensure 1 human token0 = 1 human token1
  *
- * @param token0 First token (base)
- * @param token1 Second token (quote)
+ * @param token0 First token (sorted by address, lower first)
+ * @param token1 Second token (sorted by address, higher first)
  * @returns sqrtPriceX96 as string representing 1:1 human price
  */
 export function calculateOneToOneSqrtPriceX96(token0: Token, token1: Token): string {
-  // For 1:1 human-readable price: 1 token0 = 1 token1
-  // In raw units: 10^token0.decimals units of token0 = 10^token1.decimals units of token1
+  // For 1:1 human-readable price: 1 human token0 = 1 human token1
+  // In raw units: 10^token0.decimals raw token0 = 10^token1.decimals raw token1
+  // V3 price = token1_raw / token0_raw for equal human amounts
+  // So price = 10^token1.decimals / 10^token0.decimals
 
-  const amount0 = JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(token0.decimals))
-  const amount1 = JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(token1.decimals))
+  const decimal0 = token0.decimals
+  const decimal1 = token1.decimals
 
-  // Use Uniswap's utility to encode the price ratio
-  return encodeSqrtRatioX96(amount1, amount0).toString()
+  // Calculate price ratio for 1:1 human equivalence
+  const numerator = JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(decimal1))
+  const denominator = JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(decimal0))
+
+  return encodeSqrtRatioX96(numerator, denominator).toString()
 }
-
-/**
- * Default tick for 1:1 price with equal decimals
- * For different decimals, the tick will be calculated automatically by Pool constructor
- */
-export const ZEPHYR_DEFAULT_TICK = 0
 
 /**
  * Default liquidity for mock pools
@@ -45,10 +44,11 @@ export const ZEPHYR_DEFAULT_LIQUIDITY = '1000000000000000000' // 1e18
  */
 export function getZephyrPoolParams(token0: Token, token1: Token) {
   const sqrtPriceX96 = calculateOneToOneSqrtPriceX96(token0, token1)
+  const tick = TickMath.getTickAtSqrtRatio(JSBI.BigInt(sqrtPriceX96))
 
   return {
     sqrtPriceX96,
-    tick: ZEPHYR_DEFAULT_TICK, // Pool constructor will calculate the correct tick
+    tick,
     liquidity: ZEPHYR_DEFAULT_LIQUIDITY,
   }
 }
