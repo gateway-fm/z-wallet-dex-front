@@ -1,11 +1,14 @@
 import { ContractTransaction } from '@ethersproject/contracts'
 import { CurrencyAmount, MaxUint256, Token } from '@uniswap/sdk-core'
-import { useTokenContract } from 'hooks/useContract'
+import { useWeb3React } from '@web3-react/core'
 import { useSingleCallResult } from 'lib/hooks/multicall'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import { ApproveTransactionInfo, TransactionType } from 'state/transactions/types'
 import { UserRejectedRequestError } from 'utils/errors'
 import { didUserReject } from 'utils/swapErrorToUserReadableMessage'
+
+import { ZEPHYR_CHAIN_ID } from '../constants/chains'
+import { useTokenContract } from './useContract'
 
 const MAX_ALLOWANCE = MaxUint256.toString()
 
@@ -17,25 +20,40 @@ export function useTokenAllowance(
   tokenAllowance?: CurrencyAmount<Token>
   isSyncing: boolean
 } {
+  const { chainId } = useWeb3React()
   const contract = useTokenContract(token?.address, false)
   const inputs = useMemo(() => [owner, spender], [owner, spender])
 
-  // If there is no allowance yet, re-check next observed block.
-  // This guarantees that the tokenAllowance is marked isSyncing upon approval and updated upon being synced.
-  const [blocksPerFetch, setBlocksPerFetch] = useState<1>()
-  const { result, syncing: isSyncing } = useSingleCallResult(contract, 'allowance', inputs, { blocksPerFetch }) as {
-    result?: Awaited<ReturnType<NonNullable<typeof contract>['allowance']>>
+  // Skip multicall for Zephyr network
+  const skipMulticall = chainId === ZEPHYR_CHAIN_ID
+  const blocksPerFetch = 1
+
+  const { result, syncing: isSyncing } = useSingleCallResult(skipMulticall ? null : contract, 'allowance', inputs, {
+    blocksPerFetch,
+  }) as {
+    result?: [bigint]
     syncing: boolean
   }
 
-  const rawAmount = result?.toString() // convert to a string before using in a hook, to avoid spurious rerenders
-  const allowance = useMemo(
-    () => (token && rawAmount ? CurrencyAmount.fromRawAmount(token, rawAmount) : undefined),
-    [token, rawAmount]
-  )
-  useEffect(() => setBlocksPerFetch(allowance?.equalTo(0) ? 1 : undefined), [allowance])
+  const tokenAllowance = useMemo(() => {
+    if (!token) return undefined
 
-  return useMemo(() => ({ tokenAllowance: allowance, isSyncing }), [allowance, isSyncing])
+    // For Zephyr network, return a large allowance to bypass approval requirements
+    if (skipMulticall) {
+      return CurrencyAmount.fromRawAmount(token, Math.pow(2, 256) - 1)
+    }
+
+    if (!result || isSyncing) return undefined
+    return CurrencyAmount.fromRawAmount(token, result[0].toString())
+  }, [token, result, isSyncing, skipMulticall])
+
+  return useMemo(
+    () => ({
+      tokenAllowance,
+      isSyncing: skipMulticall ? false : isSyncing,
+    }),
+    [tokenAllowance, isSyncing, skipMulticall]
+  )
 }
 
 export function useUpdateTokenAllowance(

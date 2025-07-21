@@ -25,6 +25,10 @@ export function useFetchListCallback(): (listUrl: string, skipValidation?: boole
           tokens: [],
           logoURI: '',
         }
+        // Dispatch actions to keep Redux state consistent
+        const requestId = nanoid()
+        dispatch(fetchTokenList.pending({ requestId, url: listUrl }))
+        dispatch(fetchTokenList.fulfilled({ url: listUrl, tokenList: emptyTokenList, requestId }))
         return emptyTokenList
       }
 

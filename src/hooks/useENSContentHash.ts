@@ -13,11 +13,13 @@ import { useENSRegistrarContract, useENSResolverContract } from './useContract'
 export default function useENSContentHash(ensName?: string | null): { loading: boolean; contenthash: string | null } {
   const { chainId } = useWeb3React()
 
+  const isZephyrNetwork = chainId === ZEPHYR_CHAIN_ID
+
   // Disable ENS for Zephyr network since it doesn't support ENS
   const ensNodeArgument = useMemo(() => [ensName ? safeNamehash(ensName) : undefined], [ensName])
   const registrarContract = useENSRegistrarContract()
   const resolverAddressResult = useMainnetSingleCallResult(
-    chainId === ZEPHYR_CHAIN_ID ? null : registrarContract,
+    isZephyrNetwork ? null : registrarContract,
     'resolver',
     ensNodeArgument,
     NEVER_RELOAD
@@ -27,17 +29,20 @@ export default function useENSContentHash(ensName?: string | null): { loading: b
     resolverAddress && isZero(resolverAddress) ? undefined : resolverAddress
   )
   const contenthash = useMainnetSingleCallResult(
-    chainId === ZEPHYR_CHAIN_ID ? null : resolverContract,
+    isZephyrNetwork ? null : resolverContract,
     'contenthash',
     ensNodeArgument,
     NEVER_RELOAD
   )
 
-  return useMemo(
-    () => ({
-      contenthash: chainId === ZEPHYR_CHAIN_ID ? null : contenthash.result?.[0] ?? null,
-      loading: chainId !== ZEPHYR_CHAIN_ID && (resolverAddressResult.loading || contenthash.loading),
-    }),
-    [contenthash.loading, contenthash.result, resolverAddressResult.loading, chainId]
-  )
+  return useMemo(() => {
+    if (isZephyrNetwork) {
+      return { contenthash: null, loading: false }
+    }
+
+    return {
+      contenthash: contenthash.result?.[0] ?? null,
+      loading: resolverAddressResult.loading || contenthash.loading,
+    }
+  }, [contenthash.loading, contenthash.result, resolverAddressResult.loading, isZephyrNetwork])
 }

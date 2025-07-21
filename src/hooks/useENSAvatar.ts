@@ -6,6 +6,7 @@ import uriToHttp from 'lib/utils/uriToHttp'
 import { useEffect, useMemo, useState } from 'react'
 import { safeNamehash } from 'utils/safeNamehash'
 
+import { ZEPHYR_CHAIN_ID } from '../constants/chains'
 import { isAddress } from '../utils'
 import isZero from '../utils/isZero'
 import { useENSRegistrarContract, useENSResolverContract, useERC721Contract, useERC1155Contract } from './useContract'
@@ -20,15 +21,18 @@ export default function useENSAvatar(
   address?: string,
   enforceOwnership = true
 ): { avatar: string | null; loading: boolean } {
+  const { chainId } = useWeb3React()
+  const isZephyrNetwork = chainId === ZEPHYR_CHAIN_ID
+
   const debouncedAddress = useDebounce(address, 200)
   const node = useMemo(() => {
     if (!debouncedAddress || !isAddress(debouncedAddress)) return undefined
     return safeNamehash(`${debouncedAddress.toLowerCase().substr(2)}.addr.reverse`)
   }, [debouncedAddress])
 
-  const addressAvatar = useAvatarFromNode(node)
+  const addressAvatar = useAvatarFromNode(node, isZephyrNetwork)
   const ENSName = useENSName(address).ENSName
-  const nameAvatar = useAvatarFromNode(ENSName === null ? undefined : safeNamehash(ENSName))
+  const nameAvatar = useAvatarFromNode(ENSName === null ? undefined : safeNamehash(ENSName), isZephyrNetwork)
   let avatar = addressAvatar.avatar || nameAvatar.avatar
 
   const nftAvatar = useAvatarFromNFT(avatar, enforceOwnership)
@@ -39,30 +43,40 @@ export default function useENSAvatar(
   const changed = debouncedAddress !== address
   return useMemo(
     () => ({
-      avatar: changed ? null : http ?? null,
-      loading: changed || addressAvatar.loading || nameAvatar.loading || nftAvatar.loading,
+      avatar: changed || isZephyrNetwork ? null : http ?? null,
+      loading: changed || (!isZephyrNetwork && (addressAvatar.loading || nameAvatar.loading || nftAvatar.loading)),
     }),
-    [addressAvatar.loading, changed, http, nameAvatar.loading, nftAvatar.loading]
+    [addressAvatar.loading, changed, http, nameAvatar.loading, nftAvatar.loading, isZephyrNetwork]
   )
 }
 
-function useAvatarFromNode(node?: string): { avatar?: string; loading: boolean } {
+function useAvatarFromNode(node?: string, isZephyrNetwork = false): { avatar?: string; loading: boolean } {
   const nodeArgument = useMemo(() => [node], [node])
   const textArgument = useMemo(() => [node, 'avatar'], [node])
   const registrarContract = useENSRegistrarContract()
-  const resolverAddress = useMainnetSingleCallResult(registrarContract, 'resolver', nodeArgument, NEVER_RELOAD)
+  const resolverAddress = useMainnetSingleCallResult(
+    isZephyrNetwork ? null : registrarContract,
+    'resolver',
+    nodeArgument,
+    NEVER_RELOAD
+  )
   const resolverAddressResult = resolverAddress.result?.[0]
   const resolverContract = useENSResolverContract(
     resolverAddressResult && !isZero(resolverAddressResult) ? resolverAddressResult : undefined
   )
-  const avatar = useMainnetSingleCallResult(resolverContract, 'text', textArgument, NEVER_RELOAD)
+  const avatar = useMainnetSingleCallResult(
+    isZephyrNetwork ? null : resolverContract,
+    'text',
+    textArgument,
+    NEVER_RELOAD
+  )
 
   return useMemo(
     () => ({
-      avatar: avatar.result?.[0],
-      loading: resolverAddress.loading || avatar.loading,
+      avatar: isZephyrNetwork ? undefined : avatar.result?.[0],
+      loading: isZephyrNetwork ? false : resolverAddress.loading || avatar.loading,
     }),
-    [avatar.loading, avatar.result, resolverAddress.loading]
+    [avatar.loading, avatar.result, resolverAddress.loading, isZephyrNetwork]
   )
 }
 

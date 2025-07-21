@@ -1,5 +1,7 @@
 export const UNI_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org'
 export const UNI_EXTENDED_LIST = 'https://gateway.ipfs.io/ipns/extendedtokens.uniswap.org'
+
+// NOTE: Zephyr network uses GraphQL for token discovery
 const AAVE_LIST = 'tokenlist.aave.eth'
 // TODO(WEB-2282): Re-enable CMC list once we have a better solution for handling large lists.
 // const CMC_ALL_LIST = 'https://s3.coinmarketcap.com/generated/dex/tokens/eth-tokens-all.json'

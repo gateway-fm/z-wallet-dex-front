@@ -116,7 +116,11 @@ export default function App() {
               route.enabled(routerConfig) ? (
                 <Route key={route.path} path={route.path} element={route.getElement(routerConfig)}>
                   {route.nestedPaths.map((nestedPath) => (
-                    <Route path={nestedPath} key={`${route.path}/${nestedPath}`} />
+                    <Route
+                      path={nestedPath}
+                      key={`${route.path}/${nestedPath}`}
+                      element={route.getElement(routerConfig)}
+                    />
                   ))}
                 </Route>
               ) : null

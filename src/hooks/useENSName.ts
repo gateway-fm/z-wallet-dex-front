@@ -18,14 +18,17 @@ export default function useENSName(address?: string): { ENSName: string | null; 
   const { chainId } = useWeb3React()
   const debouncedAddress = useDebounce(address, 200)
 
+  const isZephyrNetwork = chainId === ZEPHYR_CHAIN_ID
+
   // Disable ENS for Zephyr network since it doesn't support ENS
   const ensNodeArgument = useMemo(() => {
     if (!debouncedAddress || !isAddress(debouncedAddress)) return [undefined]
     return [safeNamehash(`${debouncedAddress.toLowerCase().substr(2)}.addr.reverse`)]
   }, [debouncedAddress])
+
   const registrarContract = useENSRegistrarContract()
   const resolverAddress = useMainnetSingleCallResult(
-    chainId === ZEPHYR_CHAIN_ID ? null : registrarContract,
+    isZephyrNetwork ? null : registrarContract,
     'resolver',
     ensNodeArgument,
     NEVER_RELOAD
@@ -35,7 +38,7 @@ export default function useENSName(address?: string): { ENSName: string | null; 
     resolverAddressResult && !isZero(resolverAddressResult) ? resolverAddressResult : undefined
   )
   const nameCallRes = useMainnetSingleCallResult(
-    chainId === ZEPHYR_CHAIN_ID ? null : resolverContract,
+    isZephyrNetwork ? null : resolverContract,
     'name',
     ensNodeArgument,
     NEVER_RELOAD
@@ -49,13 +52,16 @@ export default function useENSName(address?: string): { ENSName: string | null; 
   const checkedName = address === fwdAddr?.address ? name : null
 
   const changed = debouncedAddress !== address
-  const loading =
-    changed || (chainId !== ZEPHYR_CHAIN_ID && (resolverAddress.loading || nameCallRes.loading || fwdAddr.loading))
-  return useMemo(
-    () => ({
-      ENSName: changed || chainId === ZEPHYR_CHAIN_ID ? null : checkedName,
+
+  return useMemo(() => {
+    if (isZephyrNetwork) {
+      return { ENSName: null, loading: false }
+    }
+
+    const loading = changed || resolverAddress.loading || nameCallRes.loading || fwdAddr.loading
+    return {
+      ENSName: changed ? null : checkedName,
       loading,
-    }),
-    [changed, checkedName, loading, chainId]
-  )
+    }
+  }, [changed, checkedName, resolverAddress.loading, nameCallRes.loading, fwdAddr.loading, isZephyrNetwork])
 }

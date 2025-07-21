@@ -10,6 +10,7 @@ import { RouterPreference } from 'state/routing/types'
 
 import { ZEPHYR_CHAIN_ID } from '../constants/chains'
 import { ZERO_PERCENT } from '../constants/misc'
+import { getZephyrPoolParams } from '../constants/zephyr'
 import { getApproveInfo } from '../state/routing/gas'
 import { useRoutingAPITrade } from '../state/routing/useRoutingAPITrade'
 import useAutoRouterSupported from './useAutoRouterSupported'
@@ -93,14 +94,18 @@ export function useDebouncedTrade(
       }
 
       try {
-        // TODO: get real price from pool
+        // Use proper 1:1 price accounting for decimals
+        const { sqrtPriceX96, tick, liquidity } = getZephyrPoolParams(
+          zephyrRouting.inputAmount.currency.wrapped,
+          zephyrRouting.outputAmount.currency.wrapped
+        )
         const pool = new Pool(
           zephyrRouting.inputAmount.currency.wrapped,
           zephyrRouting.outputAmount.currency.wrapped,
           FeeAmount.MEDIUM, // 0.3% fee
-          '79228162514264337593543950336', // 1:1 price (sqrtPriceX96)
-          '1000000000000000000', // Mock liquidity
-          0 // tickCurrent
+          sqrtPriceX96,
+          liquidity,
+          tick
         )
 
         const v3Route = new V3Route([pool], zephyrRouting.inputAmount.currency, zephyrRouting.outputAmount.currency)
@@ -174,14 +179,18 @@ export function useDebouncedTrade(
 
     // For now, return a synchronous result with fallback values
     try {
+      // Use proper 1:1 price accounting for decimals
+      const { sqrtPriceX96, tick, liquidity } = getZephyrPoolParams(
+        zephyrRouting.inputAmount.currency.wrapped,
+        zephyrRouting.outputAmount.currency.wrapped
+      )
       const pool = new Pool(
         zephyrRouting.inputAmount.currency.wrapped,
         zephyrRouting.outputAmount.currency.wrapped,
         FeeAmount.MEDIUM,
-        // TODO: get real price from pool
-        '79228162514264337593543950336', // 1:1 price
-        '1000000000000000000', // Mock liquidity
-        0 // tickCurrent
+        sqrtPriceX96,
+        liquidity,
+        tick
       )
 
       const v3Route = new V3Route([pool], zephyrRouting.inputAmount.currency, zephyrRouting.outputAmount.currency)
