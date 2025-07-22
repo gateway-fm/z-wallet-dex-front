@@ -1,15 +1,17 @@
 import { BigNumber } from '@ethersproject/bignumber'
-import type { TransactionResponse } from '@ethersproject/providers'
+import { Contract } from '@ethersproject/contracts'
 import { Trans } from '@lingui/macro'
 import { Currency, CurrencyAmount, Percent } from '@uniswap/sdk-core'
-import { FeeAmount, NonfungiblePositionManager } from '@uniswap/v3-sdk'
+import { FeeAmount } from '@uniswap/v3-sdk'
+import { NonfungiblePositionManager } from '@uniswap/v3-sdk'
 import { useWeb3React } from '@web3-react/core'
 import { useToggleAccountDrawer } from 'components/AccountDrawer'
 import OwnershipWarning from 'components/addLiquidity/OwnershipWarning'
 import UnsupportedCurrencyFooter from 'components/swap/UnsupportedCurrencyFooter'
-import { isSupportedChain } from 'constants/chains'
+import { isSupportedChain, ZEPHYR_CHAIN_ID } from 'constants/chains'
 import usePrevious from 'hooks/usePrevious'
 import { useSingleCallResult } from 'lib/hooks/multicall'
+import { ApprovalState } from 'lib/hooks/useApproval'
 import { BodyWrapper } from 'pages/AppBody'
 import { PositionPageUnsupportedContent } from 'pages/Pool/PositionPage'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -25,7 +27,6 @@ import {
 import styled, { useTheme } from 'styled-components'
 import { ThemedText } from 'theme/components'
 import { addressesAreEquivalent } from 'utils/addressesAreEquivalent'
-import { WrongChainError } from 'utils/errors'
 
 import { ButtonError, ButtonLight, ButtonPrimary, ButtonText } from '../../components/Button'
 import { BlueCard, OutlineCard, YellowCard } from '../../components/Card'
@@ -42,11 +43,10 @@ import Row, { RowBetween, RowFixed } from '../../components/Row'
 import { SwitchLocaleLink } from '../../components/SwitchLocaleLink'
 import TransactionConfirmationModal, { ConfirmationModalContent } from '../../components/TransactionConfirmationModal'
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESSES } from '../../constants/addresses'
-import { ZEPHYR_CHAIN_ID } from '../../constants/chains'
 import { ZERO_PERCENT } from '../../constants/misc'
 import { WRAPPED_NATIVE_CURRENCY } from '../../constants/tokens'
 import { useCurrency } from '../../hooks/Tokens'
-import { ApprovalState, useApproveCallback } from '../../hooks/useApproveCallback'
+import { useApproveCallback } from '../../hooks/useApproveCallback'
 import { useArgentWalletContract } from '../../hooks/useArgentWalletContract'
 import { useV3NFTPositionManagerContract } from '../../hooks/useContract'
 import { useDerivedPositionInfo } from '../../hooks/useDerivedPositionInfo'
@@ -56,10 +56,8 @@ import useTransactionDeadline from '../../hooks/useTransactionDeadline'
 import { useV3PositionFromTokenId } from '../../hooks/useV3Positions'
 import { Bound, Field } from '../../state/mint/v3/actions'
 import { useTransactionAdder } from '../../state/transactions/hooks'
-import { TransactionInfo, TransactionType } from '../../state/transactions/types'
+import { TransactionType } from '../../state/transactions/types'
 import { useUserSlippageToleranceWithDefault } from '../../state/user/hooks'
-import approveAmountCalldata from '../../utils/approveAmountCalldata'
-import { calculateGasMargin } from '../../utils/calculateGasMargin'
 import { currencyId } from '../../utils/currencyId'
 import { maxAmountSpend } from '../../utils/maxAmountSpend'
 import { Dots } from '../Pool/styled'
@@ -68,7 +66,9 @@ import { DynamicSection, MediumOnly, ResponsiveTwoColumns, ScrollablePage, Style
 
 const DEFAULT_ADD_IN_RANGE_SLIPPAGE_TOLERANCE = new Percent(50, 10_000)
 
-const StyledBodyWrapper = styled(BodyWrapper)<{ $hasExistingPosition: boolean }>`
+const StyledBodyWrapper = styled(BodyWrapper)<{
+  $hasExistingPosition: boolean
+}>`
   padding: ${({ $hasExistingPosition }) => ($hasExistingPosition ? '10px' : 0)};
   max-width: 640px;
 `
@@ -213,116 +213,121 @@ function AddLiquidity() {
     chainId ? NONFUNGIBLE_POSITION_MANAGER_ADDRESSES[chainId] : undefined
   )
 
-  // For Zephyr network, override approvals to bypass approval requirements
-  const finalApprovalA = chainId === ZEPHYR_CHAIN_ID ? ApprovalState.APPROVED : approvalA
-  const finalApprovalB = chainId === ZEPHYR_CHAIN_ID ? ApprovalState.APPROVED : approvalB
+  // Standard approval logic for all networks including Zephyr
+  const finalApprovalA = approvalA
+  const finalApprovalB = approvalB
 
   const allowedSlippage = useUserSlippageToleranceWithDefault(
     outOfRange ? ZERO_PERCENT : DEFAULT_ADD_IN_RANGE_SLIPPAGE_TOLERANCE
   )
 
   async function onAdd() {
-    if (!chainId || !provider || !account) return
+    setShowConfirm(true)
+    setAttemptingTxn(true)
 
-    if (!positionManager || !baseCurrency || !quoteCurrency) {
-      return
-    }
-
-    if (position && account && deadline) {
-      const useNative = baseCurrency.isNative ? baseCurrency : quoteCurrency.isNative ? quoteCurrency : undefined
-      const { calldata, value } =
-        hasExistingPosition && tokenId
-          ? NonfungiblePositionManager.addCallParameters(position, {
-              tokenId,
-              slippageTolerance: allowedSlippage,
-              deadline: deadline.toString(),
-              useNative,
-            })
-          : NonfungiblePositionManager.addCallParameters(position, {
-              slippageTolerance: allowedSlippage,
-              recipient: account,
-              deadline: deadline.toString(),
-              useNative,
-              createPool: noLiquidity,
-            })
-
-      let txn: { to: string; data: string; value: string } = {
-        to: NONFUNGIBLE_POSITION_MANAGER_ADDRESSES[chainId],
-        data: calldata,
-        value,
-      }
-
-      if (argentWalletContract) {
-        const amountA = parsedAmounts[Field.CURRENCY_A]
-        const amountB = parsedAmounts[Field.CURRENCY_B]
-        const batch = [
-          ...(amountA && amountA.currency.isToken
-            ? [approveAmountCalldata(amountA, NONFUNGIBLE_POSITION_MANAGER_ADDRESSES[chainId])]
-            : []),
-          ...(amountB && amountB.currency.isToken
-            ? [approveAmountCalldata(amountB, NONFUNGIBLE_POSITION_MANAGER_ADDRESSES[chainId])]
-            : []),
-          {
-            to: txn.to,
-            data: txn.data,
-            value: txn.value,
-          },
-        ]
-        const data = argentWalletContract.interface.encodeFunctionData('wc_multiCall', [batch])
-        txn = {
-          to: argentWalletContract.address,
-          data,
-          value: '0x0',
+    try {
+      if (position && account && deadline) {
+        if (!positionManager || !baseCurrency || !quoteCurrency) {
+          return
         }
-      }
 
-      const connectedChainId = await provider.getSigner().getChainId()
-      if (chainId !== connectedChainId) throw new WrongChainError()
+        const useNative = baseCurrency.isNative ? baseCurrency : quoteCurrency.isNative ? quoteCurrency : undefined
 
-      setAttemptingTxn(true)
+        // Check if pool exists in factory before proceeding
+        // TODO: Make universal function for checking pool existence
+        if (provider && positionManager) {
+          try {
+            const pmContract = new Contract(
+              positionManager.address,
+              ['function factory() view returns (address)'],
+              provider
+            )
+            const factoryAddress = await pmContract.factory()
 
-      // For Zephyr network, skip estimateGas and use fixed value
-      // TODO: Rewrite this once we have a proper API
-      const estimatePromise =
-        chainId === ZEPHYR_CHAIN_ID
-          ? Promise.resolve(BigNumber.from(500000)) // Fixed gas limit for Zephyr
-          : provider.getSigner().estimateGas(txn)
+            const factoryContract = new Contract(
+              factoryAddress,
+              [
+                'function getPool(address,address,uint24) view returns (address)',
+                'function owner() view returns (address)',
+                'function createPool(address,address,uint24) external returns (address)',
+              ],
+              provider.getSigner()
+            )
 
-      estimatePromise
-        .then((estimate) => {
-          const newTxn = {
-            ...txn,
-            gasLimit: calculateGasMargin(estimate),
-          }
+            const token0Address = position.pool.token0.address
+            const token1Address = position.pool.token1.address
+            const fee = position.pool.fee
 
-          return provider
-            .getSigner()
-            .sendTransaction(newTxn)
-            .then((response: TransactionResponse) => {
-              setAttemptingTxn(false)
-              const transactionInfo: TransactionInfo = {
-                type: TransactionType.ADD_LIQUIDITY_V3_POOL,
-                baseCurrencyId: currencyId(baseCurrency),
-                quoteCurrencyId: currencyId(quoteCurrency),
-                createPool: Boolean(noLiquidity),
-                expectedAmountBaseRaw: parsedAmounts[Field.CURRENCY_A]?.quotient?.toString() ?? '0',
-                expectedAmountQuoteRaw: parsedAmounts[Field.CURRENCY_B]?.quotient?.toString() ?? '0',
-                feeAmount: position.pool.fee,
+            const poolAddress = await factoryContract.getPool(token0Address, token1Address, fee)
+            if (poolAddress === '0x0000000000000000000000000000000000000000') {
+              try {
+                const createPoolTx = await factoryContract.createPool(token0Address, token1Address, fee)
+                await createPoolTx.wait()
+
+                const newPoolAddress = await factoryContract.getPool(token0Address, token1Address, fee)
+                if (newPoolAddress !== '0x0000000000000000000000000000000000000000') {
+                  // Initialize pool with 1:1 price
+                  // TODO: Check this behavior
+                  const poolContract = new Contract(
+                    newPoolAddress,
+                    ['function initialize(uint160) external'],
+                    provider.getSigner()
+                  )
+
+                  const sqrtPriceX96 = '79228162514264337593543950336' // 1:1 price
+                  const initTx = await poolContract.initialize(sqrtPriceX96)
+                  await initTx.wait()
+                }
+              } catch (createError) {
+                setAttemptingTxn(false)
+                return
               }
-              addTransaction(response, transactionInfo)
-              setTxHash(response.hash)
-            })
-        })
-        .catch((error) => {
-          console.error('Failed to send transaction', error)
-          setAttemptingTxn(false)
-          // we only care if the error is something _other_ than the user rejected the tx
-          if (error?.code !== 4001) {
-            console.error(error)
+            }
+          } catch (error) {
+            setAttemptingTxn(false)
+            return
           }
+        }
+
+        const { calldata, value } = NonfungiblePositionManager.addCallParameters(position, {
+          slippageTolerance: new Percent(Math.floor(Number(allowedSlippage.multiply(100).toFixed(0))), 10_000),
+          recipient: account,
+          deadline: deadline.toString(),
+          useNative,
         })
-    } else {
-      return
+
+        const txn: { to: string; data: string; value: string } = {
+          to: positionManager.address,
+          data: calldata,
+          value,
+        }
+
+        if (!provider) {
+          setAttemptingTxn(false)
+          return
+        }
+
+        const response = await provider.getSigner().sendTransaction({
+          ...txn,
+          gasLimit: 1000000,
+        })
+
+        setAttemptingTxn(false)
+        addTransaction(response, {
+          type: TransactionType.ADD_LIQUIDITY_V3_POOL,
+          baseCurrencyId: currencyId(baseCurrency),
+          quoteCurrencyId: currencyId(quoteCurrency),
+          createPool: Boolean(noLiquidity),
+          expectedAmountBaseRaw: parsedAmounts[Field.CURRENCY_A]?.quotient?.toString() ?? '0',
+          expectedAmountQuoteRaw: parsedAmounts[Field.CURRENCY_B]?.quotient?.toString() ?? '0',
+          feeAmount: position.pool.fee,
+        })
+
+        setShowConfirm(false)
+      }
+    } catch (error) {
+      setAttemptingTxn(false)
+      setShowConfirm(false)
     }
   }
 
@@ -529,6 +534,7 @@ function AddLiquidity() {
             setShowConfirm(true)
           }}
           disabled={
+            attemptingTxn ||
             !isValid ||
             (!argentWalletContract && finalApprovalA !== ApprovalState.APPROVED && !depositADisabled) ||
             (!argentWalletContract && finalApprovalB !== ApprovalState.APPROVED && !depositBDisabled) ||
@@ -588,7 +594,13 @@ function AddLiquidity() {
                 />
               )}
               bottomContent={() => (
-                <ButtonPrimary style={{ marginTop: '1rem' }} onClick={onAdd}>
+                <ButtonPrimary
+                  style={{ marginTop: '1rem' }}
+                  onClick={() => {
+                    onAdd()
+                  }}
+                  disabled={attemptingTxn}
+                >
                   <Text fontWeight={535} fontSize={20}>
                     <Trans>Add</Trans>
                   </Text>

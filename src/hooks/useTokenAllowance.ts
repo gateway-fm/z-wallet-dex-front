@@ -2,7 +2,7 @@ import { ContractTransaction } from '@ethersproject/contracts'
 import { CurrencyAmount, MaxUint256, Token } from '@uniswap/sdk-core'
 import { useWeb3React } from '@web3-react/core'
 import { useSingleCallResult } from 'lib/hooks/multicall'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ApproveTransactionInfo, TransactionType } from 'state/transactions/types'
 import { UserRejectedRequestError } from 'utils/errors'
 import { didUserReject } from 'utils/swapErrorToUserReadableMessage'
@@ -13,7 +13,7 @@ import { useTokenContract } from './useContract'
 const MAX_ALLOWANCE = MaxUint256.toString()
 
 export function useTokenAllowance(
-  token?: Token,
+  token: Token | undefined,
   owner?: string,
   spender?: string
 ): {
@@ -24,36 +24,57 @@ export function useTokenAllowance(
   const contract = useTokenContract(token?.address, false)
   const inputs = useMemo(() => [owner, spender], [owner, spender])
 
-  // Skip multicall for Zephyr network
-  const skipMulticall = chainId === ZEPHYR_CHAIN_ID
-  const blocksPerFetch = 1
+  const [zephyrAllowance, setZephyrAllowance] = useState<bigint | undefined>(undefined)
+  const [isZephyrLoading, setIsZephyrLoading] = useState(false)
 
-  const { result, syncing: isSyncing } = useSingleCallResult(skipMulticall ? null : contract, 'allowance', inputs, {
+  const blocksPerFetch = chainId === ZEPHYR_CHAIN_ID ? 1 : undefined
+
+  const { result, syncing: isSyncing } = useSingleCallResult(contract, 'allowance', inputs, {
     blocksPerFetch,
   }) as {
     result?: [bigint]
     syncing: boolean
   }
 
-  const tokenAllowance = useMemo(() => {
-    if (!token) return undefined
+  useEffect(() => {
+    if (chainId === ZEPHYR_CHAIN_ID && contract && owner && spender && token) {
+      setIsZephyrLoading(true)
+      contract
+        .allowance(owner, spender)
+        .then((allowanceResult: any) => {
+          setZephyrAllowance(BigInt(allowanceResult.toString()))
+          setIsZephyrLoading(false)
+        })
+        .catch(() => {
+          setZephyrAllowance(BigInt(0)) // Default to 0 if call fails
+          setIsZephyrLoading(false)
+        })
+    }
+  }, [chainId, contract, owner, spender, token])
 
-    // For Zephyr network, return a large allowance to bypass approval requirements
-    // TODO: Remove this once we have a proper API
-    if (skipMulticall) {
-      return CurrencyAmount.fromRawAmount(token, MAX_ALLOWANCE)
+  const tokenAllowance = useMemo(() => {
+    if (!token) {
+      return undefined
     }
 
-    if (!result || isSyncing) return undefined
-    return CurrencyAmount.fromRawAmount(token, result[0].toString())
-  }, [token, result, isSyncing, skipMulticall])
+    if (chainId === ZEPHYR_CHAIN_ID) {
+      if (zephyrAllowance !== undefined && !isZephyrLoading) {
+        const allowanceAmount = CurrencyAmount.fromRawAmount(token, zephyrAllowance.toString())
+        return allowanceAmount
+      }
+      return CurrencyAmount.fromRawAmount(token, 0)
+    } else {
+      if (!result || isSyncing) return undefined
+      return CurrencyAmount.fromRawAmount(token, result[0].toString())
+    }
+  }, [token, result, isSyncing, chainId, zephyrAllowance, isZephyrLoading])
 
   return useMemo(
     () => ({
       tokenAllowance,
-      isSyncing: skipMulticall ? false : isSyncing,
+      isSyncing: chainId === ZEPHYR_CHAIN_ID ? isZephyrLoading : isSyncing, // Для Zephyr показываем состояние прямого вызова
     }),
-    [tokenAllowance, isSyncing, skipMulticall]
+    [tokenAllowance, isSyncing, chainId, isZephyrLoading]
   )
 }
 

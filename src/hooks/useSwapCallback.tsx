@@ -1,11 +1,12 @@
 import { Percent, TradeType } from '@uniswap/sdk-core'
 import { useWeb3React } from '@web3-react/core'
 import { PermitSignature } from 'hooks/usePermitAllowance'
+import { useUniversalRouterSwapCallback } from 'hooks/useUniversalRouter'
 import { useCallback } from 'react'
 import { InterfaceTrade } from 'state/routing/types'
 import { isClassicTrade } from 'state/routing/utils'
+import { useTransactionAdder } from 'state/transactions/hooks'
 
-import { useTransactionAdder } from '../state/transactions/hooks'
 import {
   ExactInputSwapTransactionInfo,
   ExactOutputSwapTransactionInfo,
@@ -13,8 +14,8 @@ import {
 } from '../state/transactions/types'
 import { currencyId } from '../utils/currencyId'
 import useTransactionDeadline from './useTransactionDeadline'
-import { useUniversalRouterSwapCallback } from './useUniversalRouter'
 
+// eslint-disable-next-line import/no-unused-modules
 export type SwapResult = Awaited<ReturnType<ReturnType<typeof useSwapCallback>>>
 
 // Returns a function that will execute a swap, if the parameters are all valid
