@@ -1,0 +1,107 @@
+[
+  {
+    "type": "function",
+    "name": "registerProvider",
+    "inputs": [
+      {
+        "name": "params",
+        "type": "tuple",
+        "internalType": "struct LiquidityManager.NewProviderParams",
+        "components": [
+          {"name": "provider", "type": "address", "internalType": "address"},
+          {"name": "tokenA", "type": "address", "internalType": "address"},
+          {"name": "tokenB", "type": "address", "internalType": "address"},
+          {"name": "maxBalanceA", "type": "uint256", "internalType": "uint256"},
+          {"name": "maxBalanceB", "type": "uint256", "internalType": "uint256"}
+        ]
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "depositLiquidity",
+    "inputs": [
+      {
+        "name": "params",
+        "type": "tuple",
+        "internalType": "struct LiquidityManager.UpdatePositionParams",
+        "components": [
+          {"name": "tokenA", "type": "address", "internalType": "address"},
+          {"name": "tokenB", "type": "address", "internalType": "address"},
+          {"name": "amountA", "type": "uint256", "internalType": "uint256"},
+          {"name": "amountB", "type": "uint256", "internalType": "uint256"}
+        ]
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "withdrawLiquidity",
+    "inputs": [
+      {
+        "name": "params",
+        "type": "tuple",
+        "internalType": "struct LiquidityManager.UpdatePositionParams",
+        "components": [
+          {"name": "tokenA", "type": "address", "internalType": "address"},
+          {"name": "tokenB", "type": "address", "internalType": "address"},
+          {"name": "amountA", "type": "uint256", "internalType": "uint256"},
+          {"name": "amountB", "type": "uint256", "internalType": "uint256"}
+        ]
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "collectFees",
+    "inputs": [
+      {
+        "name": "params",
+        "type": "tuple",
+        "internalType": "struct LiquidityManager.CollectFeesParams",
+        "components": [
+          {"name": "tokenA", "type": "address", "internalType": "address"},
+          {"name": "tokenB", "type": "address", "internalType": "address"}
+        ]
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "removeProvider",
+    "inputs": [
+      {
+        "name": "params",
+        "type": "tuple",
+        "internalType": "struct LiquidityManager.RemoveProviderParams",
+        "components": [
+          {"name": "provider", "type": "address", "internalType": "address"},
+          {"name": "tokenA", "type": "address", "internalType": "address"},
+          {"name": "tokenB", "type": "address", "internalType": "address"}
+        ]
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "event",
+    "name": "ProviderNewState",
+    "inputs": [
+      {"name": "provider", "type": "address", "indexed": true, "internalType": "address"},
+      {"name": "tokenA", "type": "address", "indexed": true, "internalType": "address"},
+      {"name": "tokenB", "type": "address", "indexed": true, "internalType": "address"},
+      {"name": "balanceA", "type": "uint256", "indexed": false, "internalType": "uint256"},
+      {"name": "balanceB", "type": "uint256", "indexed": false, "internalType": "uint256"}
+    ],
+    "anonymous": false
+  }
+] 
