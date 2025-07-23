@@ -1,6 +1,8 @@
 import { BigNumber } from '@ethersproject/bignumber'
+import { useWeb3React } from '@web3-react/core'
+import { ZEPHYR_CHAIN_ID } from 'constants/chains'
 import { CallStateResult, useSingleCallResult, useSingleContractMultipleData } from 'lib/hooks/multicall'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { PositionDetails } from 'types/position'
 
 import { useV3NFTPositionManagerContract } from './useContract'
@@ -8,6 +10,73 @@ import { useV3NFTPositionManagerContract } from './useContract'
 interface UseV3PositionsResults {
   loading: boolean
   positions?: PositionDetails[]
+}
+
+function useZephyrV3Positions(account: string | null | undefined): UseV3PositionsResults {
+  const { provider } = useWeb3React()
+  const positionManager = useV3NFTPositionManagerContract()
+  const [loading, setLoading] = useState(true)
+  const [positions, setPositions] = useState<PositionDetails[] | undefined>(undefined)
+
+  useEffect(() => {
+    if (!account || !positionManager || !provider) {
+      setLoading(false)
+      setPositions(undefined)
+      return
+    }
+
+    const loadPositions = async () => {
+      try {
+        setLoading(true)
+
+        // Get balance of positions
+        const balance = await positionManager.balanceOf(account)
+        const balanceNumber = balance.toNumber()
+        if (balanceNumber === 0) {
+          setPositions([])
+          setLoading(false)
+          return
+        }
+
+        // Get all token IDs
+        const tokenIds: BigNumber[] = []
+        for (let i = 0; i < balanceNumber; i++) {
+          const tokenId = await positionManager.tokenOfOwnerByIndex(account, i)
+          tokenIds.push(tokenId)
+        }
+
+        // Get position details for each token ID
+        const positionDetails: PositionDetails[] = []
+        for (const tokenId of tokenIds) {
+          const position = await positionManager.positions(tokenId)
+          positionDetails.push({
+            tokenId,
+            fee: position.fee,
+            feeGrowthInside0LastX128: position.feeGrowthInside0LastX128,
+            feeGrowthInside1LastX128: position.feeGrowthInside1LastX128,
+            liquidity: position.liquidity,
+            nonce: position.nonce,
+            operator: position.operator,
+            tickLower: position.tickLower,
+            tickUpper: position.tickUpper,
+            token0: position.token0,
+            token1: position.token1,
+            tokensOwed0: position.tokensOwed0,
+            tokensOwed1: position.tokensOwed1,
+          })
+        }
+        setPositions(positionDetails)
+      } catch (error) {
+        setPositions([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadPositions()
+  }, [account, positionManager, provider])
+
+  return { loading, positions }
 }
 
 function useV3PositionsFromTokenIds(tokenIds: BigNumber[] | undefined): UseV3PositionsResults {
@@ -63,17 +132,25 @@ export function useV3PositionFromTokenId(tokenId: BigNumber | undefined): UseV3P
 }
 
 export function useV3Positions(account: string | null | undefined): UseV3PositionsResults {
+  const { chainId } = useWeb3React()
+  const isZephyrNetwork = chainId === ZEPHYR_CHAIN_ID
+
+  // Use direct RPC calls for Zephyr
+  const zephyrPositions = useZephyrV3Positions(isZephyrNetwork ? account : null)
+  // And multicall for other networks
   const positionManager = useV3NFTPositionManagerContract()
 
-  const { loading: balanceLoading, result: balanceResult } = useSingleCallResult(positionManager, 'balanceOf', [
-    account ?? undefined,
-  ])
+  const { loading: balanceLoading, result: balanceResult } = useSingleCallResult(
+    isZephyrNetwork ? null : positionManager,
+    'balanceOf',
+    [account ?? undefined]
+  )
 
   // we don't expect any account balance to ever exceed the bounds of max safe int
   const accountBalance: number | undefined = balanceResult?.[0]?.toNumber()
 
   const tokenIdsArgs = useMemo(() => {
-    if (accountBalance && account) {
+    if (accountBalance && account && !isZephyrNetwork) {
       const tokenRequests = []
       for (let i = 0; i < accountBalance; i++) {
         tokenRequests.push([account, i])
@@ -81,22 +158,30 @@ export function useV3Positions(account: string | null | undefined): UseV3Positio
       return tokenRequests
     }
     return []
-  }, [account, accountBalance])
+  }, [account, accountBalance, isZephyrNetwork])
 
-  const tokenIdResults = useSingleContractMultipleData(positionManager, 'tokenOfOwnerByIndex', tokenIdsArgs)
+  const tokenIdResults = useSingleContractMultipleData(
+    isZephyrNetwork ? null : positionManager,
+    'tokenOfOwnerByIndex',
+    tokenIdsArgs
+  )
   const someTokenIdsLoading = useMemo(() => tokenIdResults.some(({ loading }) => loading), [tokenIdResults])
 
   const tokenIds = useMemo(() => {
-    if (account) {
+    if (account && !isZephyrNetwork) {
       return tokenIdResults
         .map(({ result }) => result)
         .filter((result): result is CallStateResult => !!result)
         .map((result) => BigNumber.from(result[0]))
     }
     return []
-  }, [account, tokenIdResults])
+  }, [account, tokenIdResults, isZephyrNetwork])
 
-  const { positions, loading: positionsLoading } = useV3PositionsFromTokenIds(tokenIds)
+  const { positions, loading: positionsLoading } = useV3PositionsFromTokenIds(isZephyrNetwork ? undefined : tokenIds)
+
+  if (isZephyrNetwork) {
+    return zephyrPositions
+  }
 
   return {
     loading: someTokenIdsLoading || balanceLoading || positionsLoading,
