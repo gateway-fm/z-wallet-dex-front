@@ -81,9 +81,12 @@ export function useDebouncedTrade(
 
   // For Zephyr network, use custom routing with ClassicTrade
   const zephyrTradeResult = useMemo(() => {
-    // Return a promise-like structure for now
-    // In a real implementation, you'd want to use useAsync or similar
-    if (!isZephyrNetwork || !zephyrRouting.inputAmount || !zephyrRouting.outputAmount) {
+    // Check if routing failed or no route found
+    if (!isZephyrNetwork || zephyrRouting.error || !zephyrRouting.inputAmount || !zephyrRouting.outputAmount) {
+      if (isZephyrNetwork && zephyrRouting.error) {
+        console.warn('Zephyr routing error:', zephyrRouting.error)
+        return { state: TradeState.NO_ROUTE_FOUND }
+      }
       return { state: TradeState.INVALID }
     }
 
@@ -124,16 +127,20 @@ export function useDebouncedTrade(
         requestId: `zephyr-${Date.now()}`,
       })
 
-      return {
-        state: TradeState.VALID,
-        trade: classicTrade as InterfaceTrade,
-        method: QuoteMethod.CLIENT_SIDE,
-      }
+      return { state: TradeState.VALID, trade: classicTrade }
     } catch (error) {
-      console.error('Failed to create Zephyr ClassicTrade:', error)
-      return { state: TradeState.INVALID }
+      console.error('Failed to create Zephyr trade:', error)
+      return { state: TradeState.NO_ROUTE_FOUND }
     }
-  }, [isZephyrNetwork, zephyrRouting, tradeType, inputTax, outputTax])
+  }, [
+    isZephyrNetwork,
+    zephyrRouting.inputAmount,
+    zephyrRouting.outputAmount,
+    zephyrRouting.error,
+    tradeType,
+    inputTax,
+    outputTax,
+  ])
 
   const finalResult = isZephyrNetwork ? zephyrTradeResult : routingApiTradeResult
 

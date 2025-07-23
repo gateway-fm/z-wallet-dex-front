@@ -7,7 +7,6 @@ import { useTopPools } from './useProtocolStats'
 
 /**
  * Simple trade calculation using GraphQL pool data
- * This is a simplified version that finds direct pools between tokens
  */
 export function useZephyrRouting(
   tradeType: TradeType,
@@ -30,100 +29,48 @@ export function useZephyrRouting(
     const inputCurrency = amountSpecified.currency
     const outputCurrency = otherCurrency
 
-    // For Zephyr 1:1 swaps, use simplified calculation when no GraphQL pool found
-    const hasUSDCPair = inputCurrency.symbol === 'USDC' || outputCurrency.symbol === 'USDC'
-    const hasTestPair = inputCurrency.symbol === 'TEST' || outputCurrency.symbol === 'TEST'
+    // Look for direct pool between tokens
+    const directPool = pools?.find((pool) => {
+      const token0Address = pool.token0.id.toLowerCase()
+      const token1Address = pool.token1.id.toLowerCase()
+      const inputAddress = inputCurrency.wrapped.address.toLowerCase()
+      const outputAddress = outputCurrency.wrapped.address.toLowerCase()
 
-    if (hasUSDCPair && hasTestPair) {
-      // For USDC/TEST pair, return 1:1 amounts regardless of GraphQL pool data
-      if (tradeType === TradeType.EXACT_INPUT) {
-        // For exact input, calculate output amount accounting for decimals
-        const inputDecimals = inputCurrency.decimals
-        const outputDecimals = outputCurrency.decimals
-        const inputAmountBigInt = amountSpecified.quotient
-
-        // Adjust for decimal difference for 1:1 human ratio
-        let outputAmountRaw = inputAmountBigInt
-        const decimalDifference = outputDecimals - inputDecimals
-
-        if (decimalDifference > 0) {
-          outputAmountRaw = JSBI.multiply(
-            outputAmountRaw,
-            JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(decimalDifference))
-          )
-        } else if (decimalDifference < 0) {
-          outputAmountRaw = JSBI.divide(
-            outputAmountRaw,
-            JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(-decimalDifference))
-          )
-        }
-
-        const outputAmount = CurrencyAmount.fromRawAmount(outputCurrency, outputAmountRaw)
-
-        return {
-          inputAmount: amountSpecified,
-          outputAmount,
-          route: `${inputCurrency.symbol} → ${outputCurrency.symbol} (1:1)`,
-          loading: false,
-        }
-      } else {
-        // For exact output, calculate input amount
-        const inputDecimals = inputCurrency.decimals
-        const outputDecimals = outputCurrency.decimals
-        const outputAmountBigInt = amountSpecified.quotient
-
-        // Adjust for decimal difference for 1:1 human ratio
-        let inputAmountRaw = outputAmountBigInt
-        const decimalDifference = inputDecimals - outputDecimals
-
-        if (decimalDifference > 0) {
-          inputAmountRaw = JSBI.multiply(
-            inputAmountRaw,
-            JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(decimalDifference))
-          )
-        } else if (decimalDifference < 0) {
-          inputAmountRaw = JSBI.divide(
-            inputAmountRaw,
-            JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(-decimalDifference))
-          )
-        }
-
-        const inputAmount = CurrencyAmount.fromRawAmount(inputCurrency, inputAmountRaw)
-
-        return {
-          inputAmount,
-          outputAmount: amountSpecified,
-          route: `${inputCurrency.symbol} → ${outputCurrency.symbol} (1:1)`,
-          loading: false,
-        }
-      }
-    }
-
-    // Find direct pool between input and output tokens
-    const directPool = pools.find((pool) => {
-      const hasInputToken =
-        pool.token0.id.toLowerCase() === inputCurrency.wrapped.address.toLowerCase() ||
-        pool.token1.id.toLowerCase() === inputCurrency.wrapped.address.toLowerCase()
-      const hasOutputToken =
-        pool.token0.id.toLowerCase() === outputCurrency.wrapped.address.toLowerCase() ||
-        pool.token1.id.toLowerCase() === outputCurrency.wrapped.address.toLowerCase()
-      return hasInputToken && hasOutputToken
+      return (
+        (token0Address === inputAddress && token1Address === outputAddress) ||
+        (token0Address === outputAddress && token1Address === inputAddress)
+      )
     })
 
     if (directPool) {
+      // Direct pool found - calculate trade
+      console.log('Direct pool found for', inputCurrency.symbol, '/', outputCurrency.symbol)
       return calculateDirectTrade(tradeType, amountSpecified, otherCurrency, directPool)
     }
 
-    // Try multi-hop through USDC
-    if (
-      inputCurrency.wrapped.address.toLowerCase() !== USDC_ZEPHYR.address.toLowerCase() &&
-      outputCurrency.wrapped.address.toLowerCase() !== USDC_ZEPHYR.address.toLowerCase()
-    ) {
-      return calculateMultiHopTrade(tradeType, amountSpecified, otherCurrency, pools)
+    // Check for multi-hop routing through USDC
+    const hasUSDCPair = inputCurrency.symbol === 'USDC' || outputCurrency.symbol === 'USDC'
+
+    if (!hasUSDCPair && pools && pools.length > 0) {
+      console.log('Trying multi-hop route through USDC for', inputCurrency.symbol, '/', outputCurrency.symbol)
+      try {
+        return calculateMultiHopTrade(tradeType, amountSpecified, otherCurrency, pools)
+      } catch (error) {
+        console.warn('Multi-hop routing failed:', error)
+      }
     }
 
-    // No route found
-    return { loading: false, route: '', error: 'No route found' }
+    // No route found - return error
+    console.warn('No route found for', inputCurrency.symbol, '/', outputCurrency.symbol)
+    console.log('Available pools:', pools?.length || 0)
+
+    return {
+      loading: false,
+      route: '',
+      error: 'Pool does not exist',
+      inputAmount: undefined,
+      outputAmount: undefined,
+    }
   }, [amountSpecified, otherCurrency, pools, poolsLoading, tradeType])
 }
 

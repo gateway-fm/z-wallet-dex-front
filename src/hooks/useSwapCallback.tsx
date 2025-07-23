@@ -1,7 +1,9 @@
 import { Percent, TradeType } from '@uniswap/sdk-core'
 import { useWeb3React } from '@web3-react/core'
+import { ZEPHYR_CHAIN_ID } from 'constants/chains'
 import { PermitSignature } from 'hooks/usePermitAllowance'
 import { useUniversalRouterSwapCallback } from 'hooks/useUniversalRouter'
+import { useZephyrSwapCallback } from 'hooks/useZephyrSwap'
 import { useCallback } from 'react'
 import { InterfaceTrade } from 'state/routing/types'
 import { isClassicTrade } from 'state/routing/utils'
@@ -27,7 +29,6 @@ export function useSwapCallback(
   permitSignature: PermitSignature | undefined
 ) {
   const deadline = useTransactionDeadline()
-
   const addTransaction = useTransactionAdder()
   const { account, chainId } = useWeb3React()
 
@@ -37,11 +38,19 @@ export function useSwapCallback(
     permit: permitSignature,
   })
 
-  const swapCallback = universalRouterSwapCallback
+  const { callback: zephyrSwapCallback } = useZephyrSwapCallback(
+    isClassicTrade(trade) ? trade : undefined,
+    Number(allowedSlippage.multiply(100).toFixed(0)) / 100, // Convert Percent to number
+    account
+  )
+
+  // Use Universal Router for other networks, but SwapRouter02 for Zephyr
+  const swapCallback = chainId === ZEPHYR_CHAIN_ID ? zephyrSwapCallback : universalRouterSwapCallback
 
   return useCallback(async () => {
     if (!trade) throw new Error('missing trade')
     if (!account || !chainId) throw new Error('wallet must be connected to swap')
+    if (!swapCallback) throw new Error('swap callback not available')
 
     const result = await swapCallback()
 
@@ -66,5 +75,5 @@ export function useSwapCallback(
     addTransaction(result.response, swapInfo, deadline?.toNumber())
 
     return result
-  }, [account, addTransaction, allowedSlippage, chainId, deadline, swapCallback, trade])
+  }, [trade, account, chainId, swapCallback, allowedSlippage, addTransaction, deadline])
 }
