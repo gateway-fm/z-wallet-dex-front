@@ -45,6 +45,7 @@ import TransactionConfirmationModal, { ConfirmationModalContent } from '../../co
 import { NONFUNGIBLE_POSITION_MANAGER_ADDRESSES } from '../../constants/addresses'
 import { ZERO_PERCENT } from '../../constants/misc'
 import { WRAPPED_NATIVE_CURRENCY } from '../../constants/tokens'
+import { calculateOneToOneSqrtPriceX96 } from '../../constants/zephyr'
 import { useCurrency } from '../../hooks/Tokens'
 import { useApproveCallback } from '../../hooks/useApproveCallback'
 import { useArgentWalletContract } from '../../hooks/useArgentWalletContract'
@@ -54,6 +55,7 @@ import { useIsSwapUnsupported } from '../../hooks/useIsSwapUnsupported'
 import { useStablecoinValue } from '../../hooks/useStablecoinPrice'
 import useTransactionDeadline from '../../hooks/useTransactionDeadline'
 import { useV3PositionFromTokenId } from '../../hooks/useV3Positions'
+import { useLiquidityManagerApproval } from '../../hooks/useZephyrApproval'
 import { Bound, Field } from '../../state/mint/v3/actions'
 import { useTransactionAdder } from '../../state/transactions/hooks'
 import { TransactionType } from '../../state/transactions/types'
@@ -115,7 +117,7 @@ function AddLiquidity() {
     feeAmountFromUrl && Object.values(FeeAmount).includes(parseFloat(feeAmountFromUrl))
       ? parseFloat(feeAmountFromUrl)
       : chainId === ZEPHYR_CHAIN_ID
-      ? FeeAmount.MEDIUM // Default to 0.3% fee for Zephyr network
+      ? FeeAmount.HIGH // TODO: change to MEDIUM once we have a proper API?
       : undefined
 
   const baseCurrency = useCurrency(currencyIdA)
@@ -203,19 +205,28 @@ function AddLiquidity() {
 
   const argentWalletContract = useArgentWalletContract()
 
-  // check whether the user has approved the router on the tokens
-  const [approvalA, approveACallback] = useApproveCallback(
+  // LiquidityManager approval for Zephyr
+  useLiquidityManagerApproval(
+    parsedAmounts[Field.CURRENCY_A]?.currency.isToken ? parsedAmounts[Field.CURRENCY_A].currency : undefined,
+    parsedAmounts[Field.CURRENCY_B]?.currency.isToken ? parsedAmounts[Field.CURRENCY_B].currency : undefined,
+    parsedAmounts[Field.CURRENCY_A]?.quotient.toString(),
+    parsedAmounts[Field.CURRENCY_B]?.quotient.toString()
+  )
+
+  // Standard NonfungiblePositionManager approval for other networks
+  const [approvalA, approveACallbackStandard] = useApproveCallback(
     argentWalletContract ? undefined : parsedAmounts[Field.CURRENCY_A],
     chainId ? NONFUNGIBLE_POSITION_MANAGER_ADDRESSES[chainId] : undefined
   )
-  const [approvalB, approveBCallback] = useApproveCallback(
+  const [approvalB, approveBCallbackStandard] = useApproveCallback(
     argentWalletContract ? undefined : parsedAmounts[Field.CURRENCY_B],
     chainId ? NONFUNGIBLE_POSITION_MANAGER_ADDRESSES[chainId] : undefined
   )
 
-  // Standard approval logic for all networks including Zephyr
   const finalApprovalA = approvalA
   const finalApprovalB = approvalB
+  const approveACallback = approveACallbackStandard
+  const approveBCallback = approveBCallbackStandard
 
   const allowedSlippage = useUserSlippageToleranceWithDefault(
     outOfRange ? ZERO_PERCENT : DEFAULT_ADD_IN_RANGE_SLIPPAGE_TOLERANCE
@@ -228,13 +239,13 @@ function AddLiquidity() {
     try {
       if (position && account && deadline) {
         if (!positionManager || !baseCurrency || !quoteCurrency) {
+          setAttemptingTxn(false)
           return
         }
 
         const useNative = baseCurrency.isNative ? baseCurrency : quoteCurrency.isNative ? quoteCurrency : undefined
 
         // Check if pool exists in factory before proceeding
-        // TODO: Make universal function for checking pool existence
         if (provider && positionManager) {
           try {
             const pmContract = new Contract(
@@ -266,15 +277,24 @@ function AddLiquidity() {
 
                 const newPoolAddress = await factoryContract.getPool(token0Address, token1Address, fee)
                 if (newPoolAddress !== '0x0000000000000000000000000000000000000000') {
-                  // Initialize pool with 1:1 price
-                  // TODO: Check this behavior
+                  // Initialize pool with 1:1 price accounting for decimals
                   const poolContract = new Contract(
                     newPoolAddress,
                     ['function initialize(uint160) external'],
                     provider.getSigner()
                   )
 
-                  const sqrtPriceX96 = '79228162514264337593543950336' // 1:1 price
+                  // Calculate proper 1:1 sqrtPriceX96 accounting for token decimals
+                  const token0 = position.pool.token0
+                  const token1 = position.pool.token1
+                  const sqrtPriceX96 = calculateOneToOneSqrtPriceX96(token0, token1)
+
+                  console.log('🔧 Initializing pool with proper 1:1 price:', {
+                    token0: { symbol: token0.symbol, decimals: token0.decimals },
+                    token1: { symbol: token1.symbol, decimals: token1.decimals },
+                    sqrtPriceX96,
+                  })
+
                   const initTx = await poolContract.initialize(sqrtPriceX96)
                   await initTx.wait()
                 }
