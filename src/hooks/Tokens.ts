@@ -24,7 +24,9 @@ function useTokensFromMap(tokenMap: TokenAddressMap, chainId: Maybe<ChainId>): {
     if (!chainId) return {}
 
     // reduce to just tokens
-    return Object.keys(tokenMap[chainId] ?? {}).reduce<{ [address: string]: Token }>((newMap, address) => {
+    return Object.keys(tokenMap[chainId] ?? {}).reduce<{
+      [address: string]: Token
+    }>((newMap, address) => {
       newMap[address] = tokenMap[chainId][address].token
       return newMap
     }, {})
@@ -32,7 +34,9 @@ function useTokensFromMap(tokenMap: TokenAddressMap, chainId: Maybe<ChainId>): {
 }
 
 // TODO(WEB-2347): after disallowing unchecked index access, refactor ChainTokenMap to not use ?'s
-export type ChainTokenMap = { [chainId in number]?: { [address in string]?: Token } }
+export type ChainTokenMap = {
+  [chainId in number]?: { [address in string]?: Token }
+}
 /** Returns tokens from all token lists on all chains, combined with user added tokens */
 export function useAllTokensMultichain(): ChainTokenMap {
   const allTokensFromLists = useCombinedTokenMapFromUrls(DEFAULT_LIST_OF_LISTS)
@@ -66,7 +70,9 @@ export function useAllTokensMultichain(): ChainTokenMap {
 }
 
 /** Returns all tokens from the default list + user added tokens */
-export function useDefaultActiveTokens(chainId: Maybe<ChainId>): { [address: string]: Token } {
+export function useDefaultActiveTokens(chainId: Maybe<ChainId>): {
+  [address: string]: Token
+} {
   const defaultListTokens = useCombinedActiveList()
   const tokensFromMap = useTokensFromMap(defaultListTokens, chainId)
   const userAddedTokens = useUserAddedTokens()
@@ -144,7 +150,10 @@ export function useUnsupportedTokens(): { [address: string]: Token } {
       ) {
         const address = bridgeInfo[ChainId.MAINNET].tokenAddress
         // don't rely on decimals--it's possible that a token could be bridged w/ different decimals on the L2
-        return { ...acc, [address]: new Token(ChainId.MAINNET, address, tokenInfo.decimals) }
+        return {
+          ...acc,
+          [address]: new Token(ChainId.MAINNET, address, tokenInfo.decimals),
+        }
       }
       return acc
     }, {})
@@ -205,9 +214,41 @@ export function useToken(tokenAddress?: string | null): Token | null | undefined
   return useTokenFromMapOrNetwork(tokens, tokenAddress)
 }
 
-export function useCurrency(currencyId: Maybe<string>, chainId?: ChainId): Currency | undefined {
+/**
+ * Returns a Currency from the currencyId.
+ * Returns null if currency is loading or null was passed.
+ * Returns undefined if currencyId is invalid or token does not exist.
+ */
+export function useCurrency(currencyId: string | null | undefined, chainId?: ChainId): Currency | undefined {
   const { chainId: connectedChainId } = useWeb3React()
-  const tokens = useDefaultActiveTokens(chainId ?? connectedChainId)
-  const result = useCurrencyFromMap(tokens, chainId ?? connectedChainId, currencyId)
-  return result
+  const currentChainId = chainId ?? connectedChainId
+  const chainIdToUse = currentChainId ?? ChainId.MAINNET
+
+  // Always call all hooks
+  const zephyrTokens = useZephyrTokens()
+  const tokens = useDefaultActiveTokens(chainIdToUse)
+  const standardResult = useCurrencyFromMap(tokens, chainIdToUse, currencyId)
+
+  // For Zephyr network, use only GraphQL tokens (no native currency support)
+  if (currentChainId === ZEPHYR_CHAIN_ID) {
+    if (!currencyId) return undefined
+
+    // Look up token in GraphQL tokens by address or symbol
+    const tokenByAddress = Object.values(zephyrTokens).find(
+      (token) => token.address.toLowerCase() === currencyId.toLowerCase()
+    )
+
+    if (tokenByAddress) return tokenByAddress
+
+    // Look up by symbol (for legacy URL support)
+    const tokenBySymbol = Object.values(zephyrTokens).find(
+      (token) => token.symbol?.toLowerCase() === currencyId.toLowerCase()
+    )
+
+    if (tokenBySymbol) return tokenBySymbol
+    return undefined
+  }
+
+  // For other networks, use standard logic
+  return standardResult
 }

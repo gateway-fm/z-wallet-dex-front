@@ -40,7 +40,7 @@ const FixedPopupColumn = styled(AutoColumn)<{
   right: 1rem;
   max-width: 348px !important;
   width: 100%;
-  z-index: ${Z_INDEX.modal};
+  z-index: ${Z_INDEX.modalOverTooltip};
   transition: ${({ theme }) => `top ${theme.transition.timing.inOut} ${theme.transition.duration.slow}`};
 
   ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`

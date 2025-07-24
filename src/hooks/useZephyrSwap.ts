@@ -6,18 +6,15 @@ import { useMemo } from 'react'
 import { ClassicTrade, TradeFillType } from 'state/routing/types'
 
 import ZephyrSwapRouterABI from '../abis/zephyr-swap-router.json'
+import { CONTRACTS_CONFIG } from '../constants/addresses'
 import { ZEPHYR_CHAIN_ID } from '../constants/chains'
 import { useContract } from './useContract'
 import { useTopPools } from './useProtocolStats'
 import { useZephyrTokenApproval } from './useZephyrApproval'
 
-const ZEPHYR_SWAP_ROUTER_ADDRESS = '0x881f1D82139635c9190976F390305764bdBdEF3D'
-const ZEPHYR_FACTORY_ADDRESS = '0xeb4f50e1879e9912ff8fd73b20bcad7f195c5ebd'
-const ZEPHYR_QUOTER_ADDRESS = '0x49fc0204705c6e1f1a9458b78c3c9db2c5fe2717'
-
 function useSwapRouter02Contract(): Contract | null {
   const { chainId } = useWeb3React()
-  const address = chainId === ZEPHYR_CHAIN_ID ? ZEPHYR_SWAP_ROUTER_ADDRESS : undefined
+  const address = chainId === ZEPHYR_CHAIN_ID ? CONTRACTS_CONFIG.SWAP_ROUTER_02 : undefined
   return useContract(address, ZephyrSwapRouterABI, true)
 }
 
@@ -40,7 +37,7 @@ export function useZephyrSwapCallback(
   const inputAmount = trade?.inputAmount?.quotient?.toString()
   const { approvalState, approve } = useZephyrTokenApproval(
     tokenIn?.isToken ? tokenIn : undefined,
-    ZEPHYR_SWAP_ROUTER_ADDRESS,
+    CONTRACTS_CONFIG.SWAP_ROUTER_02,
     inputAmount
   )
 
@@ -174,7 +171,7 @@ async function findPoolFee(tokenIn: any, tokenOut: any, pools: any[], provider: 
   console.log('Checking available fee tiers on-chain')
   const feeTiers = [8000, 10000, 3000, 500]
   const factory = new Contract(
-    ZEPHYR_FACTORY_ADDRESS,
+    CONTRACTS_CONFIG.V3_CORE_FACTORY,
     ['function getPool(address tokenA, address tokenB, uint24 fee) view returns (address pool)'],
     provider
   )
@@ -198,7 +195,7 @@ async function findPoolFee(tokenIn: any, tokenOut: any, pools: any[], provider: 
 // Helper function to get price from Quoter
 async function getQuoterPrice(tokenIn: any, tokenOut: any, fee: number, amountIn: string, provider: any): Promise<any> {
   const quoterContract = new Contract(
-    ZEPHYR_QUOTER_ADDRESS,
+    CONTRACTS_CONFIG.QUOTER_V2,
     [
       'function quoteExactInputSingle(address tokenIn, address tokenOut, uint24 fee, uint256 amountIn, uint160 sqrtPriceLimitX96) view returns (uint256 amountOut)',
     ],

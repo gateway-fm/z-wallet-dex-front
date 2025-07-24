@@ -60,7 +60,9 @@ export interface L2ChainInfo extends BaseChainInfo {
   readonly defaultListUrl: string
 }
 
-type ChainInfoMap = { readonly [chainId: number]: L1ChainInfo | L2ChainInfo } & {
+type ChainInfoMap = {
+  readonly [chainId: number]: L1ChainInfo | L2ChainInfo
+} & {
   readonly [chainId in SupportedL2ChainId]: L2ChainInfo
 } & { readonly [chainId in SupportedL1ChainId]: L1ChainInfo }
 
@@ -92,7 +94,11 @@ const CHAIN_INFO: ChainInfoMap = {
     infoLink: 'https://info.uniswap.org/#/',
     label: 'Sepolia',
     logoUrl: ethereumLogoUrl,
-    nativeCurrency: { name: 'Sepolia Ether', symbol: 'SepoliaETH', decimals: 18 },
+    nativeCurrency: {
+      name: 'Sepolia Ether',
+      symbol: 'SepoliaETH',
+      decimals: 18,
+    },
     color: darkTheme.chain_5,
   },
   [ChainId.OPTIMISM]: {
@@ -126,7 +132,11 @@ const CHAIN_INFO: ChainInfoMap = {
     logoUrl: optimismLogoUrl,
     statusPage: 'https://optimism.io/status',
     helpCenterUrl: 'https://help.uniswap.org/en/collections/3137778-uniswap-on-optimistic-ethereum-oξ',
-    nativeCurrency: { name: 'Optimism Goerli Ether', symbol: 'görOpETH', decimals: 18 },
+    nativeCurrency: {
+      name: 'Optimism Goerli Ether',
+      symbol: 'görOpETH',
+      decimals: 18,
+    },
     color: darkTheme.chain_420,
   },
   [ChainId.ARBITRUM_ONE]: {
@@ -156,7 +166,11 @@ const CHAIN_INFO: ChainInfoMap = {
     logoUrl: arbitrumLogoUrl,
     defaultListUrl: ARBITRUM_LIST, // TODO: use arbitrum goerli token list
     helpCenterUrl: 'https://help.uniswap.org/en/collections/3137787-uniswap-on-arbitrum',
-    nativeCurrency: { name: 'Goerli Arbitrum Ether', symbol: 'goerliArbETH', decimals: 18 },
+    nativeCurrency: {
+      name: 'Goerli Arbitrum Ether',
+      symbol: 'goerliArbETH',
+      decimals: 18,
+    },
     color: darkTheme.chain_421613,
   },
   [ChainId.POLYGON]: {
@@ -183,7 +197,11 @@ const CHAIN_INFO: ChainInfoMap = {
     infoLink: 'https://info.uniswap.org/#/polygon/',
     label: 'Polygon Mumbai',
     logoUrl: polygonMaticLogo,
-    nativeCurrency: { name: 'Polygon Mumbai Matic', symbol: 'mMATIC', decimals: 18 },
+    nativeCurrency: {
+      name: 'Polygon Mumbai Matic',
+      symbol: 'mMATIC',
+      decimals: 18,
+    },
   },
   [ChainId.CELO]: {
     networkType: NetworkType.L1,
@@ -267,7 +285,7 @@ const CHAIN_INFO: ChainInfoMap = {
     infoLink: 'https://info.uniswap.org/#/zephyr/',
     label: 'Zephyr',
     logoUrl: ethereumLogoUrl, // TODO: Add Zephyr logo
-    nativeCurrency: { name: 'Zero', symbol: 'ZERO', decimals: 18 },
+    nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
     color: darkTheme.chain_1,
   },
 } as const
