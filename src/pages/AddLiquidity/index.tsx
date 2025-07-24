@@ -55,7 +55,6 @@ import { useIsSwapUnsupported } from '../../hooks/useIsSwapUnsupported'
 import { useStablecoinValue } from '../../hooks/useStablecoinPrice'
 import useTransactionDeadline from '../../hooks/useTransactionDeadline'
 import { useV3PositionFromTokenId } from '../../hooks/useV3Positions'
-import { useLiquidityManagerApproval } from '../../hooks/useZephyrApproval'
 import { Bound, Field } from '../../state/mint/v3/actions'
 import { useTransactionAdder } from '../../state/transactions/hooks'
 import { TransactionType } from '../../state/transactions/types'
@@ -205,28 +204,18 @@ function AddLiquidity() {
 
   const argentWalletContract = useArgentWalletContract()
 
-  // LiquidityManager approval for Zephyr
-  useLiquidityManagerApproval(
-    parsedAmounts[Field.CURRENCY_A]?.currency.isToken ? parsedAmounts[Field.CURRENCY_A].currency : undefined,
-    parsedAmounts[Field.CURRENCY_B]?.currency.isToken ? parsedAmounts[Field.CURRENCY_B].currency : undefined,
-    parsedAmounts[Field.CURRENCY_A]?.quotient.toString(),
-    parsedAmounts[Field.CURRENCY_B]?.quotient.toString()
-  )
-
-  // Standard NonfungiblePositionManager approval for other networks
-  const [approvalA, approveACallbackStandard] = useApproveCallback(
+  // Standard NonfungiblePositionManager approval for all networks including Zephyr
+  const [approvalA, approveACallback] = useApproveCallback(
     argentWalletContract ? undefined : parsedAmounts[Field.CURRENCY_A],
     chainId ? NONFUNGIBLE_POSITION_MANAGER_ADDRESSES[chainId] : undefined
   )
-  const [approvalB, approveBCallbackStandard] = useApproveCallback(
+  const [approvalB, approveBCallback] = useApproveCallback(
     argentWalletContract ? undefined : parsedAmounts[Field.CURRENCY_B],
     chainId ? NONFUNGIBLE_POSITION_MANAGER_ADDRESSES[chainId] : undefined
   )
 
   const finalApprovalA = approvalA
   const finalApprovalB = approvalB
-  const approveACallback = approveACallbackStandard
-  const approveBCallback = approveBCallbackStandard
 
   const allowedSlippage = useUserSlippageToleranceWithDefault(
     outOfRange ? ZERO_PERCENT : DEFAULT_ADD_IN_RANGE_SLIPPAGE_TOLERANCE
@@ -290,8 +279,14 @@ function AddLiquidity() {
                   const sqrtPriceX96 = calculateOneToOneSqrtPriceX96(token0, token1)
 
                   console.log('🔧 Initializing pool with proper 1:1 price:', {
-                    token0: { symbol: token0.symbol, decimals: token0.decimals },
-                    token1: { symbol: token1.symbol, decimals: token1.decimals },
+                    token0: {
+                      symbol: token0.symbol,
+                      decimals: token0.decimals,
+                    },
+                    token1: {
+                      symbol: token1.symbol,
+                      decimals: token1.decimals,
+                    },
                     sqrtPriceX96,
                   })
 
@@ -359,7 +354,7 @@ function AddLiquidity() {
         // not ideal, but for now clobber the other if the currency ids are equal
         return [currencyIdNew, undefined]
       } else {
-        // prevent weth + eth
+        // prevent weth + eth (Zephyr has no native currency)
         const isETHOrWETHNew =
           currencyIdNew === 'ETH' ||
           (chainId !== undefined && currencyIdNew === WRAPPED_NATIVE_CURRENCY[chainId]?.address)

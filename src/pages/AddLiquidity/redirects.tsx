@@ -5,11 +5,15 @@ import { WRAPPED_NATIVE_CURRENCY } from '../../constants/tokens'
 import AddLiquidity from './index'
 
 export default function RedirectDuplicateTokenIds() {
-  const { currencyIdA, currencyIdB } = useParams<{ currencyIdA: string; currencyIdB: string; feeAmount?: string }>()
+  const { currencyIdA, currencyIdB } = useParams<{
+    currencyIdA: string
+    currencyIdB: string
+    feeAmount?: string
+  }>()
 
   const { chainId } = useWeb3React()
 
-  // prevent weth + eth
+  // prevent weth + eth (Zephyr has no native currency)
   const isETHOrWETHA =
     currencyIdA === 'ETH' || (chainId !== undefined && currencyIdA === WRAPPED_NATIVE_CURRENCY[chainId]?.address)
   const isETHOrWETHB =
