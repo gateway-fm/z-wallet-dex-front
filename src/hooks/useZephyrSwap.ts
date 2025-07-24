@@ -1,147 +1,24 @@
-import { BigNumber } from '@ethersproject/bignumber'
-import { MaxUint256 } from '@ethersproject/constants'
 import { Contract } from '@ethersproject/contracts'
-import { Percent } from '@uniswap/sdk-core'
+import { CurrencyAmount, Percent } from '@uniswap/sdk-core'
 import { useWeb3React } from '@web3-react/core'
+import { ApprovalState } from 'lib/hooks/useApproval'
 import { useMemo } from 'react'
 import { ClassicTrade, TradeFillType } from 'state/routing/types'
-import { useTransactionAdder } from 'state/transactions/hooks'
-import { TransactionType } from 'state/transactions/types'
-import { calculateGasMargin } from 'utils/calculateGasMargin'
 
-import { V3_CORE_FACTORY_ADDRESSES } from '../constants/addresses'
+import ZephyrSwapRouterABI from '../abis/zephyr-swap-router.json'
 import { ZEPHYR_CHAIN_ID } from '../constants/chains'
 import { useContract } from './useContract'
+import { useTopPools } from './useProtocolStats'
+import { useZephyrTokenApproval } from './useZephyrApproval'
 
-// TODO: put in JSON
-const SwapRouter02ABI = [
-  {
-    inputs: [
-      {
-        components: [
-          { internalType: 'address', name: 'tokenIn', type: 'address' },
-          { internalType: 'address', name: 'tokenOut', type: 'address' },
-          { internalType: 'uint24', name: 'fee', type: 'uint24' },
-          { internalType: 'address', name: 'recipient', type: 'address' },
-          { internalType: 'uint256', name: 'deadline', type: 'uint256' },
-          { internalType: 'uint256', name: 'amountIn', type: 'uint256' },
-          { internalType: 'uint256', name: 'amountOutMinimum', type: 'uint256' },
-          { internalType: 'uint160', name: 'sqrtPriceLimitX96', type: 'uint160' },
-        ],
-        internalType: 'struct IV3SwapRouter.ExactInputSingleParams',
-        name: 'params',
-        type: 'tuple',
-      },
-    ],
-    name: 'exactInputSingle',
-    outputs: [{ internalType: 'uint256', name: 'amountOut', type: 'uint256' }],
-    stateMutability: 'payable',
-    type: 'function',
-  },
-]
+const ZEPHYR_SWAP_ROUTER_ADDRESS = '0x881f1D82139635c9190976F390305764bdBdEF3D'
+const ZEPHYR_FACTORY_ADDRESS = '0xeb4f50e1879e9912ff8fd73b20bcad7f195c5ebd'
+const ZEPHYR_QUOTER_ADDRESS = '0x49fc0204705c6e1f1a9458b78c3c9db2c5fe2717'
 
-const FactoryABI = [
-  {
-    inputs: [
-      { internalType: 'address', name: 'tokenA', type: 'address' },
-      { internalType: 'address', name: 'tokenB', type: 'address' },
-      { internalType: 'uint24', name: 'fee', type: 'uint24' },
-    ],
-    name: 'getPool',
-    outputs: [{ internalType: 'address', name: 'pool', type: 'address' }],
-    stateMutability: 'view',
-    type: 'function',
-  },
-]
-
-const PoolStateABI = [
-  {
-    inputs: [],
-    name: 'slot0',
-    outputs: [
-      { internalType: 'uint160', name: 'sqrtPriceX96', type: 'uint160' },
-      { internalType: 'int24', name: 'tick', type: 'int24' },
-      { internalType: 'uint16', name: 'observationIndex', type: 'uint16' },
-      { internalType: 'uint16', name: 'observationCardinality', type: 'uint16' },
-      { internalType: 'uint16', name: 'observationCardinalityNext', type: 'uint16' },
-      { internalType: 'uint8', name: 'feeProtocol', type: 'uint8' },
-      { internalType: 'bool', name: 'unlocked', type: 'bool' },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'liquidity',
-    outputs: [{ internalType: 'uint128', name: '', type: 'uint128' }],
-    stateMutability: 'view',
-    type: 'function',
-  },
-]
-
-const ERC20_ABI = [
-  {
-    constant: false,
-    inputs: [
-      { name: '_spender', type: 'address' },
-      { name: '_value', type: 'uint256' },
-    ],
-    name: 'approve',
-    outputs: [{ name: '', type: 'bool' }],
-    payable: false,
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    constant: true,
-    inputs: [
-      { name: '_owner', type: 'address' },
-      { name: '_spender', type: 'address' },
-    ],
-    name: 'allowance',
-    outputs: [{ name: '', type: 'uint256' }],
-    payable: false,
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    constant: true,
-    inputs: [{ name: '_owner', type: 'address' }],
-    name: 'balanceOf',
-    outputs: [{ name: 'balance', type: 'uint256' }],
-    payable: false,
-    stateMutability: 'view',
-    type: 'function',
-  },
-]
-
-function useSwapRouter02Contract() {
-  return useContract('0x881f1D82139635c9190976F390305764bdBdEF3D', SwapRouter02ABI, true)
-}
-
-async function approveTokenForSwap(
-  tokenAddress: string,
-  spenderAddress: string,
-  provider: any,
-  account: string,
-  addTransaction: any
-): Promise<void> {
-  const tokenContract = new Contract(tokenAddress, ERC20_ABI, provider.getSigner())
-
-  const gasEstimate = await tokenContract.estimateGas.approve(spenderAddress, MaxUint256)
-  const gasLimit = calculateGasMargin(gasEstimate)
-
-  const approvalTx = await tokenContract.approve(spenderAddress, MaxUint256, {
-    gasLimit,
-  })
-
-  addTransaction(approvalTx, {
-    type: TransactionType.APPROVAL,
-    tokenAddress,
-    spender: spenderAddress,
-  })
-
-  await approvalTx.wait()
+function useSwapRouter02Contract(): Contract | null {
+  const { chainId } = useWeb3React()
+  const address = chainId === ZEPHYR_CHAIN_ID ? ZEPHYR_SWAP_ROUTER_ADDRESS : undefined
+  return useContract(address, ZephyrSwapRouterABI, true)
 }
 
 /**
@@ -156,18 +33,23 @@ export function useZephyrSwapCallback(
 } {
   const { account, chainId, provider } = useWeb3React()
   const swapRouter = useSwapRouter02Contract()
-  const addTransaction = useTransactionAdder()
+  const { pools } = useTopPools(50)
+
+  // Use the existing approval hook for cleaner code
+  const tokenIn = trade?.inputAmount?.currency
+  const inputAmount = trade?.inputAmount?.quotient?.toString()
+  const { approvalState, approve } = useZephyrTokenApproval(
+    tokenIn?.isToken ? tokenIn : undefined,
+    ZEPHYR_SWAP_ROUTER_ADDRESS,
+    inputAmount
+  )
 
   return useMemo(() => {
     if (!chainId || chainId !== ZEPHYR_CHAIN_ID) {
       return { callback: null }
     }
 
-    if (!trade || !provider || !account || !swapRouter) {
-      return { callback: null }
-    }
-
-    if (!recipientAddress) {
+    if (!trade || !provider || !account || !swapRouter || !recipientAddress) {
       return { callback: null }
     }
 
@@ -183,112 +65,70 @@ export function useZephyrSwapCallback(
           throw new Error('Both currencies must be tokens for Zephyr swaps')
         }
 
-        /**
-         * Find best pool across all fee tiers
-         */
-        const factoryAddress = V3_CORE_FACTORY_ADDRESSES[chainId]
-        if (!factoryAddress) {
-          throw new Error('Factory address not found for Zephyr network')
-        }
-
-        const factoryContract = new Contract(factoryAddress, FactoryABI, provider)
-        const allFeeTiers = [100, 500, 3000, 10000]
-        let bestPool: any = null
-        let bestFee = 0
-        let maxLiquidity = BigNumber.from(0)
-
-        for (const fee of allFeeTiers) {
-          const poolAddress = await factoryContract.getPool(tokenIn.address, tokenOut.address, fee)
-
-          if (poolAddress !== '0x0000000000000000000000000000000000000000') {
-            try {
-              const pool = new Contract(poolAddress, PoolStateABI, provider)
-              const [slot0, liquidity] = await Promise.all([pool.slot0(), pool.liquidity()])
-
-              const hasLiquidity = liquidity.gt(0) && !slot0.sqrtPriceX96.eq(0) && slot0.unlocked
-
-              if (hasLiquidity && liquidity.gt(maxLiquidity)) {
-                maxLiquidity = liquidity
-                bestPool = { address: poolAddress, slot0, liquidity }
-                bestFee = fee
-                console.log(`Found better pool with fee ${fee / 10000}%:`, {
-                  address: poolAddress,
-                  liquidity: liquidity.toString(),
-                  tick: slot0.tick,
-                })
-              }
-            } catch (error) {
-              console.warn(`Error checking pool with fee ${fee}:`, error.message)
-            }
-          }
-        }
-
-        if (!bestPool || maxLiquidity.eq(0)) {
-          throw new Error('No pools with liquidity found for this pair')
-        }
-
-        console.log('Selected pool:', {
-          address: bestPool.address,
-          fee: `${bestFee / 10000}%`,
-          liquidity: bestPool.liquidity.toString(),
-          tick: bestPool.slot0.tick,
+        console.log('Trade details:', {
+          tokenIn: tokenIn.address,
+          tokenOut: tokenOut.address,
+          amountIn: inputAmount.quotient.toString(),
+          expectedAmountOut: outputAmount.quotient.toString(),
         })
 
-        // Check token balance and allowance
-        const tokenContract = new Contract(tokenIn.address, ERC20_ABI, provider)
-        const [balance, allowance] = await Promise.all([
-          tokenContract.balanceOf(account),
-          tokenContract.allowance(account, swapRouter.address),
-        ])
-
-        const requiredAmountString = trade.inputAmount.quotient.toString()
-        const requiredAmountBN = BigNumber.from(requiredAmountString)
-
-        if (balance.lt(requiredAmountBN)) {
-          throw new Error(`Insufficient ${tokenIn.symbol} balance`)
+        // Handle token approval using the existing hook
+        if (approvalState !== ApprovalState.APPROVED) {
+          console.log(`Token ${tokenIn.symbol} needs approval`)
+          await approve()
+          console.log('Approval completed')
         }
 
-        // Auto-approve if needed
-        if (allowance.lt(requiredAmountBN)) {
-          console.log('Insufficient allowance, requesting approval')
-          await approveTokenForSwap(tokenIn.address, swapRouter.address, provider, account, addTransaction)
-          console.log('Token approved successfully')
-        }
+        // Find correct fee tier
+        const fee = await findPoolFee(tokenIn, tokenOut, pools, provider)
 
-        // Calculate minimum amount out with slippage
-        const slippagePercent = new Percent(allowedSlippage, 100)
+        // Calculate slippage (using higher slippage for debugging)
+        const debugSlippage = 50
+        const slippagePercent = new Percent(Math.floor(debugSlippage * 100), 10000)
         const minAmountOut = trade.minimumAmountOut(slippagePercent)
-        const deadline = Math.floor(Date.now() / 1000) + 60 * 20 // 20 minutes
 
+        console.log('Slippage calculation:', {
+          userSlippage: `${allowedSlippage}%`,
+          debugSlippage: `${debugSlippage}%`,
+          minAmountOut: minAmountOut.quotient.toString(),
+        })
+
+        // Get quote from Quoter for better pricing
+        let finalAmountOutMinimum = minAmountOut.quotient.toString()
+        try {
+          const quoterAmountOut = await getQuoterPrice(
+            tokenIn,
+            tokenOut,
+            fee,
+            inputAmount.quotient.toString(),
+            provider
+          )
+          if (quoterAmountOut) {
+            const quoterBasedOutput = CurrencyAmount.fromRawAmount(tokenOut, quoterAmountOut.toString())
+            const quoterMinAmountOut = quoterBasedOutput.multiply(100 - debugSlippage).divide(100)
+            finalAmountOutMinimum = quoterMinAmountOut.quotient.toString()
+            console.log('Using Quoter-based pricing')
+          }
+        } catch (quoterError) {
+          console.warn('Quoter failed, using GraphQL pricing:', quoterError.message)
+        }
+
+        // Execute swap
         const params = {
           tokenIn: tokenIn.address,
           tokenOut: tokenOut.address,
-          fee: bestFee,
+          fee,
           recipient: recipientAddress,
-          deadline,
-          amountIn: requiredAmountString,
-          amountOutMinimum: minAmountOut.quotient.toString(),
+          amountIn: inputAmount.quotient.toString(),
+          amountOutMinimum: finalAmountOutMinimum,
           sqrtPriceLimitX96: 0,
         }
 
-        console.log('Swap parameters:', params)
+        console.log('Executing exactInputSingle with params:', params)
 
-        // Test with static call first
-        try {
-          const staticResult = await swapRouter.callStatic.exactInputSingle(params)
-          console.log('Static call successful, expected output:', staticResult.toString())
-        } catch (staticError) {
-          console.error('Static call failed:', staticError.message)
-          throw new Error('Swap validation failed: ' + staticError.message)
-        }
-
-        // Estimate gas
-        const gasEstimate = await swapRouter.estimateGas.exactInputSingle(params)
-        console.log('Gas estimate:', gasEstimate.toString())
-
-        // Execute the swap
         const swapResult = await swapRouter.exactInputSingle(params, {
-          gasLimit: calculateGasMargin(gasEstimate),
+          value: tokenIn.isNative ? inputAmount.quotient.toString() : '0',
+          gasLimit: 500000,
         })
 
         console.log('Swap transaction sent:', swapResult.hash)
@@ -304,5 +144,79 @@ export function useZephyrSwapCallback(
     }
 
     return { callback }
-  }, [trade, allowedSlippage, recipientAddress, account, chainId, provider, swapRouter, addTransaction])
+  }, [trade, allowedSlippage, recipientAddress, account, chainId, provider, swapRouter, pools, approvalState, approve])
+}
+
+// Helper function to find the correct pool fee
+async function findPoolFee(tokenIn: any, tokenOut: any, pools: any[], provider: any): Promise<number> {
+  // First try to find in GraphQL pools
+  if (pools && pools.length > 0) {
+    const matchingPool = pools.find((pool) => {
+      const token0Address = pool.token0.id.toLowerCase()
+      const token1Address = pool.token1.id.toLowerCase()
+      const inputAddress = tokenIn.address.toLowerCase()
+      const outputAddress = tokenOut.address.toLowerCase()
+
+      return (
+        (token0Address === inputAddress && token1Address === outputAddress) ||
+        (token0Address === outputAddress && token1Address === inputAddress)
+      )
+    })
+
+    if (matchingPool) {
+      const fee = parseInt(matchingPool.feeTier, 10)
+      console.log('Found pool from GraphQL:', { poolId: matchingPool.id, fee })
+      return fee
+    }
+  }
+
+  // Try different fee tiers on-chain
+  console.log('Checking available fee tiers on-chain')
+  const feeTiers = [8000, 10000, 3000, 500]
+  const factory = new Contract(
+    ZEPHYR_FACTORY_ADDRESS,
+    ['function getPool(address tokenA, address tokenB, uint24 fee) view returns (address pool)'],
+    provider
+  )
+
+  for (const testFee of feeTiers) {
+    try {
+      const poolAddress = await factory.getPool(tokenIn.address, tokenOut.address, testFee)
+      if (poolAddress && poolAddress !== '0x0000000000000000000000000000000000000000') {
+        console.log(`Found pool with fee ${testFee}: ${poolAddress}`)
+        return testFee
+      }
+    } catch (error) {
+      console.log(`Error checking fee ${testFee}:`, error.message)
+    }
+  }
+
+  console.log('No pool found, using default fee 3000')
+  return 3000 // Default fallback
+}
+
+// Helper function to get price from Quoter
+async function getQuoterPrice(tokenIn: any, tokenOut: any, fee: number, amountIn: string, provider: any): Promise<any> {
+  const quoterContract = new Contract(
+    ZEPHYR_QUOTER_ADDRESS,
+    [
+      'function quoteExactInputSingle(address tokenIn, address tokenOut, uint24 fee, uint256 amountIn, uint160 sqrtPriceLimitX96) view returns (uint256 amountOut)',
+    ],
+    provider
+  )
+
+  const quoterAmountOut = await quoterContract.quoteExactInputSingle(
+    tokenIn.address,
+    tokenOut.address,
+    fee,
+    amountIn,
+    0
+  )
+
+  console.log('Quoter price comparison:', {
+    inputAmount: amountIn,
+    quoterAmountOut: quoterAmountOut.toString(),
+  })
+
+  return quoterAmountOut
 }
