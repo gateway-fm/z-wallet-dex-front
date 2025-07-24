@@ -859,7 +859,7 @@ msgstr "Приложение собирает анонимную статист�
 #: src/components/AccountDrawer/MiniPortfolio/constants.tsx
 #: src/components/swap/PendingModalContent/ErrorModalContent.tsx
 msgid "Swap failed"
-msgstr "Обмен не выполнен"
+msgstr "Обмен не удался"
 
 #: src/nft/components/bag/ButtonStates.tsx
 #: src/nft/components/profile/list/Modal/ContentRow.tsx
@@ -1386,7 +1386,7 @@ msgstr "У вас пока нет ликвидности в этом пуле."
 
 #: src/components/swap/PendingModalContent/index.tsx
 msgid "Swap submitted"
-msgstr "Обмен представлен"
+msgstr "Выполняется обмен..."
 
 #: src/components/swap/SwapRoute.tsx
 msgid "This route optimizes your total output by considering split routes, multiple hops, and the gas cost of each step."
@@ -1464,7 +1464,7 @@ msgstr "Не удалось развернуть"
 
 #: src/components/swap/PendingModalContent/index.tsx
 msgid "Swap success!"
-msgstr "Обмен удачи!"
+msgstr "Обмен успешно выполнен"
 
 #: src/components/swap/PendingModalContent/index.tsx
 #: src/components/swap/PendingModalContent/index.tsx

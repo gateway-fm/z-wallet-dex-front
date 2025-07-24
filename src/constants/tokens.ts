@@ -411,7 +411,9 @@ export function getSwapCurrencyId(currency: Currency): string {
   return NATIVE_CHAIN_ID
 }
 
-export const TOKEN_SHORTHANDS: { [shorthand: string]: { [chainId in ChainId | number]?: string } } = {
+export const TOKEN_SHORTHANDS: {
+  [shorthand: string]: { [chainId in ChainId | number]?: string }
+} = {
   USDC: {
     [NETWORK_CONFIG.CHAIN_ID]: USDC_ZEPHYR.address,
   },
