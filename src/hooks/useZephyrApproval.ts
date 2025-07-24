@@ -2,12 +2,15 @@ import { MaxUint256, Token } from '@uniswap/sdk-core'
 import { useWeb3React } from '@web3-react/core'
 import { ApprovalState } from 'lib/hooks/useApproval'
 import { useCallback, useMemo } from 'react'
+import { useTransactionAdder } from 'state/transactions/hooks'
+import { TransactionType } from 'state/transactions/types'
 
 import { CONTRACTS_CONFIG } from '../constants/addresses'
 import { ZEPHYR_CHAIN_ID } from '../constants/chains'
 import { useTokenContract } from './useContract'
 import { useTokenAllowance } from './useTokenAllowance'
 
+// Unified Zephyr token approval hook
 // eslint-disable-next-line import/no-unused-modules
 export function useZephyrTokenApproval(
   token?: Token,
@@ -19,6 +22,7 @@ export function useZephyrTokenApproval(
 } {
   const { chainId, account } = useWeb3React()
   const tokenContract = useTokenContract(token?.address, true)
+  const addTransaction = useTransactionAdder()
 
   const { tokenAllowance } = useTokenAllowance(token, account ?? undefined, spender)
 
@@ -45,15 +49,15 @@ export function useZephyrTokenApproval(
       console.error('Missing dependencies for approve')
       return
     }
-    try {
-      const tx = await tokenContract.approve(spender, MaxUint256.toString())
-      await tx.wait()
-      console.log(`Approved ${token.symbol} for ${spender}`)
-    } catch (error) {
-      console.error(`Failed to approve ${token.symbol}:`, error)
-      throw error
-    }
-  }, [tokenContract, spender, token, chainId])
+    const tx = await tokenContract.approve(spender, MaxUint256.toString())
+    // Add the approval transaction to the UI transaction list
+    addTransaction(tx, {
+      type: TransactionType.APPROVAL,
+      tokenAddress: token.address,
+      spender,
+      amount: MaxUint256.toString(),
+    })
+  }, [tokenContract, spender, token, chainId, addTransaction])
 
   return {
     approvalState,
@@ -61,7 +65,6 @@ export function useZephyrTokenApproval(
   }
 }
 
-// eslint-disable-next-line import/no-unused-modules
 export function useLiquidityManagerApproval(
   tokenA?: Token,
   tokenB?: Token,
@@ -88,29 +91,6 @@ export function useLiquidityManagerApproval(
   return {
     tokenAApproval,
     tokenBApproval,
-    needsApproval,
-  }
-}
-
-export function useExchangerApproval(
-  tokenIn?: Token,
-  amountIn?: string
-): {
-  approvalState: ApprovalState
-  approve: () => Promise<void>
-  needsApproval: boolean
-} {
-  const { chainId } = useWeb3React()
-  const exchangerAddress = chainId === ZEPHYR_CHAIN_ID ? CONTRACTS_CONFIG.EXCHANGER : undefined
-
-  const approval = useZephyrTokenApproval(tokenIn, exchangerAddress, amountIn)
-
-  const needsApproval = useMemo(() => {
-    return approval.approvalState === ApprovalState.NOT_APPROVED
-  }, [approval.approvalState])
-
-  return {
-    ...approval,
     needsApproval,
   }
 }
