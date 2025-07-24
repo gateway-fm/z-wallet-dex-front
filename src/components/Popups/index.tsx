@@ -13,6 +13,7 @@ const MobilePopupWrapper = styled.div`
   display: none;
   padding-left: 20px;
   padding-right: 20px;
+  z-index: ${Z_INDEX.popupOverModal};
 
   ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
     display: block;
@@ -40,7 +41,7 @@ const FixedPopupColumn = styled(AutoColumn)<{
   right: 1rem;
   max-width: 348px !important;
   width: 100%;
-  z-index: ${Z_INDEX.modalOverTooltip};
+  z-index: ${Z_INDEX.popupOverModal};
   transition: ${({ theme }) => `top ${theme.transition.timing.inOut} ${theme.transition.duration.slow}`};
 
   ${({ theme }) => theme.deprecated_mediaWidth.deprecated_upToSmall`
