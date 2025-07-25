@@ -109,12 +109,7 @@ function ActivityPopupContent({ activity, onClick, onClose }: ActivityPopupConte
           )
         }
         title={<ThemedText.SubHeader>{activity.title}</ThemedText.SubHeader>}
-        descriptor={
-          <Descriptor color="neutral2">
-            {activity.descriptor}
-            {ENSName ?? activity.otherAccount}
-          </Descriptor>
-        }
+        descriptor={<Descriptor color="neutral2">{ENSName ?? activity.otherAccount}</Descriptor>}
         onClick={onClick}
       />
     </PopupContainer>

@@ -448,7 +448,11 @@ function AddLiquidity() {
   const showApprovalB =
     !argentWalletContract && finalApprovalB !== ApprovalState.APPROVED && !!parsedAmounts[Field.CURRENCY_B]
 
-  const pendingText = <Trans>Adding liquidity...</Trans>
+  const pendingText = `Supplying ${!depositADisabled ? parsedAmounts[Field.CURRENCY_A]?.toSignificant(6) : ''} ${
+    !depositADisabled ? currencies[Field.CURRENCY_A]?.symbol : ''
+  } ${!outOfRange ? 'and' : ''} ${!depositBDisabled ? parsedAmounts[Field.CURRENCY_B]?.toSignificant(6) : ''} ${
+    !depositBDisabled ? currencies[Field.CURRENCY_B]?.symbol : ''
+  }`
 
   const [searchParams, setSearchParams] = useSearchParams()
 
