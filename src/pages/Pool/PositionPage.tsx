@@ -189,7 +189,10 @@ function CurrentPriceCard({
           <Trans>Current price</Trans>
         </ExtentsText>
         <ThemedText.DeprecatedMediumHeader textAlign="center">
-          {formatPrice({ price: inverted ? pool.token1Price : pool.token0Price, type: NumberType.TokenTx })}
+          {formatPrice({
+            price: inverted ? pool.token1Price : pool.token0Price,
+            type: NumberType.TokenTx,
+          })}
         </ThemedText.DeprecatedMediumHeader>
         <ExtentsText>
           <Trans>
@@ -205,7 +208,10 @@ const TokenLink = ({
   children,
   chainId,
   address,
-}: PropsWithChildren<{ chainId: keyof typeof CHAIN_IDS_TO_NAMES; address: string }>) => {
+}: PropsWithChildren<{
+  chainId: keyof typeof CHAIN_IDS_TO_NAMES
+  address: string
+}>) => {
   const chainName = CHAIN_IDS_TO_NAMES[chainId]
   return <StyledRouterLink to={`/tokens/${chainName}/${address}`}>{children}</StyledRouterLink>
 }
@@ -353,7 +359,13 @@ const useInverter = ({
 export function PositionPageUnsupportedContent() {
   return (
     <PageWrapper>
-      <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          flexDirection: 'column',
+        }}
+      >
         <ThemedText.HeadlineLarge style={{ marginBottom: '8px' }}>
           <Trans>Position unavailable</Trans>
         </ThemedText.HeadlineLarge>
@@ -397,7 +409,7 @@ function PositionPageContent() {
   const theme = useTheme()
   const { formatTickPrice } = useFormatter()
 
-  const parsedTokenId = parseTokenId(tokenIdFromUrl)
+  const parsedTokenId = useMemo(() => parseTokenId(tokenIdFromUrl), [tokenIdFromUrl])
   const { loading, position: positionDetails } = useV3PositionFromTokenId(parsedTokenId)
 
   const {
@@ -429,7 +441,12 @@ function PositionPageContent() {
   const [poolState, pool] = usePool(token0 ?? undefined, token1 ?? undefined, feeAmount)
   const position = useMemo(() => {
     if (pool && liquidity && typeof tickLower === 'number' && typeof tickUpper === 'number') {
-      return new Position({ pool, liquidity: liquidity.toString(), tickLower, tickUpper })
+      return new Position({
+        pool,
+        liquidity: liquidity.toString(),
+        tickLower,
+        tickUpper,
+      })
     }
     return undefined
   }, [liquidity, pool, tickLower, tickUpper])
@@ -673,7 +690,11 @@ function PositionPageContent() {
           <AutoColumn gap="sm">
             <Link
               data-cy="visit-pool"
-              style={{ textDecoration: 'none', width: 'fit-content', marginBottom: '0.5rem' }}
+              style={{
+                textDecoration: 'none',
+                width: 'fit-content',
+                marginBottom: '0.5rem',
+              }}
               to="/pools"
             >
               <HoverText>
