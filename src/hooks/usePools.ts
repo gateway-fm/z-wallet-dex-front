@@ -139,7 +139,7 @@ function usePools(
       if (!tokens) return [PoolState.INVALID, null]
       const [token0, token1, fee] = tokens
 
-      // For Zephyr network, use GraphQL data or create mock pool
+      // For Zephyr network, use GraphQL data
       if (isZephyrNetwork) {
         if (graphqlLoading) return [PoolState.LOADING, null]
 
@@ -156,7 +156,7 @@ function usePools(
             (pool0Address === token1Address && pool1Address === token0Address)
 
           // For fee matching, convert GraphQL feeTier to number and compare
-          // GraphQL sometimes returns string like "3000" or "10000"
+          // NOTE: GraphQL sometimes returns string like "3000" or "10000"
           const poolFee = typeof pool.feeTier === 'string' ? parseInt(pool.feeTier, 10) : pool.feeTier
           const feeMatches = poolFee === fee
 
@@ -176,7 +176,7 @@ function usePools(
             try {
               const { sqrtPriceX96, tick, liquidity } = getZephyrPoolParams(token0, token1)
               const mockPool = new Pool(token0, token1, fee, sqrtPriceX96, liquidity, tick)
-              console.log('🔧 Created mock pool for existing position:', {
+              console.log('Created mock pool for existing position:', {
                 token0: token0.symbol,
                 token1: token1.symbol,
                 fee,

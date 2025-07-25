@@ -118,7 +118,7 @@ export function useDebouncedTrade(
         ],
         v2Routes: [],
         tradeType,
-        gasUseEstimateUSD: 0.1, // fallback
+        gasUseEstimateUSD: 0.1, // TODO: fallback, remove when we have API(?) to estimate gas
         approveInfo: { needsApprove: false },
         quoteMethod: QuoteMethod.CLIENT_SIDE,
         inputTax: inputTax || ZERO_PERCENT,

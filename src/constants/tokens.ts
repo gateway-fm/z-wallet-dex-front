@@ -267,7 +267,6 @@ export const LDO = new Token(ChainId.MAINNET, '0x5A98FcBEA516Cf06857215779Fd812C
 
 import { NETWORK_CONFIG, TOKENS_CONFIG } from '../config/zephyr'
 
-// Zephyr Network Tokens - using configuration system
 // eslint-disable-next-line import/no-unused-modules
 export const WRAPPED_ZERO = new Token(
   NETWORK_CONFIG.CHAIN_ID,

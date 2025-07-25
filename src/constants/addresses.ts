@@ -34,7 +34,7 @@ export const UNIVERSAL_ROUTER_ADDRESSES: AddressMap = {
 }
 
 /**
- * Known contract addresses for Zephyr network - using configuration system
+ * Known contract addresses for Zephyr network
  */
 export const ZEPHYR_CONTRACTS = {
   V3_CORE_FACTORY: CONTRACTS_CONFIG.V3_CORE_FACTORY,
@@ -50,7 +50,7 @@ export const ZEPHYR_CONTRACTS = {
 }
 
 /**
- * Contract addresses by chain - simplified for Zephyr only
+ * Contract addresses by chain (for Zephyr only)
  */
 export const V3_CORE_FACTORY_ADDRESSES: AddressMap = {
   [ZEPHYR_CHAIN_ID]: CONTRACTS_CONFIG.V3_CORE_FACTORY,
