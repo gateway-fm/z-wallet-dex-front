@@ -21,12 +21,9 @@ import ERC20_ABI from 'abis/erc20.json'
 import ERC20_BYTES32_ABI from 'abis/erc20_bytes32.json'
 import ERC721_ABI from 'abis/erc721.json'
 import ERC1155_ABI from 'abis/erc1155.json'
-import EXCHANGER_ABI from 'abis/Exchanger.json'
-import LIQUIDITY_MANAGER_ABI from 'abis/LiquidityManager.json'
-import PAIR_FACTORY_ABI from 'abis/PairFactory.json'
 import { ArgentWalletDetector, EnsPublicResolver, EnsRegistrar, Erc20, Erc721, Erc1155, Weth } from 'abis/types'
 import WETH_ABI from 'abis/weth.json'
-import { CONTRACTS_CONFIG, NONFUNGIBLE_POSITION_MANAGER_ADDRESSES } from 'constants/addresses'
+import { NONFUNGIBLE_POSITION_MANAGER_ADDRESSES } from 'constants/addresses'
 import { ZEPHYR_CHAIN_ID } from 'constants/chains'
 import { RPC_PROVIDERS } from 'constants/providers'
 import { WRAPPED_NATIVE_CURRENCY } from 'constants/tokens'
@@ -166,25 +163,4 @@ export function useV2MigratorContract() {
 export function useV3Migrator(): V3Migrator | null {
   const { chainId } = useWeb3React()
   return useContract<V3Migrator>(chainId ? V3_MIGRATOR_ADDRESSES[chainId] : undefined, V2MigratorABI, true)
-}
-
-// eslint-disable-next-line import/no-unused-modules
-export function useLiquidityManagerContract(withSignerIfPossible = true): Contract | null {
-  const { chainId } = useWeb3React()
-  const address = chainId === ZEPHYR_CHAIN_ID ? CONTRACTS_CONFIG.LIQUIDITY_MANAGER : undefined
-  return useContract(address, LIQUIDITY_MANAGER_ABI, withSignerIfPossible)
-}
-
-// eslint-disable-next-line import/no-unused-modules
-export function useExchangerContract(withSignerIfPossible = true): Contract | null {
-  const { chainId } = useWeb3React()
-  const address = chainId === ZEPHYR_CHAIN_ID ? CONTRACTS_CONFIG.EXCHANGER : undefined
-  return useContract(address, EXCHANGER_ABI, withSignerIfPossible)
-}
-
-// eslint-disable-next-line import/no-unused-modules
-export function usePairFactoryContract(withSignerIfPossible = false): Contract | null {
-  const { chainId } = useWeb3React()
-  const address = chainId === ZEPHYR_CHAIN_ID ? CONTRACTS_CONFIG.PAIR_FACTORY : undefined
-  return useContract(address, PAIR_FACTORY_ABI, withSignerIfPossible)
 }
