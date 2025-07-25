@@ -90,7 +90,13 @@ function usePools(
 ): [PoolState, Pool | null][] {
   const { chainId } = useWeb3React()
   const isZephyrNetwork = chainId === ZEPHYR_CHAIN_ID
-  const { pools: graphqlPools, loading: graphqlLoading } = useTopPools(100) // Get pools from GraphQL for Zephyr
+
+  // Only fetch GraphQL pools when we actually need them for Zephyr network
+  const shouldFetchGraphQL = useMemo(() => {
+    return isZephyrNetwork && poolKeys.some(([currencyA, currencyB]) => currencyA && currencyB)
+  }, [isZephyrNetwork, poolKeys])
+
+  const { pools: graphqlPools, loading: graphqlLoading } = useTopPools(shouldFetchGraphQL ? 100 : 0)
 
   const poolTokens: ([Token, Token, FeeAmount] | undefined)[] = useMemo(() => {
     if (!chainId) return new Array(poolKeys.length)

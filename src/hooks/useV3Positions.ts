@@ -94,16 +94,8 @@ function useV3PositionsFromTokenIds(tokenIds: BigNumber[] | undefined): UseV3Pos
           const tokenId = tokenIds[i]
           const result = call.result as CallStateResult
 
-          // Check if result exists and has all required properties
-          if (
-            !result ||
-            !result.fee ||
-            !result.nonce ||
-            !result.operator ||
-            !result.token0 ||
-            !result.token1 ||
-            !result.liquidity
-          ) {
+          // Check if result exists and has basic required properties
+          if (!result || result.fee === undefined) {
             return null
           }
 
@@ -145,7 +137,7 @@ interface UseV3PositionResults {
 function useZephyrV3PositionFromTokenId(tokenId: BigNumber | undefined): UseV3PositionResults {
   const { provider } = useWeb3React()
   const positionManager = useV3NFTPositionManagerContract()
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [position, setPosition] = useState<PositionDetails | undefined>(undefined)
 
   useEffect(() => {
@@ -155,10 +147,14 @@ function useZephyrV3PositionFromTokenId(tokenId: BigNumber | undefined): UseV3Po
       return
     }
 
+    let isCancelled = false
     const loadPosition = async () => {
       try {
         setLoading(true)
         const positionData = await positionManager.positions(tokenId)
+
+        if (isCancelled) return
+
         setPosition({
           tokenId,
           fee: positionData.fee,
@@ -175,13 +171,21 @@ function useZephyrV3PositionFromTokenId(tokenId: BigNumber | undefined): UseV3Po
           tokensOwed1: positionData.tokensOwed1,
         })
       } catch (error) {
-        setPosition(undefined)
+        if (!isCancelled) {
+          setPosition(undefined)
+        }
       } finally {
-        setLoading(false)
+        if (!isCancelled) {
+          setLoading(false)
+        }
       }
     }
 
     loadPosition()
+
+    return () => {
+      isCancelled = true
+    }
   }, [tokenId, positionManager, provider])
 
   return { loading, position }
@@ -190,21 +194,19 @@ function useZephyrV3PositionFromTokenId(tokenId: BigNumber | undefined): UseV3Po
 export function useV3PositionFromTokenId(tokenId: BigNumber | undefined): UseV3PositionResults {
   const { chainId } = useWeb3React()
   const isZephyrNetwork = chainId === ZEPHYR_CHAIN_ID
-
-  // Use direct RPC calls for Zephyr
   const zephyrPosition = useZephyrV3PositionFromTokenId(isZephyrNetwork ? tokenId : undefined)
-
-  // Use multicall for other networks
   const position = useV3PositionsFromTokenIds(isZephyrNetwork ? undefined : tokenId ? [tokenId] : undefined)
 
-  if (isZephyrNetwork) {
-    return zephyrPosition
-  }
+  return useMemo(() => {
+    if (isZephyrNetwork) {
+      return zephyrPosition
+    }
 
-  return {
-    loading: position.loading,
-    position: position.positions?.[0],
-  }
+    return {
+      loading: position.loading,
+      position: position.positions?.[0],
+    }
+  }, [isZephyrNetwork, zephyrPosition, position])
 }
 
 export function useV3Positions(account: string | null | undefined): UseV3PositionsResults {

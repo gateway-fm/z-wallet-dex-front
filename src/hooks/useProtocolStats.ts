@@ -48,18 +48,20 @@ export function useTopPools(first: number = QUERY_LIMITS.DEFAULT_TOP_POOLS): Use
     pollInterval: POLLING_INTERVALS.ANALYTICS,
     errorPolicy: CACHE_POLICIES.ERROR_POLICY,
     fetchPolicy: CACHE_POLICIES.DEFAULT,
+    skip: first === 0, // Skip query when first is 0
   })
 
   const pools = useMemo(() => {
+    if (first === 0) return [] // Return empty array when skipped
     if (error && !data) {
       return handleGraphQLError(error, [])
     }
     return data?.pools || []
-  }, [data, error])
+  }, [data, error, first])
 
   return {
     pools,
-    loading,
-    error: error && !data ? error : null,
+    loading: first === 0 ? false : loading, // Not loading when skipped
+    error: first === 0 ? null : error && !data ? error : null,
   }
 }
