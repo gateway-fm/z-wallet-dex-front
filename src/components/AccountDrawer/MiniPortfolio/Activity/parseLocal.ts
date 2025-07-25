@@ -168,11 +168,10 @@ function parseMigrateCreateV3(
   tokens: ChainTokenMap
 ): Partial<Activity> {
   const baseCurrency = getCurrency(lp.baseCurrencyId, chainId, tokens)
-  const baseSymbol = baseCurrency?.symbol ?? ''
+  const baseSymbol = baseCurrency?.symbol ?? false
   const quoteCurrency = getCurrency(lp.quoteCurrencyId, chainId, tokens)
-  const quoteSymbol = quoteCurrency?.symbol ?? ''
-  const descriptor = t`${baseSymbol} and ${quoteSymbol}`
-
+  const quoteSymbol = quoteCurrency?.symbol ?? false
+  const descriptor = baseSymbol && quoteSymbol ? t`${baseSymbol} and ${quoteSymbol}` : ''
   return { descriptor, currencies: [baseCurrency, quoteCurrency] }
 }
 
