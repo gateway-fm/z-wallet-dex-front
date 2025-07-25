@@ -2,7 +2,6 @@ import { Trans } from '@lingui/macro'
 import { ChainId } from '@uniswap/sdk-core'
 import { transactionToActivity } from 'components/AccountDrawer/MiniPortfolio/Activity/parseLocal'
 import { Activity } from 'components/AccountDrawer/MiniPortfolio/Activity/types'
-import { PortfolioLogo } from 'components/AccountDrawer/MiniPortfolio/PortfolioLogo'
 import PortfolioRow from 'components/AccountDrawer/MiniPortfolio/PortfolioRow'
 import Column, { AutoColumn } from 'components/Column'
 import AlertTriangleFilled from 'components/Icons/AlertTriangleFilled'
@@ -89,7 +88,11 @@ const Descriptor = styled(ThemedText.BodySmall)`
   ${EllipsisStyle}
 `
 
-type ActivityPopupContentProps = { activity: Activity; onClick: () => void; onClose: () => void }
+type ActivityPopupContentProps = {
+  activity: Activity
+  onClick: () => void
+  onClose: () => void
+}
 function ActivityPopupContent({ activity, onClick, onClose }: ActivityPopupContentProps) {
   const success = activity.status === TransactionStatus.Confirmed && !activity.cancelled
   const { ENSName } = useENSName(activity?.otherAccount)
@@ -100,14 +103,7 @@ function ActivityPopupContent({ activity, onClick, onClose }: ActivityPopupConte
       <PortfolioRow
         left={
           success ? (
-            <Column>
-              <PortfolioLogo
-                chainId={activity.chainId}
-                currencies={activity.currencies}
-                images={activity.logos}
-                accountAddress={activity.otherAccount}
-              />
-            </Column>
+            <Column>{/* Removed PortfolioLogo component to hide token icons */}</Column>
           ) : (
             <PopupAlertTriangle />
           )
