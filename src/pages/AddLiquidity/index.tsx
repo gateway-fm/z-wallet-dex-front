@@ -226,6 +226,7 @@ function AddLiquidity() {
   const onAdd = useCallback(async () => {
     setShowConfirm(true)
     setAttemptingTxn(true)
+    setTxHash('')
 
     try {
       if (position && account && deadline) {
@@ -320,6 +321,7 @@ function AddLiquidity() {
         })
 
         setAttemptingTxn(false)
+        setTxHash(response.hash)
         addTransaction(response, {
           type: TransactionType.ADD_LIQUIDITY_V3_POOL,
           baseCurrencyId: currencyId(baseCurrency),
@@ -329,11 +331,10 @@ function AddLiquidity() {
           expectedAmountQuoteRaw: parsedAmounts[Field.CURRENCY_B]?.quotient?.toString() ?? '0',
           feeAmount: position.pool.fee,
         })
-
-        setShowConfirm(false)
       }
     } catch (error) {
       setAttemptingTxn(false)
+      setTxHash('')
       setShowConfirm(false)
     }
   }, [
@@ -414,6 +415,7 @@ function AddLiquidity() {
 
   const handleDismissConfirmation = useCallback(() => {
     setShowConfirm(false)
+    setAttemptingTxn(false)
     // if there was a tx hash, we want to clear the input
     if (txHash) {
       onFieldAInput('')
@@ -446,11 +448,7 @@ function AddLiquidity() {
   const showApprovalB =
     !argentWalletContract && finalApprovalB !== ApprovalState.APPROVED && !!parsedAmounts[Field.CURRENCY_B]
 
-  const pendingText = `Supplying ${!depositADisabled ? parsedAmounts[Field.CURRENCY_A]?.toSignificant(6) : ''} ${
-    !depositADisabled ? currencies[Field.CURRENCY_A]?.symbol : ''
-  } ${!outOfRange ? 'and' : ''} ${!depositBDisabled ? parsedAmounts[Field.CURRENCY_B]?.toSignificant(6) : ''} ${
-    !depositBDisabled ? currencies[Field.CURRENCY_B]?.symbol : ''
-  }`
+  const pendingText = <Trans>Adding liquidity...</Trans>
 
   const [searchParams, setSearchParams] = useSearchParams()
 
