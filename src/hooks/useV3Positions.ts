@@ -89,32 +89,51 @@ function useV3PositionsFromTokenIds(tokenIds: BigNumber[] | undefined): UseV3Pos
 
   const positions = useMemo(() => {
     if (!loading && !error && tokenIds) {
-      return results.map((call, i) => {
-        const tokenId = tokenIds[i]
-        const result = call.result as CallStateResult
-        return {
-          tokenId,
-          fee: result.fee,
-          feeGrowthInside0LastX128: result.feeGrowthInside0LastX128,
-          feeGrowthInside1LastX128: result.feeGrowthInside1LastX128,
-          liquidity: result.liquidity,
-          nonce: result.nonce,
-          operator: result.operator,
-          tickLower: result.tickLower,
-          tickUpper: result.tickUpper,
-          token0: result.token0,
-          token1: result.token1,
-          tokensOwed0: result.tokensOwed0,
-          tokensOwed1: result.tokensOwed1,
-        }
-      })
+      return results
+        .map((call, i) => {
+          const tokenId = tokenIds[i]
+          const result = call.result as CallStateResult
+
+          // Check if result exists and has all required properties
+          if (
+            !result ||
+            !result.fee ||
+            !result.nonce ||
+            !result.operator ||
+            !result.token0 ||
+            !result.token1 ||
+            !result.liquidity
+          ) {
+            return null
+          }
+
+          return {
+            tokenId,
+            fee: result.fee,
+            feeGrowthInside0LastX128: result.feeGrowthInside0LastX128,
+            feeGrowthInside1LastX128: result.feeGrowthInside1LastX128,
+            liquidity: result.liquidity,
+            nonce: result.nonce,
+            operator: result.operator,
+            tickLower: result.tickLower,
+            tickUpper: result.tickUpper,
+            token0: result.token0,
+            token1: result.token1,
+            tokensOwed0: result.tokensOwed0,
+            tokensOwed1: result.tokensOwed1,
+          } as PositionDetails
+        })
+        .filter((position): position is PositionDetails => position !== null)
     }
     return undefined
   }, [loading, error, results, tokenIds])
 
   return {
     loading,
-    positions: positions?.map((position, i) => ({ ...position, tokenId: inputs[i][0] })),
+    positions: positions?.map((position, i) => ({
+      ...position,
+      tokenId: inputs[i][0],
+    })),
   }
 }
 
@@ -123,8 +142,65 @@ interface UseV3PositionResults {
   position?: PositionDetails
 }
 
+function useZephyrV3PositionFromTokenId(tokenId: BigNumber | undefined): UseV3PositionResults {
+  const { provider } = useWeb3React()
+  const positionManager = useV3NFTPositionManagerContract()
+  const [loading, setLoading] = useState(true)
+  const [position, setPosition] = useState<PositionDetails | undefined>(undefined)
+
+  useEffect(() => {
+    if (!tokenId || !positionManager || !provider) {
+      setLoading(false)
+      setPosition(undefined)
+      return
+    }
+
+    const loadPosition = async () => {
+      try {
+        setLoading(true)
+        const positionData = await positionManager.positions(tokenId)
+        setPosition({
+          tokenId,
+          fee: positionData.fee,
+          feeGrowthInside0LastX128: positionData.feeGrowthInside0LastX128,
+          feeGrowthInside1LastX128: positionData.feeGrowthInside1LastX128,
+          liquidity: positionData.liquidity,
+          nonce: positionData.nonce,
+          operator: positionData.operator,
+          tickLower: positionData.tickLower,
+          tickUpper: positionData.tickUpper,
+          token0: positionData.token0,
+          token1: positionData.token1,
+          tokensOwed0: positionData.tokensOwed0,
+          tokensOwed1: positionData.tokensOwed1,
+        })
+      } catch (error) {
+        setPosition(undefined)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadPosition()
+  }, [tokenId, positionManager, provider])
+
+  return { loading, position }
+}
+
 export function useV3PositionFromTokenId(tokenId: BigNumber | undefined): UseV3PositionResults {
-  const position = useV3PositionsFromTokenIds(tokenId ? [tokenId] : undefined)
+  const { chainId } = useWeb3React()
+  const isZephyrNetwork = chainId === ZEPHYR_CHAIN_ID
+
+  // Use direct RPC calls for Zephyr
+  const zephyrPosition = useZephyrV3PositionFromTokenId(isZephyrNetwork ? tokenId : undefined)
+
+  // Use multicall for other networks
+  const position = useV3PositionsFromTokenIds(isZephyrNetwork ? undefined : tokenId ? [tokenId] : undefined)
+
+  if (isZephyrNetwork) {
+    return zephyrPosition
+  }
+
   return {
     loading: position.loading,
     position: position.positions?.[0],
@@ -145,8 +221,6 @@ export function useV3Positions(account: string | null | undefined): UseV3Positio
     'balanceOf',
     [account ?? undefined]
   )
-
-  // we don't expect any account balance to ever exceed the bounds of max safe int
   const accountBalance: number | undefined = balanceResult?.[0]?.toNumber()
 
   const tokenIdsArgs = useMemo(() => {
