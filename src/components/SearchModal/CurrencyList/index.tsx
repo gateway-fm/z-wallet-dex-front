@@ -96,20 +96,10 @@ export function CurrencyRow({
 }) {
   const key = currencyKey(currency)
 
-  // Debug click handler for USDC
   const handleClick = () => {
-    if (currency.symbol === 'USDC') {
-      console.log('[CurrencyRow USDC Click]', {
-        symbol: currency.symbol,
-        isSelected,
-        otherSelected,
-        willCall: !isSelected ? 'onSelect(false)' : 'null (blocked)',
-      })
-    }
     return isSelected ? null : onSelect(false)
   }
 
-  // only show add or remove buttons if not on selected list
   return (
     <MenuItem
       tabIndex={0}
@@ -188,13 +178,6 @@ export default function CurrencyList({
       const isSelected = Boolean(currency && selectedCurrency && selectedCurrency.equals(currency))
       const otherSelected = Boolean(currency && otherCurrency && otherCurrency.equals(currency))
       const handleSelect = (hasWarning: boolean) => {
-        if (currency?.symbol === 'USDC') {
-          console.log('[CurrencyList handleSelect USDC]', {
-            symbol: currency.symbol,
-            hasWarning,
-            willCall: currency ? 'onCurrencySelect' : 'blocked (no currency)',
-          })
-        }
         return currency && onCurrencySelect(currency, hasWarning)
       }
 

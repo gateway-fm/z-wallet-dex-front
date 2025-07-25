@@ -4,6 +4,8 @@ import { Token } from '@uniswap/sdk-core'
 import { encodeSqrtRatioX96, TickMath } from '@uniswap/v3-sdk'
 import JSBI from 'jsbi'
 
+export const ZEPHYR_DEFAULT_LIQUIDITY = '1000000000000000000' // 1e18
+
 /**
  * Zephyr Network Price Utilities
  *
@@ -33,11 +35,6 @@ export function calculateOneToOneSqrtPriceX96(token0: Token, token1: Token): str
 
   return encodeSqrtRatioX96(numerator, denominator).toString()
 }
-
-/**
- * Default liquidity for mock pools
- */
-export const ZEPHYR_DEFAULT_LIQUIDITY = '1000000000000000000' // 1e18
 
 /**
  * Get pool creation parameters for Zephyr network
