@@ -16,6 +16,7 @@ import { Dots } from 'components/swap/styled'
 import Toggle from 'components/Toggle'
 import TransactionConfirmationModal, { ConfirmationModalContent } from 'components/TransactionConfirmationModal'
 import { CHAIN_IDS_TO_NAMES, isSupportedChain } from 'constants/chains'
+import { ZEPHYR_CHAIN_ID } from 'constants/chains'
 import { isGqlSupportedChain } from 'graphql/data/util'
 import { useToken } from 'hooks/Tokens'
 import { useV3NFTPositionManagerContract } from 'hooks/useContract'
@@ -44,6 +45,7 @@ import { getPriceOrderingFromPositionForUI } from '../../components/PositionList
 import RateToggle from '../../components/RateToggle'
 import { SwitchLocaleLink } from '../../components/SwitchLocaleLink'
 import { usePositionTokenURI } from '../../hooks/usePositionTokenURI'
+import { useZephyrNFTOwner } from '../../hooks/useZephyrNFTOwner'
 import { TransactionType } from '../../state/transactions/types'
 import { calculateGasMargin } from '../../utils/calculateGasMargin'
 import { ExplorerDataType, getExplorerLink } from '../../utils/getExplorerLink'
@@ -595,7 +597,13 @@ function PositionPageContent() {
     provider,
   ])
 
-  const owner = useSingleCallResult(tokenId ? positionManager : null, 'ownerOf', [tokenId]).result?.[0]
+  // Get NFT owner with proper Zephyr support
+  const isZephyrNetwork = chainId === ZEPHYR_CHAIN_ID
+  const zephyrOwner = useZephyrNFTOwner(isZephyrNetwork && tokenId ? tokenId : undefined)
+  const standardOwner = useSingleCallResult(!isZephyrNetwork && tokenId ? positionManager : null, 'ownerOf', [tokenId])
+    .result?.[0]
+
+  const owner = isZephyrNetwork ? zephyrOwner : standardOwner
   const ownsNFT = owner === account || positionDetails?.operator === account
 
   const feeValueUpper = inverted ? feeValue0 : feeValue1
@@ -606,7 +614,7 @@ function PositionPageContent() {
   const above = pool && typeof tickUpper === 'number' ? pool.tickCurrent >= tickUpper : undefined
   const inRange: boolean = typeof below === 'boolean' && typeof above === 'boolean' ? !below && !above : false
 
-  function modalHeader() {
+  const modalHeader = useCallback(() => {
     return (
       <AutoColumn gap="md" style={{ marginTop: '20px' }}>
         <LightCard padding="12px 16px">
@@ -639,7 +647,18 @@ function PositionPageContent() {
         </ButtonPrimary>
       </AutoColumn>
     )
-  }
+  }, [feeValueUpper, feeValueLower, collect])
+
+  const reviewContent = useCallback(
+    () => (
+      <ConfirmationModalContent
+        title={<Trans>Claim fees</Trans>}
+        onDismiss={() => setShowConfirm(false)}
+        topContent={modalHeader}
+      />
+    ),
+    [modalHeader]
+  )
 
   const showCollectAsWeth = Boolean(
     ownsNFT &&
@@ -677,13 +696,7 @@ function PositionPageContent() {
           onDismiss={() => setShowConfirm(false)}
           attemptingTxn={collecting}
           hash={collectMigrationHash ?? ''}
-          reviewContent={() => (
-            <ConfirmationModalContent
-              title={<Trans>Claim fees</Trans>}
-              onDismiss={() => setShowConfirm(false)}
-              topContent={modalHeader}
-            />
-          )}
+          reviewContent={reviewContent}
           pendingText={<Trans>Collecting fees</Trans>}
         />
         <AutoColumn gap="md">
@@ -705,7 +718,8 @@ function PositionPageContent() {
               <PositionLabelRow>
                 <DoubleCurrencyLogo currency0={currencyBase} currency1={currencyQuote} size={24} margin={true} />
                 <ThemedText.DeprecatedLabel fontSize="24px" mr="10px">
-                  &nbsp;{currencyQuote?.symbol}&nbsp;/&nbsp;{currencyBase?.symbol}
+                  &nbsp;{currencyQuote?.symbol}&nbsp;/&nbsp;
+                  {currencyBase?.symbol}
                 </ThemedText.DeprecatedLabel>
                 <Badge style={{ marginRight: '8px' }}>
                   <BadgeText>
@@ -792,7 +806,12 @@ function PositionPageContent() {
                     </Label>
                     {fiatValueOfLiquidity?.greaterThan(new Fraction(1, 100)) ? (
                       <ThemedText.DeprecatedLargeHeader fontSize="36px" fontWeight={535}>
-                        <Trans>${fiatValueOfLiquidity.toFixed(2, { groupSeparator: ',' })}</Trans>
+                        <Trans>
+                          $
+                          {fiatValueOfLiquidity.toFixed(2, {
+                            groupSeparator: ',',
+                          })}
+                        </Trans>
                       </ThemedText.DeprecatedLargeHeader>
                     ) : (
                       <ThemedText.DeprecatedLargeHeader color={theme.neutral1} fontSize="36px" fontWeight={535}>
@@ -846,7 +865,12 @@ function PositionPageContent() {
                         </Label>
                         {fiatValueOfFees?.greaterThan(new Fraction(1, 100)) ? (
                           <ThemedText.DeprecatedLargeHeader color={theme.success} fontSize="36px" fontWeight={535}>
-                            <Trans>${fiatValueOfFees.toFixed(2, { groupSeparator: ',' })}</Trans>
+                            <Trans>
+                              $
+                              {fiatValueOfFees.toFixed(2, {
+                                groupSeparator: ',',
+                              })}
+                            </Trans>
                           </ThemedText.DeprecatedLargeHeader>
                         ) : (
                           <ThemedText.DeprecatedLargeHeader color={theme.neutral1} fontSize="36px" fontWeight={535}>
