@@ -1,10 +1,8 @@
 import { CoinbaseWallet } from '@web3-react/coinbase-wallet'
 import { initializeConnector } from '@web3-react/core'
-import { GnosisSafe } from '@web3-react/gnosis-safe'
 import { MetaMask } from '@web3-react/metamask'
 import { Network } from '@web3-react/network'
 import { Connector } from '@web3-react/types'
-import GNOSIS_ICON from 'assets/images/gnosis.png'
 import HORSWAP_LOGO from 'assets/svg/logo.svg'
 import COINBASE_ICON from 'assets/wallets/coinbase-icon.svg'
 import { isMobile } from 'utils/userAgent'
@@ -60,15 +58,6 @@ export const injectedConnection: Connection = {
     return false
   },
 }
-const [web3GnosisSafe, web3GnosisSafeHooks] = initializeConnector<GnosisSafe>((actions) => new GnosisSafe({ actions }))
-export const gnosisSafeConnection: Connection = {
-  getName: () => 'Gnosis Safe',
-  connector: web3GnosisSafe,
-  hooks: web3GnosisSafeHooks,
-  type: ConnectionType.GNOSIS_SAFE,
-  getIcon: () => GNOSIS_ICON,
-  shouldDisplay: () => false,
-}
 
 const [web3WalletConnect, web3WalletConnectHooks] = initializeConnector<CoinbaseWallet>(
   (actions) =>
@@ -101,7 +90,7 @@ const coinbaseWalletConnection: Connection = {
   },
 }
 
-export const connections = [gnosisSafeConnection, injectedConnection, coinbaseWalletConnection, networkConnection]
+export const connections = [injectedConnection, coinbaseWalletConnection, networkConnection]
 
 export function getConnection(c: Connector | ConnectionType) {
   if (c instanceof Connector) {
@@ -118,8 +107,6 @@ export function getConnection(c: Connector | ConnectionType) {
         return coinbaseWalletConnection
       case ConnectionType.NETWORK:
         return networkConnection
-      case ConnectionType.GNOSIS_SAFE:
-        return gnosisSafeConnection
     }
   }
 }
