@@ -140,9 +140,24 @@ module.exports = {
         // Webpack 5 does not resolve node modules, so we do so for those necessary:
         fallback: {
           // - react-markdown requires path
-          path: require.resolve("path-browserify"),
+          path: require.resolve('path-browserify'),
+          // - smart-order-router requires http
+          http: require.resolve('stream-http'),
+          https: require.resolve('https-browserify'),
+          crypto: require.resolve('crypto-browserify'),
+          buffer: require.resolve('buffer'),
+          stream: require.resolve('stream-browserify'),
+          url: require.resolve('url'),
+          zlib: require.resolve('browserify-zlib'),
+          querystring: require.resolve('querystring-es3'),
+          // - disable node modules that shouldn't be used in browser
+          fs: false,
+          os: false,
+          assert: false,
+          tty: false,
+          util: false,
         },
-      });
+      })
 
       // Retain source maps for node_modules packages:
       webpackConfig.module.rules[0] = {
@@ -151,14 +166,15 @@ module.exports = {
       };
 
       // Configure webpack transpilation (create-react-app specifies transpilation rules in a oneOf):
-      webpackConfig.module.rules[1].oneOf =
-        webpackConfig.module.rules[1].oneOf.map((rule) => {
-          if (rule.loader && rule.loader.match(/babel-loader/)) {
-            rule.loader = "swc-loader";
-            delete rule.options;
-          }
-          return rule;
-        });
+      // Temporarily disabled SWC loader due to compatibility issues
+      // webpackConfig.module.rules[1].oneOf =
+      //   webpackConfig.module.rules[1].oneOf.map((rule) => {
+      //     if (rule.loader && rule.loader.match(/babel-loader/)) {
+      //       rule.loader = "swc-loader";
+      //       delete rule.options;
+      //     }
+      //     return rule;
+      //   });
 
       // Run terser compression on node_modules before tree-shaking, so that tree-shaking is more effective.
       // This works by eliminating dead code, so that webpack can identify unused imports and tree-shake them;
