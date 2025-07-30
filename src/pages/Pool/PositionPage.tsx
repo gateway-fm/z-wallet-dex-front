@@ -85,7 +85,9 @@ const BadgeText = styled.div`
 // responsive text
 // disable the warning because we don't use the end prop, we just want to filter it out
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const Label = styled(({ end, ...props }) => <ThemedText.DeprecatedLabel {...props} />)<{ end?: boolean }>`
+const Label = styled(({ end, ...props }: { end?: boolean; [key: string]: any }) => (
+  <ThemedText.DeprecatedLabel {...props} />
+))<{ end?: boolean }>`
   display: flex;
   font-size: 16px;
   justify-content: ${({ end }) => (end ? 'flex-end' : 'flex-start')};

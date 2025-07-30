@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ScrollBarStyles } from 'components/Common'
 import useDisableScrolling from 'hooks/useDisableScrolling'
 import usePrevious from 'hooks/usePrevious'

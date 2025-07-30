@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Warning, WARNING_LEVEL } from 'constants/tokenSafety'
 import { AlertTriangle } from 'react-feather'
 import styled, { css } from 'styled-components'

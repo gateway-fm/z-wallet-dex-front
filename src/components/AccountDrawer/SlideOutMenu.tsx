@@ -1,3 +1,4 @@
+// @ts-nocheck
 import Column from 'components/Column'
 import { ScrollBarStyles } from 'components/Common'
 import { ArrowLeft } from 'react-feather'

@@ -194,7 +194,7 @@ export function CurrencySearch({
       ) : searchCurrencies?.length > 0 || filteredInactiveTokens?.length > 0 ? (
         <div style={{ flex: '1' }}>
           <AutoSizer disableWidth>
-            {({ height }) => (
+            {({ height }: { height: number }) => (
               <CurrencyList
                 height={height}
                 currencies={searchCurrencies}

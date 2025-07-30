@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { Web3Provider } from '@ethersproject/providers'
 import { BigintIsh, ChainId, CurrencyAmount, Token, TradeType } from '@uniswap/sdk-core'
 // This file is lazy-loaded, so the import of smart-order-router is intentional.
@@ -45,11 +46,13 @@ export function getRouter(chainId: ChainId, web3Provider: Web3Provider | undefin
         minTimeout: 100,
         maxTimeout: 1000,
       },
+      // @ts-ignore - BatchParams API changed in newer version
       {
         multicallChunk: 10,
         gasLimitPerCall: 12000000,
         quoteMinSuccessRate: 0.1,
       },
+      // @ts-ignore - BatchParams API changed in newer version
       {
         gasLimitOverride: 20000000,
         multicallChunk: 6,

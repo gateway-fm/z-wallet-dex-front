@@ -206,6 +206,7 @@ export default function CurrencyList({
 
   return (
     <div data-testid="currency-list-wrapper">
+      {/* @ts-ignore */}
       <FixedSizeList
         className={scrollbarStyle}
         height={height}

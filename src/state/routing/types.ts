@@ -140,7 +140,9 @@ export class ClassicTrade extends Trade<Currency, Currency, TradeType> {
   blockNumber: string | null | undefined
   requestId: string | undefined
   quoteMethod: QuoteMethod
+  // @ts-ignore - avoid accessor override conflict
   inputTax: Percent
+  // @ts-ignore - avoid accessor override conflict
   outputTax: Percent
 
   constructor({

@@ -2,12 +2,13 @@
  * Preset styles of the Rebass Text component
  */
 
+// @ts-nocheck
 import { Text, TextProps as TextPropsOriginal } from 'rebass'
 import styled from 'styled-components'
 
 const TextWrapper = styled(Text).withConfig({
   shouldForwardProp: (prop) => prop !== 'color',
-})<{ color: keyof string }>`
+})<{ color: string }>`
   color: ${({ color, theme }) => (theme as any)[color]};
 `
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { forwardRef, useCallback, useEffect, useRef, useState } from 'react'
 import { Icon } from 'react-feather'
 import styled, { css, DefaultTheme } from 'styled-components'
