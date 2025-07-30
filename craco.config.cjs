@@ -150,6 +150,9 @@ module.exports = {
           url: require.resolve('url'),
           zlib: require.resolve('browserify-zlib'),
           querystring: require.resolve('querystring-es3'),
+          // - additional polyfills for browser compatibility
+          vm: require.resolve('vm-browserify'),
+          constants: require.resolve('constants-browserify'),
           // - disable node modules that shouldn't be used in browser
           fs: false,
           os: false,
