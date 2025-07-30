@@ -29,7 +29,7 @@ export default function useSelectChain() {
           setSearchParams(searchParams)
         }
       } catch (error) {
-        if (!didUserReject(connection, error) && error.code !== -32002 /* request already pending */) {
+        if (connection && !didUserReject(connection, error) && error.code !== -32002 /* request already pending */) {
           console.error('Failed to switch networks', error)
           dispatch(
             addPopup({

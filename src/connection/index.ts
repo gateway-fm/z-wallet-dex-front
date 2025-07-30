@@ -107,6 +107,8 @@ export function getConnection(c: Connector | ConnectionType) {
         return coinbaseWalletConnection
       case ConnectionType.NETWORK:
         return networkConnection
+      default:
+        throw Error('unsupported connection type')
     }
   }
 }

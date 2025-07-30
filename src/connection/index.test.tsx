@@ -96,8 +96,8 @@ describe('connection utility/metadata tests', () => {
     const { displayed, injected } = createWalletEnvironment({ isBraveWallet: true })
 
     expect(displayed.includes(injected)).toBe(true)
-    expect(injected.getName()).toBe('Brave')
-    expect(injected.overrideActivate?.()).toBeFalsy()
+    expect(injected?.getName()).toBe('Brave')
+    expect(injected?.overrideActivate?.()).toBeFalsy()
 
     expect(displayed.length).toEqual(2)
   })
@@ -107,8 +107,8 @@ describe('connection utility/metadata tests', () => {
     const { displayed, injected } = createWalletEnvironment({ isMetaMask: true }) // Phantom sets isMetaMask to true
 
     expect(displayed.includes(injected)).toBe(true)
-    expect(injected.getName()).toBe('MetaMask')
-    expect(injected.overrideActivate?.()).toBeFalsy()
+    expect(injected?.getName()).toBe('MetaMask')
+    expect(injected?.overrideActivate?.()).toBeFalsy()
 
     expect(displayed.length).toEqual(2)
   })
@@ -118,8 +118,8 @@ describe('connection utility/metadata tests', () => {
     const { displayed, injected } = createWalletEnvironment(UNKNOWN_MM_INJECTOR)
 
     expect(displayed.includes(injected)).toBe(true)
-    expect(injected.getName()).toBe('MetaMask')
-    expect(injected.overrideActivate?.()).toBeFalsy()
+    expect(injected?.getName()).toBe('MetaMask')
+    expect(injected?.overrideActivate?.()).toBeFalsy()
 
     expect(displayed.length).toEqual(2)
   })
@@ -129,11 +129,11 @@ describe('connection utility/metadata tests', () => {
     const { displayed, injected } = createWalletEnvironment(UNKNOWN_INJECTOR, true)
 
     expect(displayed.includes(injected)).toBe(true)
-    expect(injected.getName()).toBe('Browser Wallet')
-    expect(injected.overrideActivate?.()).toBeFalsy()
+    expect(injected?.getName()).toBe('Browser Wallet')
+    expect(injected?.overrideActivate?.()).toBeFalsy()
 
-    expect(injected.getIcon?.(/* isDarkMode= */ false)).toBe(INJECTED_LIGHT_ICON)
-    expect(injected.getIcon?.(/* isDarkMode= */ true)).toBe(INJECTED_DARK_ICON)
+    expect(injected?.getIcon?.(/* isDarkMode= */ false)).toBe(INJECTED_LIGHT_ICON)
+    expect(injected?.getIcon?.(/* isDarkMode= */ true)).toBe(INJECTED_DARK_ICON)
 
     // Ensures we provide multiple connection options if in an unknown injected browser
     expect(displayed.length).toEqual(2)
@@ -142,21 +142,21 @@ describe('connection utility/metadata tests', () => {
   it('Generic Wallet Browser with delayed injection', async () => {
     const { injected } = createWalletEnvironment(undefined)
 
-    expect(injected.getName()).toBe('Install MetaMask')
-    expect(injected.overrideActivate?.()).toBeTruthy()
+    expect(injected?.getName()).toBe('Install MetaMask')
+    expect(injected?.overrideActivate?.()).toBeTruthy()
 
     createWalletEnvironment(UNKNOWN_INJECTOR)
 
-    expect(injected.getName()).toBe('Browser Wallet')
-    expect(injected.overrideActivate?.()).toBeFalsy()
+    expect(injected?.getName()).toBe('Browser Wallet')
+    expect(injected?.overrideActivate?.()).toBeFalsy()
   })
 
   it('MetaMask Mobile Browser', async () => {
     const { displayed, injected } = createWalletEnvironment({ isMetaMask: true }, true)
 
     expect(displayed.includes(injected)).toBe(true)
-    expect(injected.getName()).toBe('MetaMask')
-    expect(injected.overrideActivate?.()).toBeFalsy()
+    expect(injected?.getName()).toBe('MetaMask')
+    expect(injected?.overrideActivate?.()).toBeFalsy()
     expect(displayed.length).toEqual(1)
   })
 
@@ -165,7 +165,7 @@ describe('connection utility/metadata tests', () => {
 
     expect(displayed.includes(coinbase)).toBe(true)
     // Expect coinbase option to not override activation in a the cb mobile browser
-    expect(coinbase.overrideActivate?.()).toBeFalsy()
+    expect(coinbase?.overrideActivate?.()).toBeFalsy()
     expect(displayed.length).toEqual(1)
   })
 
@@ -176,7 +176,7 @@ describe('connection utility/metadata tests', () => {
     // Don't show injected connection on plain mWeb browser
     expect(displayed.includes(injected)).toBe(false)
     // Expect coinbase option to launch coinbase app in a regular mobile browser
-    expect(coinbase.overrideActivate?.()).toBeTruthy()
+    expect(coinbase?.overrideActivate?.()).toBeTruthy()
 
     expect(displayed.length).toEqual(1)
   })

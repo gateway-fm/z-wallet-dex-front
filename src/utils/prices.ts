@@ -1,6 +1,7 @@
 import { Trade } from '@uniswap/router-sdk'
 import { Currency, CurrencyAmount, Fraction, Percent, TradeType } from '@uniswap/sdk-core'
 import { Pair } from '@uniswap/v2-sdk'
+import { Pool } from '@uniswap/v3-sdk'
 import { FeeAmount } from '@uniswap/v3-sdk'
 import JSBI from 'jsbi'
 import { DefaultTheme } from 'styled-components'
@@ -49,7 +50,7 @@ function computeRealizedLPFeePercent(trade: Trade<Currency, Currency, TradeType>
               pool instanceof Pair
                 ? // not currently possible given protocol check above, but not fatal
                   FeeAmount.MEDIUM
-                : pool.fee
+                : (pool as Pool).fee
             return currentFee.multiply(ONE_HUNDRED_PERCENT.subtract(new Fraction(fee, 1_000_000)))
           }, ONE_HUNDRED_PERCENT)
         )
