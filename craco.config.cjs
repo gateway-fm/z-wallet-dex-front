@@ -4,6 +4,7 @@ const CaseSensitivePathsPlugin = require("case-sensitive-paths-webpack-plugin");
 const { execSync } = require("child_process");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const path = require("path");
+const webpack = require("webpack");
 const ModuleScopePlugin = require("react-dev-utils/ModuleScopePlugin");
 const { IgnorePlugin, ProvidePlugin } = require("webpack");
 const { RetryChunkLoadPlugin } = require("webpack-retry-chunk-load-plugin");
@@ -75,9 +76,10 @@ module.exports = {
   webpack: {
     plugins: [
       // Webpack 5 does not polyfill node globals, so we do so for those necessary:
-      new ProvidePlugin({
+      new webpack.ProvidePlugin({
         // - react-markdown requires process.cwd
-        process: "process/browser.js",
+        process: "process/browser",
+        Buffer: ['buffer', 'Buffer'],
       }),
       new VanillaExtractPlugin(),
       new RetryChunkLoadPlugin({
@@ -153,6 +155,7 @@ module.exports = {
           // - additional polyfills for browser compatibility
           vm: require.resolve('vm-browserify'),
           constants: require.resolve('constants-browserify'),
+          process: require.resolve('process/browser'),
           // - disable node modules that shouldn't be used in browser
           fs: false,
           os: false,
