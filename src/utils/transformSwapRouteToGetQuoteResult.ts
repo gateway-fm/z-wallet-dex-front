@@ -3,9 +3,11 @@ import { Currency, CurrencyAmount, TradeType } from '@uniswap/sdk-core'
 // This file is lazy-loaded, so the import of smart-order-router is intentional.
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { routeAmountsToString, SwapRoute } from '@uniswap/smart-order-router'
+import { Pair } from '@uniswap/v2-sdk'
 import { Pool } from '@uniswap/v3-sdk'
 import { QuoteResult, QuoteState, URAQuoteType } from 'state/routing/types'
 import { ClassicQuoteData, V2PoolInRoute, V3PoolInRoute } from 'state/routing/types'
+import { currencyAddressForSwapQuote } from 'state/routing/utils'
 
 // from routing-api (https://github.com/Uniswap/routing-api/blob/main/lib/handlers/quote/quote.ts#L243-L311)
 export function transformSwapRouteToGetQuoteResult(
@@ -51,13 +53,13 @@ export function transformSwapRouteToGetQuoteResult(
           tokenIn: {
             chainId: tokenIn.chainId,
             decimals: tokenIn.decimals,
-            address: tokenIn.address,
+            address: currencyAddressForSwapQuote(tokenIn),
             symbol: tokenIn.symbol,
           },
           tokenOut: {
             chainId: tokenOut.chainId,
             decimals: tokenOut.decimals,
-            address: tokenOut.address,
+            address: currencyAddressForSwapQuote(tokenOut),
             symbol: tokenOut.symbol,
           },
           fee: nextPool.fee.toString(),
@@ -68,21 +70,22 @@ export function transformSwapRouteToGetQuoteResult(
           amountOut: edgeAmountOut,
         })
       } else {
-        const reserve0 = nextPool.reserve0
-        const reserve1 = nextPool.reserve1
+        const v2Pool = nextPool as Pair
+        const reserve0 = v2Pool.reserve0
+        const reserve1 = v2Pool.reserve1
 
         curRoute.push({
           type: 'v2-pool',
           tokenIn: {
             chainId: tokenIn.chainId,
             decimals: tokenIn.decimals,
-            address: tokenIn.address,
+            address: currencyAddressForSwapQuote(tokenIn),
             symbol: tokenIn.symbol,
           },
           tokenOut: {
             chainId: tokenOut.chainId,
             decimals: tokenOut.decimals,
-            address: tokenOut.address,
+            address: currencyAddressForSwapQuote(tokenOut),
             symbol: tokenOut.symbol,
           },
           reserve0: {
