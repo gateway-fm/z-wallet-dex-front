@@ -271,10 +271,10 @@
     "zustand": "^4.3.6"
   },
   "engines": {
-    "node": ">=18.0.0",
-    "yarn": ">=1.22.0",
+    "node": ">=20.0.0",
+    "yarn": ">=1.22.22",
     "npm": "please-use-yarn"
   },
-  "packageManager": "yarn@1.22.0",
+  "packageManager": "yarn@1.22.22",
   "homepage": "/"
 }
