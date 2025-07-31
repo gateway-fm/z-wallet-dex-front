@@ -67,7 +67,8 @@ describe('Add Liquidity', () => {
     cy.get('[data-testid="increment-price-range"]').eq(0).should('be.disabled')
     cy.get('[data-testid="decrement-price-range"]').eq(0).should('be.disabled')
     // Enter min price, which should enable the buttons
-    cy.get('.rate-input-0').eq(0).type('900').blur()
+    cy.get('.rate-input-0').eq(0).type('900')
+    cy.get('.rate-input-0').eq(0).blur()
     cy.get('[data-testid="increment-price-range"]').eq(0).should('not.be.disabled')
     cy.get('[data-testid="decrement-price-range"]').eq(0).should('not.be.disabled')
 
@@ -75,7 +76,8 @@ describe('Add Liquidity', () => {
     cy.get('[data-testid="increment-price-range"]').eq(1).should('be.disabled')
     cy.get('[data-testid="decrement-price-range"]').eq(1).should('be.disabled')
     // Enter max price, which should enable the buttons
-    cy.get('.rate-input-0').eq(1).type('1100').blur()
+    cy.get('.rate-input-0').eq(1).type('1100')
+    cy.get('.rate-input-0').eq(1).blur()
     cy.get('[data-testid="increment-price-range"]').eq(1).should('not.be.disabled')
     cy.get('[data-testid="decrement-price-range"]').eq(1).should('not.be.disabled')
   })

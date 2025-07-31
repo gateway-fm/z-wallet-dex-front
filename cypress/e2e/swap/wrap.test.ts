@@ -10,10 +10,12 @@ describe('Swap wrap', () => {
   })
 
   it('ETH to wETH is same value (wrapped swaps have no price impact)', () => {
-    cy.get('#swap-currency-input .token-amount-input').type('0.01').should('have.value', '0.01')
+    cy.get('#swap-currency-input .token-amount-input').type('0.01')
+cy.get(.type('0.01').should( 1>.type('0.01').should(-).should('have.value', '0.01')
     cy.get('#swap-currency-output .token-amount-input').should('have.value', '0.01')
 
-    cy.get('#swap-currency-output .token-amount-input').clear().type('0.02').should('have.value', '0.02')
+    cy.get('#swap-currency-output .token-amount-input').clear().type('0.02')
+cy.get(.type('0.02').should( 1>.type('0.02').should(-).should('have.value', '0.02')
     cy.get('#swap-currency-input .token-amount-input').should('have.value', '0.02')
   })
 
@@ -22,7 +24,8 @@ describe('Swap wrap', () => {
       cy.contains('Enter ETH amount')
 
       // Enter amount to wrap
-      cy.get('#swap-currency-output .token-amount-input').type('1').should('have.value', 1)
+      cy.get('#swap-currency-output .token-amount-input').type('1')
+cy.get(.type('1').should( 1>.type('1').should(-).should('have.value', 1)
       cy.get('#swap-currency-input .token-amount-input').should('have.value', 1)
 
       // Submit transaction
@@ -55,7 +58,8 @@ describe('Swap wrap', () => {
       cy.contains('Enter WETH amount')
 
       // Enter the amount to unwrap
-      cy.get('#swap-currency-output .token-amount-input').type('1').should('have.value', 1)
+      cy.get('#swap-currency-output .token-amount-input').type('1')
+cy.get(.type('1').should( 1>.type('1').should(-).should('have.value', 1)
       cy.get('#swap-currency-input .token-amount-input').should('have.value', 1)
 
       // Submit transaction

@@ -5,7 +5,6 @@ import { useCallback, useMemo } from 'react'
 import { useTransactionAdder } from 'state/transactions/hooks'
 import { TransactionType } from 'state/transactions/types'
 
-import { CONTRACTS_CONFIG } from '../constants/addresses'
 import { ZEPHYR_CHAIN_ID } from '../constants/chains'
 import { useTokenContract } from './useContract'
 import { useTokenAllowance } from './useTokenAllowance'
@@ -65,32 +64,35 @@ export function useZephyrTokenApproval(
   }
 }
 
-export function useLiquidityManagerApproval(
-  tokenA?: Token,
-  tokenB?: Token,
-  amountA?: string,
-  amountB?: string
-): {
-  tokenAApproval: { approvalState: ApprovalState; approve: () => Promise<void> }
-  tokenBApproval: { approvalState: ApprovalState; approve: () => Promise<void> }
-  needsApproval: boolean
-} {
-  const { chainId } = useWeb3React()
-  const liquidityManagerAddress = chainId === ZEPHYR_CHAIN_ID ? CONTRACTS_CONFIG.LIQUIDITY_MANAGER : undefined
-
-  const tokenAApproval = useZephyrTokenApproval(tokenA, liquidityManagerAddress, amountA)
-  const tokenBApproval = useZephyrTokenApproval(tokenB, liquidityManagerAddress, amountB)
-
-  const needsApproval = useMemo(() => {
-    return (
-      tokenAApproval.approvalState === ApprovalState.NOT_APPROVED ||
-      tokenBApproval.approvalState === ApprovalState.NOT_APPROVED
-    )
-  }, [tokenAApproval.approvalState, tokenBApproval.approvalState])
-
-  return {
-    tokenAApproval,
-    tokenBApproval,
-    needsApproval,
-  }
-}
+// TODO: Temporarily commented out unused export
+//
+// export function useLiquidityManagerApproval(
+// tokenA?: Token,
+// tokenB?: Token,
+// amountA?: string,
+// amountB?: string
+// ): {
+// tokenAApproval: { approvalState: ApprovalState; approve: () => Promise<void> }
+// tokenBApproval: { approvalState: ApprovalState; approve: () => Promise<void> }
+// needsApproval: boolean
+// } {
+// const { chainId } = useWeb3React()
+// const liquidityManagerAddress = chainId === ZEPHYR_CHAIN_ID ? CONTRACTS_CONFIG.LIQUIDITY_MANAGER : undefined
+//
+// const tokenAApproval = useZephyrTokenApproval(tokenA, liquidityManagerAddress, amountA)
+// const tokenBApproval = useZephyrTokenApproval(tokenB, liquidityManagerAddress, amountB)
+//
+// const needsApproval = useMemo(() => {
+//     return (
+//       tokenAApproval.approvalState === ApprovalState.NOT_APPROVED ||
+//       tokenBApproval.approvalState === ApprovalState.NOT_APPROVED
+//     )
+// }, [tokenAApproval.approvalState, tokenBApproval.approvalState])
+//
+// return {
+//     tokenAApproval,
+//     tokenBApproval,
+//     needsApproval,
+// }
+// }
+//

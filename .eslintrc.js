@@ -96,5 +96,17 @@ module.exports = {
         ],
       },
     },
+    {
+      // Disable unsafe chain command rule for Cypress tests and ignore parsing errors
+      files: ['cypress/**/*.ts'],
+      rules: {
+        'cypress/unsafe-to-chain-command': 'off',
+      },
+      parser: '@typescript-eslint/parser',
+      parserOptions: {
+        ecmaVersion: 2020,
+        sourceType: 'module',
+      },
+    },
   ],
 }
