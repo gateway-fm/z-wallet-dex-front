@@ -132,6 +132,25 @@ module.exports = {
         fallback: {
           // - react-markdown requires path
           path: require.resolve('path-browserify'),
+          // - smart-order-router requires http
+          http: require.resolve('stream-http'),
+          https: require.resolve('https-browserify'),
+          crypto: require.resolve('crypto-browserify'),
+          buffer: require.resolve('buffer'),
+          stream: require.resolve('stream-browserify'),
+          url: require.resolve('url'),
+          zlib: require.resolve('browserify-zlib'),
+          querystring: require.resolve('querystring-es3'),
+          // - additional polyfills for browser compatibility
+          vm: require.resolve('vm-browserify'),
+          constants: require.resolve('constants-browserify'),
+          process: require.resolve('process/browser'),
+          // - disable node modules that shouldn't be used in browser
+          fs: false,
+          os: false,
+          assert: false,
+          tty: false,
+          util: false,
         },
       })
 
