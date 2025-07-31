@@ -30,7 +30,7 @@ export default function getRoutingDiagramEntries(trade: ClassicTrade): RoutingDi
       const entry: RoutingDiagramEntry['path'][0] = [
         tokenIn,
         tokenOut,
-        nextPool instanceof Pair ? V2_DEFAULT_FEE_TIER : nextPool.fee,
+        nextPool instanceof Pair ? V2_DEFAULT_FEE_TIER : (nextPool as any).fee,
       ]
       path.push(entry)
     }

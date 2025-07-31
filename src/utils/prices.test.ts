@@ -36,7 +36,7 @@ describe('prices', () => {
           new Trade({
             v2Routes: [
               {
-                routev2: new V2Route([pair12], TEST_TOKEN_1, TEST_TOKEN_2),
+                routev2: new V2Route([pair12], TEST_TOKEN_1, TEST_TOKEN_2) as any,
                 inputAmount: toCurrencyAmount(TEST_TOKEN_1, 1000),
                 outputAmount: toCurrencyAmount(TEST_TOKEN_2, 1000),
               },
@@ -73,7 +73,7 @@ describe('prices', () => {
           new Trade({
             v2Routes: [
               {
-                routev2: new V2Route([pair12, pair23], TEST_TOKEN_1, TEST_TOKEN_3),
+                routev2: new V2Route([pair12, pair23], TEST_TOKEN_1, TEST_TOKEN_3) as any,
                 inputAmount: toCurrencyAmount(TEST_TOKEN_1, 1000),
                 outputAmount: toCurrencyAmount(TEST_TOKEN_3, 1000),
               },
@@ -91,7 +91,7 @@ describe('prices', () => {
           new Trade({
             v2Routes: [
               {
-                routev2: new V2Route([pair12, pair23], TEST_TOKEN_1, TEST_TOKEN_3),
+                routev2: new V2Route([pair12, pair23], TEST_TOKEN_1, TEST_TOKEN_3) as any,
                 inputAmount: toCurrencyAmount(TEST_TOKEN_1, 1000),
                 outputAmount: toCurrencyAmount(TEST_TOKEN_3, 1000),
               },

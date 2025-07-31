@@ -128,7 +128,7 @@ export const PositionPreview = ({
               </ThemedText.DeprecatedMain>
               <ThemedText.DeprecatedMediumHeader textAlign="center">
                 {formatTickPrice({
-                  price: priceLower,
+                  price: priceLower as any,
                   atLimit: ticksAtLimit,
                   direction: Bound.LOWER,
                 })}
@@ -151,7 +151,7 @@ export const PositionPreview = ({
               </ThemedText.DeprecatedMain>
               <ThemedText.DeprecatedMediumHeader textAlign="center">
                 {formatTickPrice({
-                  price: priceUpper,
+                  price: priceUpper as any,
                   atLimit: ticksAtLimit,
                   direction: Bound.UPPER,
                 })}

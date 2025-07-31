@@ -184,7 +184,7 @@ export function useV3DerivedMintInfo(
   const invertPrice = Boolean(baseToken && token0 && !baseToken.equals(token0))
 
   // always returns the price with 0 as base token
-  const price: Price<Token, Token> | undefined = useMemo(() => {
+  const price: any = useMemo(() => {
     // if no liquidity use typed value
     if (noLiquidity) {
       const parsedQuoteAmount = tryParseCurrencyAmount(startPriceTypedValue, invertPrice ? token0 : token1)
@@ -241,7 +241,7 @@ export function useV3DerivedMintInfo(
   // used for ratio calculation when pool not initialized
   const mockPool = useMemo(() => {
     if (tokenA && tokenB && feeAmount && price && !invalidPrice) {
-      const currentTick = priceToClosestTick(price)
+      const currentTick = priceToClosestTick(price as any)
       const currentSqrt = TickMath.getSqrtRatioAtTick(currentTick)
       const pool = new Pool(tokenA, tokenB, feeAmount, currentSqrt, JSBI.BigInt(0), currentTick, [])
 

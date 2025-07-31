@@ -309,7 +309,7 @@ export function ButtonDropdownLight({ disabled = false, children, ...rest }: { d
   return (
     <ButtonOutlined {...rest} disabled={disabled}>
       <RowBetween>
-        <div style={{ display: 'flex', alignItems: 'center' }}>{children}</div>
+        <div style={{ display: 'flex', alignItems: 'center' }}>{children as React.ReactNode}</div>
         <ChevronDown size={24} />
       </RowBetween>
     </ButtonOutlined>

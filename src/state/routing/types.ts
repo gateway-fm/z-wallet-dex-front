@@ -140,8 +140,14 @@ export class ClassicTrade extends Trade<Currency, Currency, TradeType> {
   blockNumber: string | null | undefined
   requestId: string | undefined
   quoteMethod: QuoteMethod
-  inputTax: Percent
-  outputTax: Percent
+  private _inputTax: Percent
+  private _outputTax: Percent
+  override get inputTax(): Percent {
+    return this._inputTax
+  }
+  override get outputTax(): Percent {
+    return this._outputTax
+  }
 
   constructor({
     gasUseEstimateUSD,
@@ -178,28 +184,28 @@ export class ClassicTrade extends Trade<Currency, Currency, TradeType> {
       outputAmount: CurrencyAmount<Currency>
     }[]
   }) {
-    super(routes)
+    super(routes as any)
     this.blockNumber = blockNumber
     this.gasUseEstimateUSD = gasUseEstimateUSD
     this.requestId = requestId
     this.quoteMethod = quoteMethod
     this.approveInfo = approveInfo
-    this.inputTax = inputTax
-    this.outputTax = outputTax
+    this._inputTax = inputTax
+    this._outputTax = outputTax
   }
 
   public get totalTaxRate(): Percent {
     return this.inputTax.add(this.outputTax)
   }
 
-  public get postTaxOutputAmount() {
+  public get postTaxOutputAmount(): any {
     // Ideally we should calculate the final output amount by ammending the inputAmount based on the input tax and then applying the output tax,
     // but this isn't currently possible because V2Trade reconstructs the total inputAmount based on the swap routes
     // TODO(WEB-2761): Amend V2Trade objects in the v2-sdk to have a separate field for post-input tax routes
     return this.outputAmount.multiply(new Fraction(ONE).subtract(this.totalTaxRate))
   }
 
-  public minimumAmountOut(slippageTolerance: Percent, amountOut = this.outputAmount): CurrencyAmount<Currency> {
+  public minimumAmountOut(slippageTolerance: Percent, amountOut: any = this.outputAmount): any {
     // Since universal-router-sdk reconstructs V2Trade objects, overriding this method does not actually change the minimumAmountOut that gets submitted on-chain
     // Our current workaround is to add tax rate to slippage tolerance before we submit the trade to universal-router-sdk in useUniversalRouter.ts
     // So the purpose of this override is so the UI displays the same minimum amount out as what is submitted on-chain
