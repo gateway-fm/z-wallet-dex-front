@@ -49,7 +49,7 @@ function computeRealizedLPFeePercent(trade: Trade<Currency, Currency, TradeType>
               pool instanceof Pair
                 ? // not currently possible given protocol check above, but not fatal
                   FeeAmount.MEDIUM
-                : pool.fee
+                : (pool as any).fee
             return currentFee.multiply(ONE_HUNDRED_PERCENT.subtract(new Fraction(fee, 1_000_000)))
           }, ONE_HUNDRED_PERCENT)
         )

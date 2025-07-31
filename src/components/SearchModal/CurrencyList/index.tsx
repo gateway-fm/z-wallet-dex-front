@@ -206,18 +206,17 @@ export default function CurrencyList({
 
   return (
     <div data-testid="currency-list-wrapper">
-      <FixedSizeList
-        className={scrollbarStyle}
-        height={height}
-        ref={fixedListRef as any}
-        width="100%"
-        itemData={itemData}
-        itemCount={itemData.length}
-        itemSize={56}
-        itemKey={itemKey}
-      >
-        {Row}
-      </FixedSizeList>
+      {(FixedSizeList as any)({
+        className: scrollbarStyle,
+        height,
+        ref: fixedListRef,
+        width: '100%',
+        itemData,
+        itemCount: itemData.length,
+        itemSize: 56,
+        itemKey,
+        children: Row,
+      })}
     </div>
   )
 }

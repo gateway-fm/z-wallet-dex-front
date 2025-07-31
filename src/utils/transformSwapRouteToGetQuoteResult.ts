@@ -51,13 +51,13 @@ export function transformSwapRouteToGetQuoteResult(
           tokenIn: {
             chainId: tokenIn.chainId,
             decimals: tokenIn.decimals,
-            address: tokenIn.address,
+            address: (tokenIn as any).address || '',
             symbol: tokenIn.symbol,
           },
           tokenOut: {
             chainId: tokenOut.chainId,
             decimals: tokenOut.decimals,
-            address: tokenOut.address,
+            address: (tokenOut as any).address || '',
             symbol: tokenOut.symbol,
           },
           fee: nextPool.fee.toString(),
@@ -68,21 +68,21 @@ export function transformSwapRouteToGetQuoteResult(
           amountOut: edgeAmountOut,
         })
       } else {
-        const reserve0 = nextPool.reserve0
-        const reserve1 = nextPool.reserve1
+        const reserve0 = (nextPool as any).reserve0
+        const reserve1 = (nextPool as any).reserve1
 
         curRoute.push({
           type: 'v2-pool',
           tokenIn: {
             chainId: tokenIn.chainId,
             decimals: tokenIn.decimals,
-            address: tokenIn.address,
+            address: (tokenIn as any).address || '',
             symbol: tokenIn.symbol,
           },
           tokenOut: {
             chainId: tokenOut.chainId,
             decimals: tokenOut.decimals,
-            address: tokenOut.address,
+            address: (tokenOut as any).address || '',
             symbol: tokenOut.symbol,
           },
           reserve0: {

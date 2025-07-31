@@ -117,7 +117,7 @@ function useLineItem(props: SwapLineItemProps): LineItemData | undefined {
     case SwapLineItemType.EXCHANGE_RATE:
       return {
         Label: () => <Trans>Rate</Trans>,
-        Value: () => <TradePrice price={trade.executionPrice} />,
+        Value: () => <TradePrice price={trade.executionPrice as any} />,
         TooltipBody: !isPreview ? () => <RoutingTooltip trade={trade} /> : undefined,
         tooltipSize: TooltipSize.Small,
       }

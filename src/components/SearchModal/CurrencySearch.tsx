@@ -158,9 +158,7 @@ export function CurrencySearch({
     <ContentWrapper>
       <PaddedColumn gap="16px">
         <RowBetween>
-          <Text fontWeight={535} fontSize={16}>
-            <Trans>Select a token</Trans>
-          </Text>
+          {(Text as any)({ fontWeight: 535, fontSize: 16, children: <Trans>Select a token</Trans> })}
           <CloseIcon onClick={onDismiss} />
         </RowBetween>
         <Row>
@@ -194,7 +192,7 @@ export function CurrencySearch({
       ) : searchCurrencies?.length > 0 || filteredInactiveTokens?.length > 0 ? (
         <div style={{ flex: '1' }}>
           <AutoSizer disableWidth>
-            {({ height }) => (
+            {({ height }: { height: number }) => (
               <CurrencyList
                 height={height}
                 currencies={searchCurrencies}

@@ -45,11 +45,11 @@ export function getRouter(chainId: ChainId, web3Provider: Web3Provider | undefin
         minTimeout: 100,
         maxTimeout: 1000,
       },
-      {
+      () => ({
         multicallChunk: 10,
         gasLimitPerCall: 12000000,
         quoteMinSuccessRate: 0.1,
-      },
+      }),
       {
         gasLimitOverride: 20000000,
         multicallChunk: 6,
