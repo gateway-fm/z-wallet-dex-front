@@ -1,7 +1,7 @@
 import { Connector } from '@web3-react/types'
 import { useSyncExternalStore } from 'react'
 
-import { getConnection, gnosisSafeConnection, networkConnection } from './index'
+import { getConnection, networkConnection } from './index'
 import { deletePersistedConnectionMeta, getPersistedConnectionMeta } from './meta'
 import { ConnectionType } from './types'
 
@@ -36,12 +36,6 @@ async function connect(connector: Connector, type: ConnectionType) {
   } finally {
     performance.measure(`web3:connect:${type}`, `web3:connect:${type}:start`)
   }
-}
-
-// The Safe connector will only work from safe.global, which iframes;
-// it is only necessary to try (and to load all the deps) if we are in an iframe.
-if (window !== window.parent) {
-  connect(gnosisSafeConnection.connector, ConnectionType.GNOSIS_SAFE)
 }
 
 connect(networkConnection.connector, ConnectionType.NETWORK)

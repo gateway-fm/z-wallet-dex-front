@@ -6,7 +6,6 @@ export enum ConnectionType {
   INJECTED = 'INJECTED',
   COINBASE_WALLET = 'COINBASE_WALLET',
   NETWORK = 'NETWORK',
-  GNOSIS_SAFE = 'GNOSIS_SAFE',
 }
 
 export function toConnectionType(value = ''): ConnectionType | undefined {
