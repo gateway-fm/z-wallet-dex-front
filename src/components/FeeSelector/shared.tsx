@@ -28,6 +28,21 @@ export const FEE_AMOUNT_DETAIL: Record<
       ZEPHYR_CHAIN_ID as ChainId,
     ],
   },
+  [FeeAmount.LOW_200]: {
+    label: '0.02',
+    description: <Trans>Low fee (0.02%).</Trans>,
+    supportedChains: ZEPHYR_SUPPORTED_CHAINS,
+  },
+  [FeeAmount.LOW_300]: {
+    label: '0.03',
+    description: <Trans>Low fee (0.03%).</Trans>,
+    supportedChains: ZEPHYR_SUPPORTED_CHAINS,
+  },
+  [FeeAmount.LOW_400]: {
+    label: '0.04',
+    description: <Trans>Low fee (0.04%).</Trans>,
+    supportedChains: ZEPHYR_SUPPORTED_CHAINS,
+  },
   [FeeAmount.LOW]: {
     label: '0.05',
     description: <Trans>Best for stable pairs.</Trans>,
