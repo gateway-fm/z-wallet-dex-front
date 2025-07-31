@@ -74,9 +74,9 @@ module.exports = {
       new ProvidePlugin({
         // - react-markdown requires process.cwd
         process: 'process/browser.js',
-        // - fix for Browser is not defined error
-        Browser: 'process/browser.js',
         Buffer: ['buffer', 'Buffer'],
+        // - fix for Browser polyfill - create a simple mock
+        Browser: path.resolve(__dirname, 'src/polyfills/browser-mock.js'),
       }),
       new VanillaExtractPlugin(),
       new RetryChunkLoadPlugin({
