@@ -1,6 +1,5 @@
 import { CoinbaseWallet } from '@web3-react/coinbase-wallet'
 import { initializeConnector } from '@web3-react/core'
-
 import { MetaMask } from '@web3-react/metamask'
 import { Network } from '@web3-react/network'
 import { Connector } from '@web3-react/types'
@@ -60,7 +59,6 @@ export const injectedConnection: Connection = {
   },
 }
 
-
 const [web3WalletConnect, web3WalletConnectHooks] = initializeConnector<CoinbaseWallet>(
   (actions) =>
     new CoinbaseWallet({
@@ -109,7 +107,6 @@ export function getConnection(c: Connector | ConnectionType) {
         return coinbaseWalletConnection
       case ConnectionType.NETWORK:
         return networkConnection
-
     }
   }
 }
