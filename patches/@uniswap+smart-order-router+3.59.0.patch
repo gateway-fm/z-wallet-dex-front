@@ -1,0 +1,202 @@
+diff --git a/node_modules/@uniswap/smart-order-router/build/module/providers/index.js b/node_modules/@uniswap/smart-order-router/build/module/providers/index.js
+index 10b8847..33627be 100644
+--- a/node_modules/@uniswap/smart-order-router/build/module/providers/index.js
++++ b/node_modules/@uniswap/smart-order-router/build/module/providers/index.js
+@@ -19,7 +19,7 @@ export * from './static-gas-price-provider';
+ export * from './swap-router-provider';
+ export * from './tenderly-simulation-provider';
+ export * from './token-properties-provider';
+-export * from './token-provider';
++// export * from './token-provider'; // Removed tokens for Zephyr network - not needed
+ export * from './token-validator-provider';
+ export * from './uri-subgraph-provider';
+ export * from './v2/caching-pool-provider';
+diff --git a/node_modules/@uniswap/smart-order-router/build/module/routers/alpha-router/functions/get-candidate-pools.js b/node_modules/@uniswap/smart-order-router/build/module/routers/alpha-router/functions/get-candidate-pools.js
+index 92f59f7..130358a 100644
+--- a/node_modules/@uniswap/smart-order-router/build/module/routers/alpha-router/functions/get-candidate-pools.js
++++ b/node_modules/@uniswap/smart-order-router/build/module/routers/alpha-router/functions/get-candidate-pools.js
+@@ -2,70 +2,15 @@ import { Protocol } from '@uniswap/router-sdk';
+ import { ChainId, TradeType } from '@uniswap/sdk-core';
+ import { ADDRESS_ZERO, FeeAmount } from '@uniswap/v3-sdk';
+ import _ from 'lodash';
+-import { DAI_OPTIMISM_SEPOLIA, USDC_ARBITRUM_SEPOLIA, USDC_OPTIMISM_SEPOLIA, USDT_OPTIMISM_SEPOLIA, WBTC_OPTIMISM_SEPOLIA, } from '../../../providers';
+-import { CELO, CELO_ALFAJORES, CEUR_CELO, CEUR_CELO_ALFAJORES, CUSD_CELO, CUSD_CELO_ALFAJORES, DAI_ARBITRUM, DAI_AVAX, DAI_BNB, DAI_MAINNET, DAI_MOONBEAM, DAI_OPTIMISM, DAI_OPTIMISM_GOERLI, DAI_POLYGON_MUMBAI, DAI_SEPOLIA, FEI_MAINNET, USDB_BLAST, USDC_ARBITRUM, USDC_ARBITRUM_GOERLI, USDC_AVAX, USDC_BASE, USDC_BNB, USDC_ETHEREUM_GNOSIS, USDC_MAINNET, USDC_MOONBEAM, USDC_OPTIMISM, USDC_OPTIMISM_GOERLI, USDC_POLYGON, USDC_SEPOLIA, USDT_ARBITRUM, USDT_BNB, USDT_MAINNET, USDT_OPTIMISM, USDT_OPTIMISM_GOERLI, WBTC_ARBITRUM, WBTC_GNOSIS, WBTC_MAINNET, WBTC_MOONBEAM, WBTC_OPTIMISM, WBTC_OPTIMISM_GOERLI, WGLMR_MOONBEAM, WMATIC_POLYGON, WMATIC_POLYGON_MUMBAI, WSTETH_MAINNET, WXDAI_GNOSIS, } from '../../../providers/token-provider';
++// import { DAI_OPTIMISM_SEPOLIA, USDC_ARBITRUM_SEPOLIA, USDC_OPTIMISM_SEPOLIA, USDT_OPTIMISM_SEPOLIA, WBTC_OPTIMISM_SEPOLIA, } from '../../../providers';
++// import { CELO, CELO_ALFAJORES, CEUR_CELO, CEUR_CELO_ALFAJORES, CUSD_CELO, CUSD_CELO_ALFAJORES, DAI_ARBITRUM, DAI_AVAX, DAI_BNB, DAI_MAINNET, DAI_MOONBEAM, DAI_OPTIMISM, DAI_OPTIMISM_GOERLI, DAI_POLYGON_MUMBAI, DAI_SEPOLIA, FEI_MAINNET, USDB_BLAST, USDC_ARBITRUM, USDC_ARBITRUM_GOERLI, USDC_AVAX, USDC_BASE, USDC_BNB, USDC_ETHEREUM_GNOSIS, USDC_MAINNET, USDC_MOONBEAM, USDC_OPTIMISM, USDC_OPTIMISM_GOERLI, USDC_POLYGON, USDC_SEPOLIA, USDT_ARBITRUM, USDT_BNB, USDT_MAINNET, USDT_OPTIMISM, USDT_OPTIMISM_GOERLI, WBTC_ARBITRUM, WBTC_GNOSIS, WBTC_MAINNET, WBTC_MOONBEAM, WBTC_OPTIMISM, WBTC_OPTIMISM_GOERLI, WGLMR_MOONBEAM, WMATIC_POLYGON, WMATIC_POLYGON_MUMBAI, WSTETH_MAINNET, WXDAI_GNOSIS, } from '../../../providers/token-provider';
++// Removed token imports as we use custom solution for Zephyr network
+ import { getAddress, getAddressLowerCase, getApplicableV3FeeAmounts, unparseFeeAmount, WRAPPED_NATIVE_CURRENCY, } from '../../../util';
+ import { parseFeeAmount } from '../../../util/amounts';
+ import { log } from '../../../util/log';
+ import { metric, MetricLoggerUnit } from '../../../util/metric';
+ const baseTokensByChain = {
+-    [ChainId.MAINNET]: [
+-        USDC_MAINNET,
+-        USDT_MAINNET,
+-        WBTC_MAINNET,
+-        DAI_MAINNET,
+-        WRAPPED_NATIVE_CURRENCY[1],
+-        FEI_MAINNET,
+-        WSTETH_MAINNET,
+-    ],
+-    [ChainId.OPTIMISM]: [
+-        DAI_OPTIMISM,
+-        USDC_OPTIMISM,
+-        USDT_OPTIMISM,
+-        WBTC_OPTIMISM,
+-    ],
+-    [ChainId.SEPOLIA]: [DAI_SEPOLIA, USDC_SEPOLIA],
+-    [ChainId.OPTIMISM_GOERLI]: [
+-        DAI_OPTIMISM_GOERLI,
+-        USDC_OPTIMISM_GOERLI,
+-        USDT_OPTIMISM_GOERLI,
+-        WBTC_OPTIMISM_GOERLI,
+-    ],
+-    [ChainId.OPTIMISM_SEPOLIA]: [
+-        DAI_OPTIMISM_SEPOLIA,
+-        USDC_OPTIMISM_SEPOLIA,
+-        USDT_OPTIMISM_SEPOLIA,
+-        WBTC_OPTIMISM_SEPOLIA,
+-    ],
+-    [ChainId.ARBITRUM_ONE]: [
+-        DAI_ARBITRUM,
+-        USDC_ARBITRUM,
+-        WBTC_ARBITRUM,
+-        USDT_ARBITRUM,
+-    ],
+-    [ChainId.ARBITRUM_GOERLI]: [USDC_ARBITRUM_GOERLI],
+-    [ChainId.ARBITRUM_SEPOLIA]: [USDC_ARBITRUM_SEPOLIA],
+-    [ChainId.POLYGON]: [USDC_POLYGON, WMATIC_POLYGON],
+-    [ChainId.POLYGON_MUMBAI]: [DAI_POLYGON_MUMBAI, WMATIC_POLYGON_MUMBAI],
+-    [ChainId.CELO]: [CUSD_CELO, CEUR_CELO, CELO],
+-    [ChainId.CELO_ALFAJORES]: [
+-        CUSD_CELO_ALFAJORES,
+-        CEUR_CELO_ALFAJORES,
+-        CELO_ALFAJORES,
+-    ],
+-    [ChainId.GNOSIS]: [WBTC_GNOSIS, WXDAI_GNOSIS, USDC_ETHEREUM_GNOSIS],
+-    [ChainId.MOONBEAM]: [
+-        DAI_MOONBEAM,
+-        USDC_MOONBEAM,
+-        WBTC_MOONBEAM,
+-        WGLMR_MOONBEAM,
+-    ],
+-    [ChainId.BNB]: [DAI_BNB, USDC_BNB, USDT_BNB],
+-    [ChainId.AVALANCHE]: [DAI_AVAX, USDC_AVAX],
+-    [ChainId.BASE]: [USDC_BASE],
+-    [ChainId.BLAST]: [WRAPPED_NATIVE_CURRENCY[ChainId.BLAST], USDB_BLAST],
+-    [ChainId.ZORA]: [WRAPPED_NATIVE_CURRENCY[ChainId.ZORA]],
+-    [ChainId.ZKSYNC]: [WRAPPED_NATIVE_CURRENCY[ChainId.ZKSYNC]],
++    // Only Zephyr network supported, all base tokens removed
+ };
+ class SubcategorySelectionPools {
+     constructor(pools, poolsNeeded) {
+diff --git a/node_modules/@uniswap/smart-order-router/build/module/routers/alpha-router/gas-models/gas-costs.js b/node_modules/@uniswap/smart-order-router/build/module/routers/alpha-router/gas-models/gas-costs.js
+index e3d94df..901d8ed 100644
+--- a/node_modules/@uniswap/smart-order-router/build/module/routers/alpha-router/gas-models/gas-costs.js
++++ b/node_modules/@uniswap/smart-order-router/build/module/routers/alpha-router/gas-models/gas-costs.js
+@@ -1,7 +1,7 @@
+ import { BigNumber } from '@ethersproject/bignumber';
+ import { ChainId } from '@uniswap/sdk-core';
+ import { Protocol } from '@uniswap/router-sdk';
+-import { AAVE_MAINNET, LIDO_MAINNET } from '../../../providers';
++// import { AAVE_MAINNET, LIDO_MAINNET } from '../../../providers'; // Removed for Zephyr network
+ // Cost for crossing an uninitialized tick.
+ export const COST_PER_UNINIT_TICK = BigNumber.from(0);
+ //l2 execution fee on optimism is roughly the same as mainnet
+@@ -115,18 +115,19 @@ export const SINGLE_HOP_OVERHEAD = (_id) => {
+ export const TOKEN_OVERHEAD = (id, route) => {
+     const currencies = route.protocol === Protocol.V4 ? route.currencyPath : route.tokenPath;
+     let overhead = BigNumber.from(0);
+-    if (id == ChainId.MAINNET) {
+-        // AAVE's transfer contains expensive governance snapshotting logic. We estimate
+-        // it at around 150k.
+-        if (currencies.some((t) => t.equals(AAVE_MAINNET))) {
+-            overhead = overhead.add(150000);
+-        }
+-        // LDO's reaches out to an external token controller which adds a large overhead
+-        // of around 150k.
+-        if (currencies.some((t) => t.equals(LIDO_MAINNET))) {
+-            overhead = overhead.add(150000);
+-        }
+-    }
++    // Removed AAVE and LIDO checks for Zephyr network
++    // if (id == ChainId.MAINNET) {
++    //     // AAVE's transfer contains expensive governance snapshotting logic. We estimate
++    //     // it at around 150k.
++    //     if (currencies.some((t) => t.equals(AAVE_MAINNET))) {
++    //         overhead = overhead.add(150000);
++    //     }
++    //     // LDO's reaches out to an external token controller which adds a large overhead
++    //     // of around 150k.
++    //     if (currencies.some((t) => t.equals(LIDO_MAINNET))) {
++    //         overhead = overhead.add(150000);
++    //     }
++    // }
+     return overhead;
+ };
+ // TODO: change per chain
+diff --git a/node_modules/@uniswap/smart-order-router/build/module/routers/alpha-router/gas-models/gas-model.js b/node_modules/@uniswap/smart-order-router/build/module/routers/alpha-router/gas-models/gas-model.js
+index 489ce98..aef8dfa 100644
+--- a/node_modules/@uniswap/smart-order-router/build/module/routers/alpha-router/gas-models/gas-model.js
++++ b/node_modules/@uniswap/smart-order-router/build/module/routers/alpha-router/gas-models/gas-model.js
+@@ -1,54 +1,14 @@
+-import { ChainId, } from '@uniswap/sdk-core';
+-import { CUSD_CELO, CUSD_CELO_ALFAJORES, DAI_ARBITRUM, DAI_AVAX, DAI_BNB, DAI_GOERLI, DAI_MAINNET, DAI_OPTIMISM, DAI_OPTIMISM_GOERLI, DAI_OPTIMISM_SEPOLIA, DAI_POLYGON_MUMBAI, DAI_SEPOLIA, DAI_ZKSYNC, USDB_BLAST, USDCE_ZKSYNC, USDC_ARBITRUM, USDC_ARBITRUM_GOERLI, USDC_ARBITRUM_SEPOLIA, USDC_AVAX, USDC_BASE, USDC_BNB, USDC_BRIDGED_AVAX, USDC_CELO, USDC_ETHEREUM_GNOSIS, USDC_GOERLI, USDC_MAINNET, USDC_MOONBEAM, USDC_NATIVE_ARBITRUM, USDC_NATIVE_AVAX, USDC_NATIVE_BASE, USDC_NATIVE_CELO, USDC_NATIVE_OPTIMISM, USDC_NATIVE_POLYGON, USDC_OPTIMISM, USDC_OPTIMISM_GOERLI, USDC_OPTIMISM_SEPOLIA, USDC_POLYGON, USDC_SEPOLIA, USDC_WORMHOLE_CELO, USDC_ZKSYNC, USDC_ZORA, USDT_ARBITRUM, USDT_BNB, USDT_GOERLI, USDT_MAINNET, USDT_OPTIMISM, USDT_OPTIMISM_GOERLI, USDT_OPTIMISM_SEPOLIA, WBTC_GOERLI, } from '../../../providers/token-provider';
++import { ChainId, Token } from '@uniswap/sdk-core';
++// import { CUSD_CELO, CUSD_CELO_ALFAJORES, DAI_ARBITRUM, DAI_AVAX, DAI_BNB, DAI_GOERLI, DAI_MAINNET, DAI_OPTIMISM, DAI_OPTIMISM_GOERLI, DAI_OPTIMISM_SEPOLIA, DAI_POLYGON_MUMBAI, DAI_SEPOLIA, DAI_ZKSYNC, USDB_BLAST, USDCE_ZKSYNC, USDC_ARBITRUM, USDC_ARBITRUM_GOERLI, USDC_ARBITRUM_SEPOLIA, USDC_AVAX, USDC_BASE, USDC_BNB, USDC_BRIDGED_AVAX, USDC_CELO, USDC_ETHEREUM_GNOSIS, USDC_GOERLI, USDC_MAINNET, USDC_MOONBEAM, USDC_NATIVE_ARBITRUM, USDC_NATIVE_AVAX, USDC_NATIVE_BASE, USDC_NATIVE_CELO, USDC_NATIVE_OPTIMISM, USDC_NATIVE_POLYGON, USDC_OPTIMISM, USDC_OPTIMISM_GOERLI, USDC_OPTIMISM_SEPOLIA, USDC_POLYGON, USDC_SEPOLIA, USDC_WORMHOLE_CELO, USDC_ZKSYNC, USDC_ZORA, USDT_ARBITRUM, USDT_BNB, USDT_GOERLI, USDT_MAINNET, USDT_OPTIMISM, USDT_OPTIMISM_GOERLI, USDT_OPTIMISM_SEPOLIA, WBTC_GOERLI, } from '../../../providers/token-provider';
++// Mocked tokens for Zephyr network - remove unwanted token dependencies
++const MOCK_TOKEN = new Token(ChainId.MAINNET, '0x0000000000000000000000000000000000000000', 18, 'MOCK', 'Mock Token');
+ import { WRAPPED_NATIVE_CURRENCY } from '../../../util';
+ // When adding new usd gas tokens, ensure the tokens are ordered
+ // from tokens with highest decimals to lowest decimals. For example,
+ // DAI_AVAX has 18 decimals and comes before USDC_AVAX which has 6 decimals.
+ export const usdGasTokensByChain = {
+-    [ChainId.MAINNET]: [DAI_MAINNET, USDC_MAINNET, USDT_MAINNET],
+-    [ChainId.ARBITRUM_ONE]: [
+-        DAI_ARBITRUM,
+-        USDC_ARBITRUM,
+-        USDC_NATIVE_ARBITRUM,
+-        USDT_ARBITRUM,
+-    ],
+-    [ChainId.OPTIMISM]: [
+-        DAI_OPTIMISM,
+-        USDC_OPTIMISM,
+-        USDC_NATIVE_OPTIMISM,
+-        USDT_OPTIMISM,
+-    ],
+-    [ChainId.OPTIMISM_GOERLI]: [
+-        DAI_OPTIMISM_GOERLI,
+-        USDC_OPTIMISM_GOERLI,
+-        USDT_OPTIMISM_GOERLI,
+-    ],
+-    [ChainId.OPTIMISM_SEPOLIA]: [
+-        DAI_OPTIMISM_SEPOLIA,
+-        USDC_OPTIMISM_SEPOLIA,
+-        USDT_OPTIMISM_SEPOLIA,
+-    ],
+-    [ChainId.ARBITRUM_GOERLI]: [USDC_ARBITRUM_GOERLI],
+-    [ChainId.ARBITRUM_SEPOLIA]: [USDC_ARBITRUM_SEPOLIA],
+-    [ChainId.GOERLI]: [DAI_GOERLI, USDC_GOERLI, USDT_GOERLI, WBTC_GOERLI],
+-    [ChainId.SEPOLIA]: [USDC_SEPOLIA, DAI_SEPOLIA],
+-    [ChainId.POLYGON]: [USDC_POLYGON, USDC_NATIVE_POLYGON],
+-    [ChainId.POLYGON_MUMBAI]: [DAI_POLYGON_MUMBAI],
+-    [ChainId.CELO]: [CUSD_CELO, USDC_CELO, USDC_NATIVE_CELO, USDC_WORMHOLE_CELO],
+-    [ChainId.CELO_ALFAJORES]: [CUSD_CELO_ALFAJORES],
+-    [ChainId.GNOSIS]: [USDC_ETHEREUM_GNOSIS],
+-    [ChainId.MOONBEAM]: [USDC_MOONBEAM],
+-    [ChainId.BNB]: [USDT_BNB, USDC_BNB, DAI_BNB],
+-    [ChainId.AVALANCHE]: [
+-        DAI_AVAX,
+-        USDC_AVAX,
+-        USDC_NATIVE_AVAX,
+-        USDC_BRIDGED_AVAX,
+-    ],
+-    [ChainId.BASE]: [USDC_BASE, USDC_NATIVE_BASE],
+-    [ChainId.BLAST]: [USDB_BLAST],
+-    [ChainId.ZORA]: [USDC_ZORA],
+-    [ChainId.ZKSYNC]: [DAI_ZKSYNC, USDCE_ZKSYNC, USDC_ZKSYNC],
++    // Only Zephyr network supported, all other chains removed
++    // [ChainId.MAINNET]: [DAI_MAINNET, USDC_MAINNET, USDT_MAINNET],
+ };
+ /**
+  * Factory for building gas models that can be used with any route to generate
