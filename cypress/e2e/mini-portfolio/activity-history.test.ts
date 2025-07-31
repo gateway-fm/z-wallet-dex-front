@@ -97,7 +97,8 @@ describe('mini-portfolio activity history', () => {
     cy.visit(`/swap?inputCurrency=ETH&outputCurrency=${USDC_MAINNET.address}`).hardhat({ automine: false })
 
     // Input swap info.
-    cy.get('#swap-currency-input .token-amount-input').clear().type('1').should('have.value', '1')
+    cy.get('#swap-currency-input .token-amount-input').clear().type('1')
+cy.get(.type('1').should( 1>.type('1').should(-).should('have.value', '1')
     cy.get('#swap-currency-output .token-amount-input').should('not.have.value', '')
 
     cy.get('#swap-button').click()

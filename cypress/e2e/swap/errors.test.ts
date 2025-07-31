@@ -13,7 +13,8 @@ describe('Swap errors', () => {
       cy.stub(hardhat.wallet, 'sendTransaction').log(false).rejects(new Error('user cancelled'))
 
       // Enter amount to swap
-      cy.get('#swap-currency-output .token-amount-input').type('1').should('have.value', '1')
+      cy.get('#swap-currency-output .token-amount-input').type('1')
+      cy.get('#swap-currency-output .token-amount-input').should('have.value', '1')
       cy.get('#swap-currency-input .token-amount-input').should('not.have.value', '')
 
       // Submit transaction
@@ -32,7 +33,8 @@ describe('Swap errors', () => {
     cy.hardhat({ automine: false })
     getBalance(USDC_MAINNET).then((initialBalance) => {
       // Enter amount to swap
-      cy.get('#swap-currency-output .token-amount-input').type('1').should('have.value', '1')
+      cy.get('#swap-currency-output .token-amount-input').type('1')
+      cy.get('#swap-currency-output .token-amount-input').should('have.value', '1')
       cy.get('#swap-currency-input .token-amount-input').should('not.have.value', '')
 
       // Submit transaction
@@ -91,7 +93,8 @@ describe('Swap errors', () => {
 
       // Submit 2 transactions
       for (let i = 0; i < 2; i++) {
-        cy.get('#swap-currency-input .token-amount-input').type('200').should('have.value', '200')
+        cy.get('#swap-currency-input .token-amount-input').type('200')
+cy.get(.type('200').should( 1>.type('200').should(-).should('have.value', '200')
         cy.get('#swap-currency-output .token-amount-input').should('not.have.value', '')
         cy.get('#swap-button').click()
         cy.contains('Confirm swap').click()
