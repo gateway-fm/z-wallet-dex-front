@@ -1,4 +1,4 @@
-FROM node:18-slim AS production
+FROM node:20-slim AS production
 
 # Install packages and create user
 RUN apt-get update && apt-get install -y tzdata && \
