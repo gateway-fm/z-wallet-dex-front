@@ -1,16 +1,8 @@
 # Multi-stage build for React app
 FROM node:20-slim AS builder
 
-# Install system dependencies needed for build
-RUN apt-get update && apt-get install -y \
-    git \
-    python3 \
-    make \
-    g++ \
-    && rm -rf /var/lib/apt/lists/*
-
 # Use Yarn 1.22
-RUN npm install -g --force yarn@1.22.0
+RUN npm install -g --force yarn@1.22.22
 
 WORKDIR /app
 
@@ -26,6 +18,7 @@ RUN yarn build
 
 # Remove dev dependencies and keep only production ones
 RUN yarn install --production --frozen-lockfile --ignore-scripts
+RUN yarn add serve --ignore-scripts --force
 
 # Production stage
 FROM node:20-slim AS production
@@ -37,7 +30,7 @@ RUN apt-get update && apt-get install -y tzdata && \
     rm -rf /var/lib/apt/lists/*
 
 # Use Yarn 1.22
-RUN npm install -g --force yarn@1.22.0
+RUN npm install -g --force yarn@1.22.22
 
 WORKDIR /app
 
