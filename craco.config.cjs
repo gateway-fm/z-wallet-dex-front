@@ -141,15 +141,6 @@ module.exports = {
         exclude: /node_modules/,
       }
 
-      // Configure webpack transpilation (create-react-app specifies transpilation rules in a oneOf):
-      webpackConfig.module.rules[1].oneOf = webpackConfig.module.rules[1].oneOf.map((rule) => {
-        if (rule.loader && rule.loader.match(/babel-loader/)) {
-          rule.loader = 'swc-loader'
-          delete rule.options
-        }
-        return rule
-      })
-
       // Run terser compression on node_modules before tree-shaking, so that tree-shaking is more effective.
       // This works by eliminating dead code, so that webpack can identify unused imports and tree-shake them;
       // it is only necessary for node_modules - it is done through linting for our own source code -
@@ -178,11 +169,6 @@ module.exports = {
             }
           : {}
       )
-
-      // Configure webpack resolution. webpackConfig.cache is unused with swc-loader, but the resolver can still cache:
-      webpackConfig.resolve = Object.assign(webpackConfig.resolve, {
-        unsafeCache: true,
-      })
 
       return webpackConfig
     },
