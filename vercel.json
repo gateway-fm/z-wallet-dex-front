@@ -4,7 +4,7 @@
   "framework": null,
   "buildCommand": "yarn prepare && yarn build",
   "devCommand": "yarn start",
-  "installCommand": "yarn install",
+  "installCommand": "corepack enable && corepack prepare yarn@1.22.22 --activate && yarn install",
   "outputDirectory": "build",
   "trailingSlash": false,
   "public": false,
@@ -13,7 +13,9 @@
       "NODE_OPTIONS": "--max-old-space-size=4096",
       "HUSKY": "0",
       "LINGUI_CONFIG": "./lingui.config.ts",
-      "CI": "true"
+      "CI": "true",
+      "YARN_VERSION": "1.22.22",
+      "YARN_CACHE_FOLDER": ".yarn/cache"
     }
   },
   "headers": [
