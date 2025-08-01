@@ -4,7 +4,7 @@
   "framework": null,
   "buildCommand": "yarn prepare && yarn build",
   "devCommand": "yarn start",
-  "installCommand": "corepack enable && corepack prepare yarn@1.22.22 --activate && yarn install",
+  "installCommand": "npm install -g yarn@1.22.22 && export PATH=$(npm bin -g):$PATH && yarn --version && yarn install",
   "outputDirectory": "build",
   "trailingSlash": false,
   "public": false,
