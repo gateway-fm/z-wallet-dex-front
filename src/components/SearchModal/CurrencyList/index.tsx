@@ -1,8 +1,6 @@
 import { Currency } from '@uniswap/sdk-core'
 import { CSSProperties, MutableRefObject, useCallback, useMemo } from 'react'
 import { Check } from 'react-feather'
-import { FixedSizeList } from 'react-window'
-import { Text } from 'rebass'
 import styled from 'styled-components'
 import { ThemedText } from 'theme/components'
 
@@ -12,7 +10,6 @@ import CurrencyLogo from '../../Logo/CurrencyLogo'
 import Row, { RowFixed } from '../../Row'
 import { MouseoverTooltip } from '../../Tooltip'
 import { MenuItem } from '../styled'
-import { scrollbarStyle } from './index.css'
 
 function currencyKey(currency: Currency): string {
   return currency.isToken ? currency.address : 'ETHER'
@@ -25,10 +22,13 @@ const CheckIcon = styled(Check)`
   color: ${({ theme }) => theme.accent1};
 `
 
-const CurrencyName = styled(Text)`
+const CurrencyName = styled.div`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-weight: 485;
+  font-size: 16px;
+  color: ${({ theme }) => theme.neutral1};
 `
 
 const Tag = styled.div`
@@ -137,12 +137,6 @@ export function CurrencyRow({
   )
 }
 
-interface TokenRowProps {
-  data: Array<Currency>
-  index: number
-  style: CSSProperties
-}
-
 export default function CurrencyList({
   height,
   currencies,
@@ -150,7 +144,6 @@ export default function CurrencyList({
   selectedCurrency,
   onCurrencySelect,
   otherCurrency,
-  fixedListRef,
   showCurrencyAmount,
 }: {
   height: number
@@ -159,7 +152,7 @@ export default function CurrencyList({
   selectedCurrency?: Currency | null
   onCurrencySelect: (currency: Currency, hasWarning?: boolean) => void
   otherCurrency?: Currency | null
-  fixedListRef?: MutableRefObject<FixedSizeList | undefined>
+  fixedListRef?: MutableRefObject<any | undefined>
   showCurrencyAmount?: boolean
 }) {
   const itemData: Currency[] = useMemo(() => {
@@ -169,22 +162,23 @@ export default function CurrencyList({
     return currencies
   }, [currencies, otherListTokens])
 
-  const Row = useCallback(
-    function TokenRow({ data, index, style }: TokenRowProps) {
-      const row: Currency = data[index]
+  const itemKey = useCallback((index: number, data: typeof itemData) => {
+    const currency = data[index]
+    return currencyKey(currency)
+  }, [])
 
-      const currency = row
+  return (
+    <div data-testid="currency-list-wrapper" style={{ height, overflow: 'auto' }}>
+      {itemData.map((currency: Currency, index: number) => {
+        const isSelected = Boolean(currency && selectedCurrency && selectedCurrency.equals(currency))
+        const otherSelected = Boolean(currency && otherCurrency && otherCurrency.equals(currency))
+        const handleSelect = (hasWarning: boolean) => {
+          return currency && onCurrencySelect(currency, hasWarning)
+        }
 
-      const isSelected = Boolean(currency && selectedCurrency && selectedCurrency.equals(currency))
-      const otherSelected = Boolean(currency && otherCurrency && otherCurrency.equals(currency))
-      const handleSelect = (hasWarning: boolean) => {
-        return currency && onCurrencySelect(currency, hasWarning)
-      }
-
-      if (currency) {
         return (
           <CurrencyRow
-            style={style}
+            key={itemKey(index, itemData)}
             currency={currency}
             isSelected={isSelected}
             onSelect={handleSelect}
@@ -192,30 +186,6 @@ export default function CurrencyList({
             showCurrencyAmount={showCurrencyAmount}
           />
         )
-      } else {
-        return null
-      }
-    },
-    [selectedCurrency, otherCurrency, onCurrencySelect, showCurrencyAmount]
-  )
-
-  const itemKey = useCallback((index: number, data: typeof itemData) => {
-    const currency = data[index]
-    return currencyKey(currency)
-  }, [])
-
-  return (
-    <div data-testid="currency-list-wrapper">
-      {(FixedSizeList as any)({
-        className: scrollbarStyle,
-        height,
-        ref: fixedListRef,
-        width: '100%',
-        itemData,
-        itemCount: itemData.length,
-        itemSize: 56,
-        itemKey,
-        children: Row,
       })}
     </div>
   )
