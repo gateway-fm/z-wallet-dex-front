@@ -36,8 +36,7 @@ const getIsCoinbaseWalletBrowser = () => isMobile && getIsCoinbaseWallet()
 const getIsMetaMaskBrowser = () => isMobile && getIsMetaMaskWallet()
 const getIsInjectedMobileBrowser = () => getIsCoinbaseWalletBrowser() || getIsMetaMaskBrowser()
 
-const getShouldAdvertiseMetaMask = () =>
-  !getIsMetaMaskWallet() && !isMobile && (!getIsInjected() || getIsCoinbaseWallet())
+const getShouldAdvertiseMetaMask = () => !getIsMetaMaskWallet() && (!getIsInjected() || getIsCoinbaseWallet())
 const getIsGenericInjector = () => getIsInjected() && !getIsMetaMaskWallet() && !getIsCoinbaseWallet()
 
 const [web3Injected, web3InjectedHooks] = initializeConnector<MetaMask>((actions) => new MetaMask({ actions, onError }))
@@ -48,8 +47,12 @@ export const injectedConnection: Connection = {
   hooks: web3InjectedHooks,
   type: ConnectionType.INJECTED,
   getIcon: (isDarkMode: boolean) => getInjection(isDarkMode).icon,
-  shouldDisplay: () => getIsMetaMaskWallet() || getShouldAdvertiseMetaMask() || getIsGenericInjector(),
-  // If on non-injected, non-mobile browser, prompt user to install Metamask
+  shouldDisplay: () =>
+    getIsMetaMaskWallet() ||
+    getShouldAdvertiseMetaMask() ||
+    getIsGenericInjector() ||
+    (isMobile && !getIsInjectedMobileBrowser()),
+  // If on non-injected browser, prompt user to install Metamask
   overrideActivate: () => {
     if (getShouldAdvertiseMetaMask()) {
       window.open('https://metamask.io/', 'inst_metamask')

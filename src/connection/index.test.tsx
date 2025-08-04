@@ -173,11 +173,12 @@ describe('connection utility/metadata tests', () => {
     const { displayed, injected, coinbase } = createWalletEnvironment(undefined, true)
 
     expect(displayed.includes(coinbase)).toBe(true)
-    // Don't show injected connection on plain mWeb browser
-    expect(displayed.includes(injected)).toBe(false)
+    // Show injected connection (MetaMask) on plain mWeb browser for installation
+    expect(displayed.includes(injected)).toBe(true)
+    expect(injected.getName()).toBe('Install MetaMask')
     // Expect coinbase option to launch coinbase app in a regular mobile browser
     expect(coinbase.overrideActivate?.()).toBeTruthy()
 
-    expect(displayed.length).toEqual(1)
+    expect(displayed.length).toEqual(2)
   })
 })
