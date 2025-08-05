@@ -79,6 +79,7 @@ export default createReducer<SwapState>(initialState, (builder) =>
         independentField: state.independentField === Field.INPUT ? Field.OUTPUT : Field.INPUT,
         [Field.INPUT]: { currencyId: state[Field.OUTPUT].currencyId },
         [Field.OUTPUT]: { currencyId: state[Field.INPUT].currencyId },
+        typedValue: state.typedValue,
       }
     })
     .addCase(forceExactInput, (state) => {
