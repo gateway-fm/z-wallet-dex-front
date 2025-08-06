@@ -189,10 +189,14 @@ export function useDerivedSwapInfo(state: SwapState, chainId: ChainId | undefine
       }
     }
 
-    // compare input balance to max input based on version
-    const [balanceIn, maxAmountIn] = [currencyBalances[Field.INPUT], trade?.trade?.maximumAmountIn(allowedSlippage)]
+    // compare input balance to required input amount based on trade
+    const balanceIn = currencyBalances[Field.INPUT]
+    const inputAmount = trade?.trade?.inputAmount
+    const maxAmountIn = trade?.trade?.maximumAmountIn(allowedSlippage)
 
-    if (balanceIn && maxAmountIn && balanceIn.lessThan(maxAmountIn)) {
+    if (balanceIn && inputAmount && balanceIn.lessThan(inputAmount)) {
+      inputError = <Trans>Insufficient {balanceIn.currency.symbol} balance</Trans>
+    } else if (balanceIn && maxAmountIn && balanceIn.lessThan(maxAmountIn)) {
       inputError = <Trans>Insufficient {balanceIn.currency.symbol} balance</Trans>
     }
 

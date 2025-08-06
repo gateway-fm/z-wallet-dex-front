@@ -4,6 +4,7 @@ import { ZEPHYR_CHAIN_ID } from 'constants/chains'
 import { PermitSignature } from 'hooks/usePermitAllowance'
 import { useUniversalRouterSwapCallback } from 'hooks/useUniversalRouter'
 import { useZephyrSwapCallback } from 'hooks/useZephyrSwap'
+import useCurrencyBalance from 'lib/hooks/useCurrencyBalance'
 import { useCallback } from 'react'
 import { InterfaceTrade } from 'state/routing/types'
 import { isClassicTrade } from 'state/routing/utils'
@@ -28,9 +29,9 @@ export function useSwapCallback(
   allowedSlippage: Percent, // in bips
   permitSignature: PermitSignature | undefined
 ) {
+  const { account, chainId } = useWeb3React()
   const deadline = useTransactionDeadline()
   const addTransaction = useTransactionAdder()
-  const { account, chainId } = useWeb3React()
 
   const universalRouterSwapCallback = useUniversalRouterSwapCallback(isClassicTrade(trade) ? trade : undefined, {
     slippageTolerance: allowedSlippage,
@@ -44,13 +45,19 @@ export function useSwapCallback(
     account
   )
 
-  // Use Universal Router for other networks, but SwapRouter02 for Zephyr
   const swapCallback = chainId === ZEPHYR_CHAIN_ID ? zephyrSwapCallback : universalRouterSwapCallback
+
+  const inputBalance = useCurrencyBalance(account, trade?.inputAmount.currency)
 
   return useCallback(async () => {
     if (!trade) throw new Error('missing trade')
     if (!account || !chainId) throw new Error('wallet must be connected to swap')
     if (!swapCallback) throw new Error('swap callback not available')
+
+    // Check if user has sufficient balance before attempting the swap
+    if (inputBalance && trade.inputAmount && inputBalance.lessThan(trade.inputAmount)) {
+      throw new Error(`Insufficient ${trade.inputAmount.currency.symbol} balance`)
+    }
 
     const result = await swapCallback()
 
@@ -75,5 +82,5 @@ export function useSwapCallback(
     addTransaction(result.response, swapInfo, deadline?.toNumber())
 
     return result
-  }, [trade, account, chainId, swapCallback, allowedSlippage, addTransaction, deadline])
+  }, [trade, account, chainId, swapCallback, allowedSlippage, addTransaction, deadline, inputBalance])
 }
