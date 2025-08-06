@@ -26,8 +26,10 @@ export function useZephyrRouting(
       return { loading: poolsLoading, route: '', error: undefined }
     }
 
-    const inputCurrency = amountSpecified.currency
-    const outputCurrency = otherCurrency
+    // For EXACT_INPUT: amountSpecified = input amount, otherCurrency = output currency
+    // For EXACT_OUTPUT: amountSpecified = output amount, otherCurrency = input currency
+    const inputCurrency = tradeType === TradeType.EXACT_INPUT ? amountSpecified.currency : otherCurrency
+    const outputCurrency = tradeType === TradeType.EXACT_INPUT ? otherCurrency : amountSpecified.currency
 
     // Look for direct pool between tokens
     const directPool = pools?.find((pool) => {
@@ -44,7 +46,7 @@ export function useZephyrRouting(
 
     if (directPool) {
       // Direct pool found - calculate trade
-      console.log('Direct pool found for', inputCurrency.symbol, '/', outputCurrency.symbol)
+
       return calculateDirectTrade(tradeType, amountSpecified, otherCurrency, directPool)
     }
 
@@ -52,7 +54,6 @@ export function useZephyrRouting(
     const hasUSDCPair = inputCurrency.symbol === 'USDC' || outputCurrency.symbol === 'USDC'
 
     if (!hasUSDCPair && pools && pools.length > 0) {
-      console.log('Trying multi-hop route through USDC for', inputCurrency.symbol, '/', outputCurrency.symbol)
       try {
         return calculateMultiHopTrade(tradeType, amountSpecified, otherCurrency, pools)
       } catch (error) {
@@ -62,7 +63,6 @@ export function useZephyrRouting(
 
     // No route found - return error
     console.warn('No route found for', inputCurrency.symbol, '/', outputCurrency.symbol)
-    console.log('Available pools:', pools?.length || 0)
 
     return {
       loading: false,
@@ -87,7 +87,10 @@ function calculateDirectTrade(
   error?: string
 } {
   try {
-    const inputCurrency = amountSpecified.currency
+    // For EXACT_INPUT: amountSpecified = input amount, otherCurrency = output currency
+    // For EXACT_OUTPUT: amountSpecified = output amount, otherCurrency = input currency
+    const inputCurrency = tradeType === TradeType.EXACT_INPUT ? amountSpecified.currency : otherCurrency
+    const outputCurrency = tradeType === TradeType.EXACT_INPUT ? otherCurrency : amountSpecified.currency
     const isToken0Input = pool.token0.id.toLowerCase() === inputCurrency.wrapped.address.toLowerCase()
 
     // Get pool prices
@@ -124,7 +127,7 @@ function calculateDirectTrade(
 
       // Get decimal difference between tokens
       const inputDecimals = inputCurrency.decimals
-      const outputDecimals = otherCurrency.decimals
+      const outputDecimals = outputCurrency.decimals
       const decimalDifference = outputDecimals - inputDecimals
 
       // Convert the floating point exchange rate to a ratio with proper scaling
@@ -154,9 +157,20 @@ function calculateDirectTrade(
         )
       }
 
-      outputAmount = CurrencyAmount.fromRawAmount(otherCurrency, outputAmountRaw)
+      outputAmount = CurrencyAmount.fromRawAmount(outputCurrency, outputAmountRaw)
     } else {
       // For EXACT_OUTPUT, we need to calculate required input amount
+
+      // First, create the correct output amount with proper currency and decimals
+      const humanReadableAmount = amountSpecified.toExact()
+      const parts = humanReadableAmount.split('.')
+      const integerPart = parts[0] || '0'
+      const decimalPart = parts[1] || ''
+      const totalDigits =
+        integerPart + decimalPart.padEnd(outputCurrency.decimals, '0').slice(0, outputCurrency.decimals)
+      const outputRawAmount = JSBI.BigInt(totalDigits)
+      outputAmount = CurrencyAmount.fromRawAmount(outputCurrency, outputRawAmount)
+
       let exchangeRate: number
 
       if (isToken0Input) {
@@ -169,13 +183,12 @@ function calculateDirectTrade(
         exchangeRate = 1 / token1Price
       }
 
-      // The desired output amount is amountSpecified
-      // We need to calculate the required input amount
-      const outputAmountBigInt = amountSpecified.quotient
+      // Use the correct output amount
+      const outputAmountBigInt = outputAmount.quotient
 
       // Get decimal difference between tokens
       const inputDecimals = inputCurrency.decimals
-      const outputDecimals = otherCurrency.decimals
+      const outputDecimals = outputCurrency.decimals
       const decimalDifference = inputDecimals - outputDecimals
 
       // Convert the floating point exchange rate to a ratio with proper scaling
@@ -206,22 +219,26 @@ function calculateDirectTrade(
       }
 
       const calculatedInputAmount = CurrencyAmount.fromRawAmount(inputCurrency, inputAmountRaw)
-      outputAmount = amountSpecified
+      // outputAmount was already created above
 
-      return {
+      const result = {
         inputAmount: calculatedInputAmount,
         outputAmount,
         route: `${inputCurrency.symbol} → ${otherCurrency.symbol}`,
         loading: false,
       }
+
+      return result
     }
 
-    return {
+    const result = {
       inputAmount: tradeType === TradeType.EXACT_INPUT ? amountSpecified : undefined,
       outputAmount,
       route: `${inputCurrency.symbol} → ${otherCurrency.symbol}`,
       loading: false,
     }
+
+    return result
   } catch (error) {
     console.error('Direct trade calculation failed:', error)
     return {

@@ -92,19 +92,15 @@ export function useDebouncedTrade(
 
     // For now, return a synchronous result with fallback values
     try {
+      // Sort tokens by address for Pool constructor (required for Uniswap V3)
+      const tokenA = zephyrRouting.inputAmount.currency.wrapped
+      const tokenB = zephyrRouting.outputAmount.currency.wrapped
+      const [token0, token1] = tokenA.sortsBefore(tokenB) ? [tokenA, tokenB] : [tokenB, tokenA]
+
       // Use proper 1:1 price accounting for decimals
-      const { sqrtPriceX96, tick, liquidity } = getZephyrPoolParams(
-        zephyrRouting.inputAmount.currency.wrapped,
-        zephyrRouting.outputAmount.currency.wrapped
-      )
-      const pool = new Pool(
-        zephyrRouting.inputAmount.currency.wrapped,
-        zephyrRouting.outputAmount.currency.wrapped,
-        FeeAmount.MEDIUM,
-        sqrtPriceX96,
-        liquidity,
-        tick
-      )
+      const { sqrtPriceX96, tick, liquidity } = getZephyrPoolParams(token0, token1)
+
+      const pool = new Pool(token0, token1, FeeAmount.MEDIUM, sqrtPriceX96, liquidity, tick)
 
       const v3Route = new V3Route([pool], zephyrRouting.inputAmount.currency, zephyrRouting.outputAmount.currency)
 

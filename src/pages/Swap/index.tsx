@@ -297,10 +297,10 @@ function Swap({
     outputTax,
   } = swapInfo
 
-  const [inputTokenHasTax, outputTokenHasTax] = useMemo(
-    () => [!inputTax.equalTo(0), !outputTax.equalTo(0)],
-    [inputTax, outputTax]
-  )
+  const [inputTokenHasTax, outputTokenHasTax] = useMemo(() => {
+    const result = [!inputTax.equalTo(0), !outputTax.equalTo(0)]
+    return result
+  }, [inputTax, outputTax])
 
   useEffect(() => {
     // Force exact input if the user switches to an output token with tax
@@ -314,19 +314,19 @@ function Swap({
   } = useWrapCallback(currencies[Field.INPUT], currencies[Field.OUTPUT], typedValue)
   const showWrap: boolean = wrapType !== WrapType.NOT_APPLICABLE
 
-  const parsedAmounts = useMemo(
-    () =>
-      showWrap
-        ? {
-            [Field.INPUT]: parsedAmount,
-            [Field.OUTPUT]: parsedAmount,
-          }
-        : {
-            [Field.INPUT]: independentField === Field.INPUT ? parsedAmount : trade?.inputAmount,
-            [Field.OUTPUT]: independentField === Field.OUTPUT ? parsedAmount : trade?.postTaxOutputAmount,
-          },
-    [independentField, parsedAmount, showWrap, trade]
-  )
+  const parsedAmounts = useMemo(() => {
+    const result = showWrap
+      ? {
+          [Field.INPUT]: parsedAmount,
+          [Field.OUTPUT]: parsedAmount,
+        }
+      : {
+          [Field.INPUT]: independentField === Field.INPUT ? parsedAmount : trade?.inputAmount,
+          [Field.OUTPUT]: independentField === Field.OUTPUT ? parsedAmount : trade?.postTaxOutputAmount,
+        }
+
+    return result
+  }, [independentField, parsedAmount, showWrap, trade])
 
   const showFiatValueInput = Boolean(parsedAmounts[Field.INPUT])
   const showFiatValueOutput = Boolean(parsedAmounts[Field.OUTPUT])
@@ -400,8 +400,8 @@ function Swap({
   })
 
   const { formatCurrencyAmount } = useFormatter()
-  const formattedAmounts = useMemo(
-    () => ({
+  const formattedAmounts = useMemo(() => {
+    const result = {
       [independentField]: typedValue,
       [dependentField]: showWrap
         ? parsedAmounts[independentField]?.toExact() ?? ''
@@ -410,9 +410,10 @@ function Swap({
             type: NumberType.SwapTradeAmount,
             placeholder: '',
           }),
-    }),
-    [dependentField, formatCurrencyAmount, independentField, parsedAmounts, showWrap, typedValue]
-  )
+    }
+
+    return result
+  }, [dependentField, formatCurrencyAmount, independentField, parsedAmounts, showWrap, typedValue])
 
   const userHasSpecifiedInputOutput = Boolean(
     currencies[Field.INPUT] && currencies[Field.OUTPUT] && parsedAmounts[independentField]?.greaterThan(JSBI.BigInt(0))
@@ -621,7 +622,11 @@ function Swap({
           <SwapCurrencyInputPanel
             label={<Trans>You pay</Trans>}
             disabled={disableTokenInputs}
-            value={formattedAmounts[Field.INPUT]}
+            value={
+              independentField === Field.OUTPUT && (routeIsSyncing || routeIsLoading)
+                ? '...'
+                : formattedAmounts[Field.INPUT]
+            }
             showMaxButton={showMaxButton}
             currency={currencies[Field.INPUT] ?? null}
             onUserInput={handleTypeInput}
@@ -639,7 +644,7 @@ function Swap({
             data-testid="swap-currency-button"
             onClick={() => {
               if (disableTokenInputs) return
-              onSwitchTokens(inputTokenHasTax, formattedAmounts[dependentField])
+              onSwitchTokens(inputTokenHasTax, formattedAmounts[dependentField], formattedAmounts[independentField])
             }}
             color={theme.neutral1}
           >
