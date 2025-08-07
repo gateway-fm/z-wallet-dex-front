@@ -39,10 +39,16 @@ export function useSwapCallback(
   })
 
   const { callback: zephyrSwapCallback } = useZephyrSwapV2(
-    isClassicTrade(trade) ? trade : undefined,
+    isClassicTrade(trade)
+      ? {
+          inputAmount: trade.inputAmount,
+          outputAmount: trade.outputAmount,
+          tradeType: trade.tradeType,
+        }
+      : undefined,
     Number(allowedSlippage.multiply(100).toFixed(0)) / 100, // Convert Percent to number
     account,
-    undefined // callData will be provided by the trade object in V2
+    undefined // callData will be provided by the routing system
   )
 
   // Use Universal Router for other networks, but SwapRouter02 for Zephyr

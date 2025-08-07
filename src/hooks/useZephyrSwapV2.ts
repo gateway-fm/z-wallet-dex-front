@@ -1,21 +1,30 @@
+import { Currency, CurrencyAmount, TradeType } from '@uniswap/sdk-core'
 import { useWeb3React } from '@web3-react/core'
-import { useMemo } from 'react'
-import { ClassicTrade, TradeFillType } from 'state/routing/types'
 import { ApprovalState } from 'lib/hooks/useApproval'
+import { useMemo } from 'react'
+import { TradeFillType } from 'state/routing/types'
 
+// Using existing ABI
+import ZephyrSwapRouterABI from '../abis/zephyr-swap-router.json'
 import { CONTRACTS_CONFIG } from '../config/zephyr'
 import { ZEPHYR_CHAIN_ID } from '../constants/chains'
 import { useContract } from './useContract'
 import { useZephyrTokenApproval } from './useZephyrApproval'
 
-// Using existing ABI
-import ZephyrSwapRouterABI from '../abis/zephyr-swap-router.json'
+/**
+ * Simplified trade interface for Zephyr swaps
+ */
+interface SimpleTrade {
+  inputAmount: CurrencyAmount<Currency>
+  outputAmount: CurrencyAmount<Currency>
+  tradeType: TradeType
+}
 
 /**
  * Returns the swap call parameters for a trade on Zephyr network using the new routing system
  */
 export function useZephyrSwapV2(
-  trade: ClassicTrade | undefined,
+  trade: SimpleTrade | undefined,
   allowedSlippage: number,
   recipientAddress: string | null | undefined,
   callData?: string
@@ -95,5 +104,5 @@ export function useZephyrSwapV2(
     }
 
     return { callback }
-  }, [trade, allowedSlippage, recipientAddress, account, chainId, provider, swapRouter, callData, approvalState, approve])
+  }, [trade, recipientAddress, account, chainId, provider, swapRouter, callData, approvalState, approve])
 }

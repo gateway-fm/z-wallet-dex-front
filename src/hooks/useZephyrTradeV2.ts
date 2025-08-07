@@ -1,8 +1,7 @@
 import { Currency, CurrencyAmount, TradeType } from '@uniswap/sdk-core'
 import { useWeb3React } from '@web3-react/core'
 import { useMemo } from 'react'
-import { ClassicTrade, TradeFillType } from 'state/routing/types'
-import { ApprovalState } from 'lib/hooks/useApproval'
+import { TradeFillType } from 'state/routing/types'
 
 import { ZEPHYR_CHAIN_ID } from '../constants/chains'
 import { useZephyrRoutingV2 } from './useZephyrRoutingV2'
@@ -23,7 +22,6 @@ export function useZephyrTradeV2(
   route: string
   loading: boolean
   error?: string
-  trade?: ClassicTrade
   executeSwap: (() => Promise<{ type: TradeFillType.Classic; response: any }>) | null
 } {
   const { account, chainId } = useWeb3React()
@@ -35,33 +33,19 @@ export function useZephyrTradeV2(
     otherCurrency
   )
 
-  // Create a mock ClassicTrade object for compatibility with existing swap hook
-  const trade = useMemo((): ClassicTrade | undefined => {
-    if (!inputAmount || !outputAmount || !amountSpecified || !otherCurrency) {
-      return undefined
-    }
-
-    // Mock ClassicTrade object with required properties
-    return {
-      inputAmount,
-      outputAmount,
-      tradeType,
-      route: {
-        // Mock route properties needed by swap hook
-        input: inputAmount.currency,
-        output: outputAmount.currency,
-        pools: [], // Not used in our implementation
-      },
-      // Add other required properties with defaults
-      gasEstimate: undefined,
-      blockNumber: undefined,
-      requestId: undefined,
-      quoteId: undefined,
-    } as ClassicTrade
-  }, [inputAmount, outputAmount, tradeType, amountSpecified, otherCurrency])
-
-  // Get swap callback
-  const { callback: executeSwap } = useZephyrSwapV2(trade, allowedSlippage, account, callData)
+  // Get swap callback with direct parameters instead of trade object
+  const { callback: executeSwap } = useZephyrSwapV2(
+    inputAmount && outputAmount
+      ? {
+          inputAmount,
+          outputAmount,
+          tradeType,
+        }
+      : undefined,
+    allowedSlippage,
+    account,
+    callData
+  )
 
   // Ensure we're on the right chain
   const isValidChain = chainId === ZEPHYR_CHAIN_ID
@@ -82,8 +66,7 @@ export function useZephyrTradeV2(
       route,
       loading,
       error,
-      trade,
       executeSwap,
     }
-  }, [isValidChain, inputAmount, outputAmount, route, loading, error, trade, executeSwap])
+  }, [isValidChain, inputAmount, outputAmount, route, loading, error, executeSwap])
 }
