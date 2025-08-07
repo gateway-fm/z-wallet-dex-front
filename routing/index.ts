@@ -1,1 +1,0 @@
-export { getSwapData } from './route';
