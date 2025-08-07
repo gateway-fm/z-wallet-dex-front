@@ -14,7 +14,7 @@ import { useAllLists, useCombinedActiveList, useCombinedTokenMapFromUrls } from 
 import { WrappedTokenInfo } from '../state/lists/wrappedTokenInfo'
 import { deserializeToken, useUserAddedTokens } from '../state/user/hooks'
 import { useUnsupportedTokenList } from './../state/lists/hooks'
-import { useZephyrTokens } from './useZephyrTokens'
+import { useZephyrTokens } from './useZephyrTokensV2'
 
 type Maybe<T> = T | null | undefined
 

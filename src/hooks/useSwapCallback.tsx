@@ -3,7 +3,7 @@ import { useWeb3React } from '@web3-react/core'
 import { ZEPHYR_CHAIN_ID } from 'constants/chains'
 import { PermitSignature } from 'hooks/usePermitAllowance'
 import { useUniversalRouterSwapCallback } from 'hooks/useUniversalRouter'
-import { useZephyrSwapCallback } from 'hooks/useZephyrSwap'
+import { useZephyrSwapV2 } from 'hooks/useZephyrSwapV2'
 import { useCallback } from 'react'
 import { InterfaceTrade } from 'state/routing/types'
 import { isClassicTrade } from 'state/routing/utils'
@@ -38,10 +38,11 @@ export function useSwapCallback(
     permit: permitSignature,
   })
 
-  const { callback: zephyrSwapCallback } = useZephyrSwapCallback(
+  const { callback: zephyrSwapCallback } = useZephyrSwapV2(
     isClassicTrade(trade) ? trade : undefined,
     Number(allowedSlippage.multiply(100).toFixed(0)) / 100, // Convert Percent to number
-    account
+    account,
+    undefined // callData will be provided by the trade object in V2
   )
 
   // Use Universal Router for other networks, but SwapRouter02 for Zephyr
