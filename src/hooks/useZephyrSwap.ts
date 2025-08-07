@@ -52,8 +52,6 @@ export function useZephyrSwapCallback(
 
     const callback = async (): Promise<{ type: TradeFillType.Classic; response: any }> => {
       try {
-        console.log('Executing Zephyr swap with SwapRouter02')
-
         const { inputAmount, outputAmount } = trade
         const tokenIn = inputAmount.currency
         const tokenOut = outputAmount.currency
@@ -62,33 +60,17 @@ export function useZephyrSwapCallback(
           throw new Error('Both currencies must be tokens for Zephyr swaps')
         }
 
-        console.log('Trade details:', {
-          tokenIn: tokenIn.address,
-          tokenOut: tokenOut.address,
-          amountIn: inputAmount.quotient.toString(),
-          expectedAmountOut: outputAmount.quotient.toString(),
-        })
-
         // Handle token approval using the existing hook
         if (approvalState !== ApprovalState.APPROVED) {
-          console.log(`Token ${tokenIn.symbol} needs approval`)
           await approve()
-          console.log('Approval completed')
         }
 
         // Find correct fee tier
         const fee = await findPoolFee(tokenIn, tokenOut, pools, provider)
 
-        // Calculate slippage (using higher slippage for debugging)
-        const debugSlippage = 50
-        const slippagePercent = new Percent(Math.floor(debugSlippage * 100), 10000)
+        // Use user-configured slippage tolerance
+        const slippagePercent = new Percent(Math.floor(allowedSlippage * 100), 10000)
         const minAmountOut = trade.minimumAmountOut(slippagePercent)
-
-        console.log('Slippage calculation:', {
-          userSlippage: `${allowedSlippage}%`,
-          debugSlippage: `${debugSlippage}%`,
-          minAmountOut: minAmountOut.quotient.toString(),
-        })
 
         // Get quote from Quoter for better pricing
         let finalAmountOutMinimum = minAmountOut.quotient.toString()
@@ -102,9 +84,8 @@ export function useZephyrSwapCallback(
           )
           if (quoterAmountOut) {
             const quoterBasedOutput = CurrencyAmount.fromRawAmount(tokenOut, quoterAmountOut.toString())
-            const quoterMinAmountOut = quoterBasedOutput.multiply(100 - debugSlippage).divide(100)
+            const quoterMinAmountOut = quoterBasedOutput.multiply(100 - allowedSlippage).divide(100)
             finalAmountOutMinimum = quoterMinAmountOut.quotient.toString()
-            console.log('Using Quoter-based pricing')
           }
         } catch (quoterError) {
           console.warn('Quoter failed, using GraphQL pricing:', quoterError.message)
@@ -121,14 +102,10 @@ export function useZephyrSwapCallback(
           sqrtPriceLimitX96: 0,
         }
 
-        console.log('Executing exactInputSingle with params:', params)
-
         const swapResult = await swapRouter.exactInputSingle(params, {
           value: tokenIn.isNative ? inputAmount.quotient.toString() : '0',
           gasLimit: 500000,
         })
-
-        console.log('Swap transaction sent:', swapResult.hash)
 
         return {
           type: TradeFillType.Classic,
@@ -162,13 +139,13 @@ async function findPoolFee(tokenIn: any, tokenOut: any, pools: any[], provider: 
 
     if (matchingPool) {
       const fee = parseInt(matchingPool.feeTier, 10)
-      console.log('Found pool from GraphQL:', { poolId: matchingPool.id, fee })
+
       return fee
     }
   }
 
   // Try different fee tiers on-chain
-  console.log('Checking available fee tiers on-chain')
+
   const feeTiers = [8000, 10000, 3000, 500]
   const factory = new Contract(
     CONTRACTS_CONFIG.V3_CORE_FACTORY,
@@ -180,15 +157,11 @@ async function findPoolFee(tokenIn: any, tokenOut: any, pools: any[], provider: 
     try {
       const poolAddress = await factory.getPool(tokenIn.address, tokenOut.address, testFee)
       if (poolAddress && poolAddress !== '0x0000000000000000000000000000000000000000') {
-        console.log(`Found pool with fee ${testFee}: ${poolAddress}`)
         return testFee
       }
-    } catch (error) {
-      console.log(`Error checking fee ${testFee}:`, error.message)
-    }
+    } catch (error) {}
   }
 
-  console.log('No pool found, using default fee 3000')
   return 3000 // Default fallback
 }
 
@@ -209,11 +182,6 @@ async function getQuoterPrice(tokenIn: any, tokenOut: any, fee: number, amountIn
     amountIn,
     0
   )
-
-  console.log('Quoter price comparison:', {
-    inputAmount: amountIn,
-    quoterAmountOut: quoterAmountOut.toString(),
-  })
 
   return quoterAmountOut
 }

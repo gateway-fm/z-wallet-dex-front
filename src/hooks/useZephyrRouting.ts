@@ -219,7 +219,6 @@ function calculateDirectTrade(
       }
 
       const calculatedInputAmount = CurrencyAmount.fromRawAmount(inputCurrency, inputAmountRaw)
-      // outputAmount was already created above
 
       const result = {
         inputAmount: calculatedInputAmount,
