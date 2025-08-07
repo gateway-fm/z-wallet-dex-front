@@ -28,13 +28,13 @@
     "cypress:run": "cypress run --browser chrome --e2e",
     "deduplicate": "yarn-deduplicate --strategy=highest",
     "postinstall": "yarn patch-package",
-    "docker:build": "docker buildx build --platform linux/amd64 --load -t nekrasovgfm/zephyr-dex:latest .",
-    "docker:build:native": "docker build -t nekrasovgfm/zephyr-dex:native .",
-    "docker:run": "docker run --rm -p 3000:3000 nekrasovgfm/zephyr-dex:latest",
-    "docker:run:native": "docker run --rm -p 3000:3000 nekrasovgfm/zephyr-dex:native",
-    "docker:push": "docker push nekrasovgfm/zephyr-dex:latest",
-    "docker:build:multi": "docker buildx build --platform linux/amd64,linux/arm64 -t nekrasovgfm/zephyr-dex:latest --push .",
-    "docker:build:aws": "docker build --platform linux/amd64 -t nekrasovgfm/zephyr-dex:latest ."
+    "docker:build": "docker buildx build --platform linux/amd64 --load -t gatewayfm/zephyr-dex:latest .",
+    "docker:build:native": "docker build -t gatewayfm/zephyr-dex:native .",
+    "docker:run": "docker run --rm -p 3000:3000 gatewayfm/zephyr-dex:latest",
+    "docker:run:native": "docker run --rm -p 3000:3000 gatewayfm/zephyr-dex:native",
+    "docker:push": "docker push gatewayfm/zephyr-dex:latest",
+    "docker:build:multi": "docker buildx build --platform linux/amd64,linux/arm64 -t gatewayfm/zephyr-dex:latest --push .",
+    "docker:build:aws": "docker build --platform linux/amd64 -t gatewayfm/zephyr-dex:latest ."
   },
   "lint-staged": {
     "yarn.lock": [
