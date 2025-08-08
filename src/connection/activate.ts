@@ -1,7 +1,7 @@
 import { ChainId } from '@uniswap/sdk-core'
 import { Connection } from 'connection/types'
-import { atom } from 'jotai'
-import { useAtomValue, useUpdateAtom } from 'jotai/utils'
+import { atom, useSetAtom } from 'jotai'
+import { useAtomValue } from 'jotai/utils'
 import { useCallback } from 'react'
 import { useAppDispatch } from 'state/hooks'
 import { updateSelectedWallet } from 'state/user/reducer'
@@ -23,7 +23,7 @@ const activationStateAtom = atom<ActivationState>(IDLE_ACTIVATION_STATE)
 
 function useTryActivation() {
   const dispatch = useAppDispatch()
-  const setActivationState = useUpdateAtom(activationStateAtom)
+  const setActivationState = useSetAtom(activationStateAtom)
 
   return useCallback(
     async (connection: Connection, onSuccess: () => void, chainId?: ChainId) => {
@@ -64,7 +64,7 @@ function useTryActivation() {
 }
 
 function useCancelActivation() {
-  const setActivationState = useUpdateAtom(activationStateAtom)
+  const setActivationState = useSetAtom(activationStateAtom)
   return useCallback(
     () =>
       setActivationState((activationState) => {
