@@ -2,6 +2,15 @@ import { Currency, CurrencyAmount, TradeType } from '@uniswap/sdk-core'
 import { useMemo, useState, useEffect } from 'react'
 import { getSwapData, SwapParams, SwapType } from '../lib/routing'
 
+interface RoutingResult {
+  inputAmount?: CurrencyAmount<Currency>
+  outputAmount?: CurrencyAmount<Currency>
+  route: string
+  loading: boolean
+  error?: string
+  callData?: string
+}
+
 /**
  * New routing hook using blockchain team's solution
  */
@@ -9,32 +18,17 @@ export function useZephyrRoutingV2(
   tradeType: TradeType,
   amountSpecified?: CurrencyAmount<Currency>,
   otherCurrency?: Currency
-): {
-  inputAmount?: CurrencyAmount<Currency>
-  outputAmount?: CurrencyAmount<Currency>
-  route: string
-  loading: boolean
-  error?: string
-  callData?: string
-} {
-  const [routingState, setRoutingState] = useState<{
-    callData?: string
-    amountQuoted?: bigint
-    route: string
-    loading: boolean
-    error?: string
-  }>({ route: '', loading: false })
+): RoutingResult {
+  const [loading, setLoading] = useState(false)
+  const [result, setResult] = useState<Omit<RoutingResult, 'loading'>>({ route: '' })
 
   const swapParams = useMemo((): SwapParams | null => {
     if (!amountSpecified || !otherCurrency) return null
 
-    const inputCurrency = amountSpecified.currency
-    const outputCurrency = otherCurrency
-
     return {
-      signer: '0x0000000000000000000000000000000000000000', // Will be set by the actual swap hook
-      tokenIn: inputCurrency.wrapped.address,
-      tokenOut: outputCurrency.wrapped.address,
+      signer: '0x0000000000000000000000000000000000000000', // Placeholder - will be set by swap hook
+      tokenIn: amountSpecified.currency.wrapped.address,
+      tokenOut: otherCurrency.wrapped.address,
       amount: BigInt(amountSpecified.quotient.toString()),
       swapType: tradeType === TradeType.EXACT_INPUT ? SwapType.EXACT_INPUT : SwapType.EXACT_OUTPUT,
       slippage: 1, // 1% default slippage
@@ -43,14 +37,16 @@ export function useZephyrRoutingV2(
 
   useEffect(() => {
     if (!swapParams) {
-      setRoutingState({ route: '', loading: false })
+      setResult({ route: '' })
+      setLoading(false)
       return
     }
 
     let cancelled = false
 
     const performRouting = async () => {
-      setRoutingState({ route: '', loading: true })
+      setLoading(true)
+      setResult({ route: '' })
 
       try {
         const { callData, amountQuoted } = await getSwapData(swapParams)
@@ -62,21 +58,35 @@ export function useZephyrRoutingV2(
         const outputSymbol = otherCurrency?.symbol || 'Unknown'
         const routeDescription = `${inputSymbol} → ${outputSymbol}`
 
-        setRoutingState({
-          callData,
-          amountQuoted,
+        // Convert bigint back to CurrencyAmount for return values
+        const quotedAmount = CurrencyAmount.fromRawAmount(otherCurrency!, amountQuoted.toString())
+
+        const routingResult: Omit<RoutingResult, 'loading'> = {
           route: routeDescription,
-          loading: false,
-        })
+          callData,
+        }
+
+        if (tradeType === TradeType.EXACT_INPUT) {
+          routingResult.inputAmount = amountSpecified
+          routingResult.outputAmount = quotedAmount
+        } else {
+          routingResult.inputAmount = quotedAmount
+          routingResult.outputAmount = amountSpecified
+        }
+
+        setResult(routingResult)
       } catch (error) {
         if (cancelled) return
 
         console.error('Routing failed:', error)
-        setRoutingState({
+        setResult({
           route: '',
-          loading: false,
           error: error instanceof Error ? error.message : 'Routing failed',
         })
+      } finally {
+        if (!cancelled) {
+          setLoading(false)
+        }
       }
     }
 
@@ -85,39 +95,12 @@ export function useZephyrRoutingV2(
     return () => {
       cancelled = true
     }
-  }, [swapParams, amountSpecified, otherCurrency])
+  }, [swapParams, amountSpecified, otherCurrency, tradeType])
 
   return useMemo(() => {
-    const { callData, amountQuoted, route, loading, error } = routingState
-
-    if (loading || error || !amountQuoted || !amountSpecified || !otherCurrency) {
-      return {
-        route,
-        loading,
-        error,
-        callData,
-      }
+    return {
+      ...result,
+      loading,
     }
-
-    // Convert bigint back to CurrencyAmount
-    const quotedAmount = CurrencyAmount.fromRawAmount(otherCurrency, amountQuoted.toString())
-
-    if (tradeType === TradeType.EXACT_INPUT) {
-      return {
-        inputAmount: amountSpecified,
-        outputAmount: quotedAmount,
-        route,
-        loading,
-        callData,
-      }
-    } else {
-      return {
-        inputAmount: quotedAmount,
-        outputAmount: amountSpecified,
-        route,
-        loading,
-        callData,
-      }
-    }
-  }, [routingState, amountSpecified, otherCurrency, tradeType])
+  }, [result, loading])
 }

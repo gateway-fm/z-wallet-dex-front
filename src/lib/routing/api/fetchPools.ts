@@ -1,11 +1,12 @@
-import { zephyrGraphQLClient } from '../../../data/graphql/client'
 import { gql } from '@apollo/client'
+
+import { zephyrGraphQLClient } from '../../../data/graphql/client'
 import { Route } from '../types'
 
 // GraphQL query to fetch pools
 const POOLS_QUERY = gql`
   query PoolsQuery {
-    pools (where: { liquidity_gt: 0 }) {
+    pools(where: { liquidity_gt: 0 }) {
       id
       feeTier
       token0 {
@@ -33,6 +34,15 @@ interface PoolsResponse {
 const MAX_HOPS = 4
 
 export async function getAllRoutes(tokenIn: string, tokenOut: string): Promise<Route[]> {
+  // Validate input parameters
+  if (!tokenIn || !tokenOut) {
+    throw new Error('Token addresses are required')
+  }
+
+  if (!tokenIn.startsWith('0x') || !tokenOut.startsWith('0x')) {
+    throw new Error('Invalid token address format')
+  }
+
   try {
     // 1. Load pools using Apollo GraphQL client
     const { data } = await zephyrGraphQLClient.query<PoolsResponse>({
@@ -40,20 +50,41 @@ export async function getAllRoutes(tokenIn: string, tokenOut: string): Promise<R
       fetchPolicy: 'cache-first',
     })
 
-    const { pools } = data
+    if (!data || !data.pools) {
+      throw new Error('No pool data received from GraphQL')
+    }
 
-    console.log(`Loaded ${pools.length} pools from GraphQL`)
+    const { pools } = data
 
     type Edge = { next: string; fee: number }
     const adj: Map<string, Edge[]> = new Map()
 
     // 2. Build adjacency list from GraphQL data
     for (const p of pools) {
-      const a = p.token0.id
-      const b = p.token1.id
+      // Validate pool data
+      if (!p.token0?.id || !p.token1?.id || !p.feeTier) {
+        continue
+      }
+
+      const a = p.token0.id.toLowerCase()
+      const b = p.token1.id.toLowerCase()
       const fee = Number(p.feeTier)
+
+      // Validate fee tier
+      if (isNaN(fee) || fee <= 0) {
+        continue
+      }
+
       adj.set(a, [...(adj.get(a) ?? []), { next: b, fee }])
       adj.set(b, [...(adj.get(b) ?? []), { next: a, fee }]) // undirected graph
+    }
+
+    // Check if both tokens exist in the graph
+    if (!adj.has(tokenIn)) {
+      throw new Error(`Token ${tokenIn} not found in any liquidity pools`)
+    }
+    if (!adj.has(tokenOut)) {
+      throw new Error(`Token ${tokenOut} not found in any liquidity pools`)
     }
 
     // 3. DFS with depth cutoff to find all possible routes
@@ -84,8 +115,6 @@ export async function getAllRoutes(tokenIn: string, tokenOut: string): Promise<R
         })
       }
     }
-
-    console.log(`Found ${routes.length} routes from ${tokenIn} to ${tokenOut}`)
 
     // 4. Deduplication: unique by (tokenIn-tokenOut-fee) sequence
     const seen = new Set<string>()
