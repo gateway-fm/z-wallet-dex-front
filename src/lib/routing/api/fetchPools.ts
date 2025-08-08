@@ -37,7 +37,7 @@ export async function getAllRoutes(tokenIn: string, tokenOut: string): Promise<R
     // 1. Load pools using Apollo GraphQL client
     const { data } = await zephyrGraphQLClient.query<PoolsResponse>({
       query: POOLS_QUERY,
-      // fetchPolicy: 'cache-first',
+      fetchPolicy: 'cache-first',
     })
 
     const { pools } = data
