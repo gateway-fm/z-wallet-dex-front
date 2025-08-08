@@ -1,5 +1,6 @@
 import { Currency, CurrencyAmount, TradeType } from '@uniswap/sdk-core'
-import { useMemo, useState, useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+
 import { getSwapData, SwapParams, SwapType } from '../lib/routing'
 
 interface RoutingResult {
@@ -17,7 +18,8 @@ interface RoutingResult {
 export function useZephyrRoutingV2(
   tradeType: TradeType,
   amountSpecified?: CurrencyAmount<Currency>,
-  otherCurrency?: Currency
+  otherCurrency?: Currency,
+  account?: string // Add account parameter
 ): RoutingResult {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<Omit<RoutingResult, 'loading'>>({ route: '' })
@@ -26,14 +28,15 @@ export function useZephyrRoutingV2(
     if (!amountSpecified || !otherCurrency) return null
 
     return {
-      signer: '0x0000000000000000000000000000000000000000', // Placeholder - will be set by swap hook
+      signer: account || '0x0000000000000000000000000000000000000000', // Use real account if available
+      recipient: account, // Set recipient to account
       tokenIn: amountSpecified.currency.wrapped.address,
       tokenOut: otherCurrency.wrapped.address,
       amount: BigInt(amountSpecified.quotient.toString()),
       swapType: tradeType === TradeType.EXACT_INPUT ? SwapType.EXACT_INPUT : SwapType.EXACT_OUTPUT,
       slippage: 1, // 1% default slippage
     }
-  }, [amountSpecified, otherCurrency, tradeType])
+  }, [amountSpecified, otherCurrency, tradeType, account])
 
   useEffect(() => {
     if (!swapParams) {

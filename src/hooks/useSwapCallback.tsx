@@ -3,6 +3,7 @@ import { useWeb3React } from '@web3-react/core'
 import { ZEPHYR_CHAIN_ID } from 'constants/chains'
 import { PermitSignature } from 'hooks/usePermitAllowance'
 import { useUniversalRouterSwapCallback } from 'hooks/useUniversalRouter'
+import { useZephyrRoutingV2 } from 'hooks/useZephyrRoutingV2'
 import { useZephyrSwapV2 } from 'hooks/useZephyrSwapV2'
 import { useCallback } from 'react'
 import { InterfaceTrade } from 'state/routing/types'
@@ -38,6 +39,14 @@ export function useSwapCallback(
     permit: permitSignature,
   })
 
+  // Get routing data for Zephyr network
+  const routingResult = useZephyrRoutingV2(
+    trade?.tradeType || TradeType.EXACT_INPUT,
+    trade?.inputAmount,
+    trade?.outputAmount?.currency,
+    account // Pass account for proper recipient
+  )
+
   const { callback: zephyrSwapCallback } = useZephyrSwapV2(
     isClassicTrade(trade)
       ? {
@@ -48,7 +57,7 @@ export function useSwapCallback(
       : undefined,
     Number(allowedSlippage.multiply(100).toFixed(0)) / 100, // Convert Percent to number
     account,
-    undefined // callData will be provided by the routing system
+    routingResult.callData // Use callData from routing system
   )
 
   // Use Universal Router for other networks, but SwapRouter02 for Zephyr
@@ -57,6 +66,20 @@ export function useSwapCallback(
   return useCallback(async () => {
     if (!trade) throw new Error('missing trade')
     if (!account || !chainId) throw new Error('wallet must be connected to swap')
+
+    // For Zephyr network, check routing data
+    if (chainId === ZEPHYR_CHAIN_ID) {
+      if (routingResult.loading) {
+        throw new Error('Routing data is still loading, please wait')
+      }
+      if (routingResult.error) {
+        throw new Error(`Routing failed: ${routingResult.error}`)
+      }
+      if (!routingResult.callData) {
+        throw new Error('No call data available from routing system')
+      }
+    }
+
     if (!swapCallback) throw new Error('swap callback not available')
 
     const result = await swapCallback()
@@ -82,5 +105,5 @@ export function useSwapCallback(
     addTransaction(result.response, swapInfo, deadline?.toNumber())
 
     return result
-  }, [trade, account, chainId, swapCallback, allowedSlippage, addTransaction, deadline])
+  }, [trade, account, chainId, swapCallback, allowedSlippage, addTransaction, deadline, routingResult])
 }

@@ -48,7 +48,12 @@ export function useZephyrSwapV2(
       return { callback: null }
     }
 
-    if (!trade || !provider || !account || !swapRouter || !recipientAddress || !callData) {
+    if (!trade || !provider || !account || !swapRouter || !recipientAddress) {
+      return { callback: null }
+    }
+
+    if (!callData) {
+      console.warn('No callData provided to ZephyrSwapV2, swap will not be available')
       return { callback: null }
     }
 
@@ -70,6 +75,7 @@ export function useZephyrSwapV2(
           amountIn: inputAmount.quotient.toString(),
           expectedAmountOut: outputAmount.quotient.toString(),
           callData: callData.slice(0, 50) + '...',
+          recipient: account,
         })
 
         // Handle token approval if needed
@@ -79,7 +85,7 @@ export function useZephyrSwapV2(
           console.log('Approval completed')
         }
 
-        // Execute the pre-calculated swap using callData from routing system
+        // Execute the pre-calculated swap using callData
         const transaction = {
           to: CONTRACTS_CONFIG.SWAP_ROUTER_02,
           data: callData,
