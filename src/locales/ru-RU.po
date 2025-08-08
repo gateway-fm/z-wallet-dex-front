@@ -25,7 +25,7 @@ msgstr "Создать предложение"
 
 #: src/pages/PoolFinder/index.tsx
 msgid "No pool found."
-msgstr "Пулы не найдены."
+msgstr "Позиции не найдены."
 
 #: src/constants/tokenSafety.tsx
 msgid "{0, plural, =1 {This token isn't traded on leading U.S. centralized exchanges.} other {These tokens aren't traded on leading U.S. centralized exchanges.}}"
@@ -81,7 +81,7 @@ msgstr "Попробуйте"
 
 #: src/pages/PoolFinder/index.tsx
 msgid "Manage this pool."
-msgstr "Управление этим пулом."
+msgstr "Управление этой позицией."
 
 #: src/nft/components/profile/list/ListPage.tsx
 msgid "My NFTs"
@@ -180,7 +180,7 @@ msgstr "Кончик:"
 
 #: src/components/AccountDetails/TransactionSummary.tsx
 msgid "Create {0}/{1} V3 pool"
-msgstr "Создать пул {0}/{1} в V3"
+msgstr "Создать позицию {0}/{1} в V3"
 
 #: src/nft/components/details/AssetActivity.tsx
 msgid "Event"
@@ -239,7 +239,7 @@ msgstr "Исследуйте токены"
 
 #: src/nft/components/bag/ButtonStates.tsx
 msgid "Insufficient pool liquidity to complete transaction"
-msgstr "Недостаточная ликвидность пула для завершения транзакции"
+msgstr "Недостаточная ликвидность позиции для завершения транзакции"
 
 #: src/components/AccountDrawer/MiniPortfolio/constants.tsx
 msgid "Added V2 liquidity"
@@ -266,7 +266,7 @@ msgstr "Добавить в корзину"
 
 #: src/pages/PoolDetails/PoolDetailsStats.tsx
 msgid "Pool balances"
-msgstr "Балансы пула"
+msgstr "Балансы позиции"
 
 #: src/constants/tokenSafety.tsx
 msgid "{0, plural, =1 {This token isn't traded on leading U.S. centralized exchanges or frequently swapped on Uniswap.} other {These tokens aren't traded on leading U.S. centralized exchanges or frequently swapped on Uniswap.}}"
@@ -313,7 +313,7 @@ msgstr "Завершение цитаты..."
 
 #: src/pages/MigrateV2/MigrateV2Pair.tsx
 msgid "You are the first liquidity provider for this Uniswap V3 pool. Your liquidity will migrate at the current {0} price."
-msgstr "Вы первый поставщик ликвидности в этом пуле Uniswap V3. Ваша ликвидность будет перенесена по текущей цене {0}."
+msgstr "Вы первый поставщик ликвидности в этой позиции Uniswap V3. Ваша ликвидность будет перенесена по текущей цене {0}."
 
 #: src/components/swap/PendingModalContent/index.tsx
 #: src/components/swap/PendingModalContent/index.tsx
@@ -366,7 +366,7 @@ msgstr "Популярные коллекции NFT"
 
 #: src/pages/PoolFinder/index.tsx
 msgid "Connect to a wallet to find pools"
-msgstr "Подключите кошелёк, чтобы найти пулы"
+msgstr "Подключите кошелёк, чтобы найти позиции"
 
 #: src/components/swap/PendingModalContent/ErrorModalContent.tsx
 msgid "Why are approvals required?"
@@ -483,7 +483,7 @@ msgstr "Токен не найден"
 
 #: src/pages/AddLiquidityV2/ConfirmAddModalBottom.tsx
 msgid "Share of Pool:"
-msgstr "Доля в пуле:"
+msgstr "Доля в позиции:"
 
 #: src/nft/components/collection/TransactionCompleteModal.tsx
 msgid "Complete!"
@@ -559,7 +559,7 @@ msgstr "Торгуйте криптовалютой с уверенностью"
 
 #: src/pages/Pool/PositionPage.tsx
 msgid "Back to Pools"
-msgstr "Назад к пулам"
+msgstr "Назад к позициям"
 
 #: src/components/AccountDrawer/MiniPortfolio/constants.tsx
 msgid "Your account had insufficent funds to complete this swap."
@@ -740,7 +740,7 @@ msgstr "Недостаточно ликвидности, чтобы показа
 
 #: src/pages/MigrateV2/index.tsx
 msgid "For each pool shown below, click migrate to remove your liquidity from Uniswap V2 and deposit it into Uniswap V3."
-msgstr "Для каждого указанного ниже пула нажмите «Перенести», чтобы удалить ликвидность из Uniswap V2 и внести её в Uniswap V3."
+msgstr "Для каждой указанной ниже позиции нажмите «Перенести», чтобы удалить ликвидность из Uniswap V2 и внести её в Uniswap V3."
 
 #: src/pages/MigrateV2/index.tsx
 msgid "Connect to a wallet to view your V2 liquidity."
@@ -877,7 +877,7 @@ msgstr "По этому адресу не существует объектов 
 
 #: src/components/swap/SwapLineItem.tsx
 msgid "The impact your trade has on the market price of this pool."
-msgstr "Влияние вашей сделки на рыночную цену этого пула."
+msgstr "Влияние вашей сделки на рыночную цену этой позиции."
 
 #: src/components/AccountDrawer/MiniPortfolio/ExpandoRow.tsx
 msgid "Hidden"
@@ -885,7 +885,7 @@ msgstr "Скрытый"
 
 #: src/pages/AddLiquidityV2/index.tsx
 msgid "Initial prices and pool share"
-msgstr "Начальные цены и доля в пуле"
+msgstr "Начальные цены и доля в позиции"
 
 #: src/components/AccountDrawer/MiniPortfolio/Pools/index.tsx
 #: src/components/Badge/RangeBadge.tsx
@@ -933,12 +933,12 @@ msgstr "Обменять ровно <0/> на <1/>"
 
 #: src/components/swap/PriceImpactWarning.tsx
 msgid "A swap of this size may have a high price impact, given the current liquidity in the pool. There may be a large difference between the amount of your input token and what you will receive in the output token"
-msgstr "Обмен на такую большую сумму может сильно повлиять на цену, учитывая текущую ликвидность в пуле. Может быть большая разница между стоимостью продаваемых токенов и стоимостью токенов, которые вы получите"
+msgstr "Обмен на такую большую сумму может сильно повлиять на цену, учитывая текущую ликвидность в позиции. Может быть большая разница между стоимостью продаваемых токенов и стоимостью токенов, которые вы получите"
 
 #: src/components/PositionCard/index.tsx
 #: src/components/PositionCard/V2.tsx
 msgid "Your total pool tokens:"
-msgstr "Всего токенов пула у вас:"
+msgstr "Всего токенов позиции у вас:"
 
 #: src/pages/Swap/UniswapXOptIn.tsx
 msgid "Gas free swaps"
@@ -946,7 +946,7 @@ msgstr "Обмен без газа"
 
 #: src/pages/AddLiquidityV2/ConfirmAddModalBottom.tsx
 msgid "Create pool & supply"
-msgstr "Создать пул и предоставить"
+msgstr "Создать позицию и предоставить"
 
 #: src/components/Tokens/TokenDetails/ShareButton.tsx
 msgid "Copy Link"
@@ -1074,7 +1074,7 @@ msgstr "Отменено"
 
 #: src/nft/components/profile/view/EmptyWalletContent.tsx
 msgid "No pools yet"
-msgstr "пулов пока нет"
+msgstr "позиций пока нет"
 
 #: src/components/PositionList/index.tsx
 #: src/components/PositionList/index.tsx
@@ -1176,7 +1176,7 @@ msgstr "Неизвестный Ленд"
 
 #: src/pages/PoolFinder/index.tsx
 msgid "Create pool."
-msgstr "Создать пул."
+msgstr "Создать позицию."
 
 #: src/components/AddressInputPanel/index.tsx
 msgid "Recipient"
@@ -1195,7 +1195,7 @@ msgstr "Развернуто"
 #: src/pages/RemoveLiquidity/V3.tsx
 #: src/pages/RemoveLiquidity/V3.tsx
 msgid "Pooled {0}:"
-msgstr "{0} в пуле:"
+msgstr "{0} в позиции:"
 
 #: src/components/Polling/ChainConnectivityWarning.tsx
 msgid "Check network status"
@@ -1231,7 +1231,7 @@ msgstr "Неверная сеть"
 
 #: src/components/Badge/RangeBadge.tsx
 msgid "The price of this pool is outside of your selected range. Your position is not currently earning fees."
-msgstr "Цена этого пула находится за пределами выбранного вами диапазона. Ваша позиция в настоящее время не зарабатывает комиссии."
+msgstr "Цена этой позиции находится за пределами выбранного вами диапазона. Ваша позиция в настоящее время не зарабатывает комиссии."
 
 #: src/components/CurrencyInputPanel/FiatValue.tsx
 #: src/components/ErrorBoundary/index.tsx
@@ -1341,7 +1341,7 @@ msgstr "Перезагрузите приложение"
 
 #: src/components/NavigationTabs/index.tsx
 msgid "Import V2 pool"
-msgstr "Импортировать пул V2"
+msgstr "Импортировать позицию V2"
 
 #: src/components/vote/ProposalEmptyState.tsx
 msgid "Proposals submitted by community members will appear here."
@@ -1382,7 +1382,7 @@ msgstr "Владелец"
 
 #: src/pages/PoolFinder/index.tsx
 msgid "You don’t have liquidity in this pool yet."
-msgstr "У вас пока нет ликвидности в этом пуле."
+msgstr "У вас пока нет ликвидности в этой позиции."
 
 #: src/components/swap/PendingModalContent/index.tsx
 msgid "Swap submitted"
@@ -1487,7 +1487,7 @@ msgstr "Не удалось отозвать одобрение"
 
 #: src/pages/AddLiquidityV2/index.tsx
 msgid "When you add liquidity, you will receive pool tokens representing your position. These tokens automatically earn fees proportional to your share of the pool, and can be redeemed at any time."
-msgstr "Когда вы добавляете ликвидность, вы получаете токены пула, представляющие вашу позицию. Эти токены автоматически приносят комиссию, пропорциональную вашей доле в пуле, и могут быть погашены в любое время."
+msgstr "Когда вы добавляете ликвидность, вы получаете токены позиции, представляющие вашу позицию. Эти токены автоматически приносят комиссию, пропорциональную вашей доле в позиции, и могут быть погашены в любое время."
 
 #: src/pages/Vote/VotePage.tsx
 msgid "Description"
@@ -1714,7 +1714,7 @@ msgstr "Токены не найдены."
 
 #: src/pages/AddLiquidityV2/PoolPriceBar.tsx
 msgid "Share of pool"
-msgstr "Доля пула"
+msgstr "Доля позиции"
 
 #: src/components/NetworkAlert/NetworkAlert.tsx
 msgid "Deposit tokens to the {label} network."
@@ -1728,7 +1728,7 @@ msgstr "Просмотреть в обозревателе"
 
 #: src/pages/Pool/v2.tsx
 msgid "Import pool"
-msgstr "Пул импорта"
+msgstr "Позиция импорта"
 
 #: src/components/AccountDrawer/MiniPortfolio/Activity/OffchainActivityModal.tsx
 #: src/components/TransactionConfirmationModal/index.tsx
@@ -1773,7 +1773,7 @@ msgstr "Выберите токен"
 
 #: src/pages/Pool/CTACards.tsx
 msgid "Top pools"
-msgstr "Топ пулов"
+msgstr "Топ позиций"
 
 #: src/components/Settings/TransactionDeadlineSettings/index.tsx
 msgid "Transaction deadline"
@@ -1801,7 +1801,7 @@ msgstr "Обернуть {0}"
 
 #: src/pages/AddLiquidityV2/index.tsx
 msgid "The ratio of tokens you add will set the price of this pool."
-msgstr "Соотношение добавляемых вами токенов установит цену этого пула."
+msgstr "Соотношение добавляемых вами токенов установит цену этой позиции."
 
 #: src/utils/swapErrorToUserReadableMessage.tsx
 msgid "The output token cannot be transferred. There may be an issue with the output token. Note: fee on transfer and rebase tokens are incompatible with Uniswap V3."
@@ -1941,7 +1941,7 @@ msgstr "Уже перечислены на"
 
 #: src/pages/RemoveLiquidity/index.tsx
 msgid "<0>Tip:</0> Removing pool tokens converts your position back into underlying tokens at the current rate, proportional to your share of the pool. Accrued fees are included in the amounts you receive."
-msgstr "<0>Подсказка:</0> Погашение токенов пула преобразует вашу позицию обратно в исходные токены по текущему курсу пропорционально вашей доле в пуле. Начисленные комиссии включаются в суммы, которые вы получите."
+msgstr "<0>Подсказка:</0> Погашение токенов позиции преобразует вашу позицию обратно в исходные токены по текущему курсу пропорционально вашей доле в позиции. Начисленные комиссии включаются в суммы, которые вы получите."
 
 #: src/utils/swapErrorToUserReadableMessage.tsx
 msgid "This transaction will not succeed due to price movement. Try increasing your slippage tolerance. Note: fee on transfer and rebase tokens are incompatible with Uniswap V3."
@@ -2057,7 +2057,7 @@ msgstr "Ваш кошелек подключен не к той сети."
 
 #: src/pages/AddLiquidity/index.tsx
 msgid "This pool must be initialized before you can add liquidity. To initialize, select a starting price for the pool. Then, enter your liquidity price range and deposit amount. Gas fees will be higher than usual due to the initialization transaction."
-msgstr "Этот пул необходимо инициализировать, прежде чем вы сможете добавить ликвидность. Для инициализации выберите начальную цену для пула. Затем введите диапазон цен для ликвидности и сумму депозита. Плата за газ будет выше, чем обычно, из-за инициализирующей транзакции."
+msgstr "Эту позицию необходимо инициализировать, прежде чем вы сможете добавить ликвидность. Для инициализации выберите начальную цену для позиции. Затем введите диапазон цен для ликвидности и сумму депозита. Плата за газ будет выше, чем обычно, из-за инициализирующей транзакции."
 
 #: src/pages/Pool/PositionPage.tsx
 msgid "Unclaimed fees"
@@ -2136,7 +2136,7 @@ msgstr "Мигрирующая ликвидность"
 
 #: src/components/PositionCard/index.tsx
 msgid "By adding liquidity you'll earn 0.3% of all trades on this pair proportional to your share of the pool. Fees are added to the pool, accrue in real time and can be claimed by withdrawing your liquidity."
-msgstr "Добавив ликвидность, вы будете зарабатывать 0,3% от всех сделок на этой паре пропорционально вашей доле в пуле. Комиссии добавляются в пул, начисляются в режиме реального времени и могут быть востребованы путём вывода вашей ликвидности."
+msgstr "Добавив ликвидность, вы будете зарабатывать 0,3% от всех сделок на этой паре пропорционально вашей доле в позиции. Комиссии добавляются в позицию, начисляются в режиме реального времени и могут быть востребованы путём вывода вашей ликвидности."
 
 #: src/nft/components/bag/ButtonStates.tsx
 #: src/nft/components/profile/list/Modal/ListModalSection.tsx
@@ -2194,11 +2194,11 @@ msgstr "Цена"
 
 #: src/components/Badge/RangeBadge.tsx
 msgid "The price of this pool is within your selected range. Your position is currently earning fees."
-msgstr "Цена этого пула находится в пределах выбранного вами диапазона. Ваша позиция в настоящее время зарабатывает комиссии."
+msgstr "Цена этой позиции находится в пределах выбранного вами диапазона. Ваша позиция в настоящее время зарабатывает комиссии."
 
 #: src/pages/AddLiquidityV2/index.tsx
 msgid "You are creating a pool"
-msgstr "Вы создаете пул"
+msgstr "Вы создаете позицию"
 
 #: src/components/vote/VoteModal.tsx
 #: src/components/vote/VoteModal.tsx
@@ -2237,7 +2237,7 @@ msgstr "Очередь"
 
 #: src/components/Tokens/TokenTable/TokenRow.tsx
 msgid "Total value locked (TVL) is the aggregate amount of the asset available across all Uniswap v3 liquidity pools."
-msgstr "Общая заблокированная стоимость (TVL) — это совокупная сумма актива, доступного во всех пулах ликвидности Uniswap v3."
+msgstr "Общая заблокированная стоимость (TVL) — это совокупная сумма актива, доступного во всех позициях ликвидности Uniswap v3."
 
 #: src/components/vote/VoteModal.tsx
 msgid "Submitting vote"
@@ -2753,7 +2753,7 @@ msgstr "Сборы"
 #: src/components/PositionCard/index.tsx
 #: src/components/PositionCard/V2.tsx
 msgid "Pool tokens in rewards pool:"
-msgstr "Токены пулов в пуле вознаграждений:"
+msgstr "Токены позиций в позиции вознаграждений:"
 
 #: src/components/Tokens/TokenDetails/About.tsx
 msgid "No token information available"
@@ -2802,7 +2802,7 @@ msgstr "Подтвердите обмен"
 #: src/pages/Pool/index.tsx
 #: src/pages/Pool/index.tsx
 msgid "Pools"
-msgstr "Пулы"
+msgstr "Позиции"
 
 #: src/components/Tokens/TokenTable/TokenTable.tsx
 msgid "An error occurred loading tokens. Please try again."
@@ -2814,7 +2814,7 @@ msgstr "Ты в!"
 
 #: src/pages/PoolFinder/index.tsx
 msgid "Pool found!"
-msgstr "Пул найден!"
+msgstr "Позиция найдена!"
 
 #: src/components/AccountDetails/TransactionSummary.tsx
 msgid "Vote to abstain on proposal {proposalKey} with reason \"{0}\""
@@ -2857,15 +2857,15 @@ msgstr "Отправить не удалось"
 
 #: src/components/RoutingDiagram/RoutingDiagram.tsx
 msgid "{0}% pool"
-msgstr "Пул {0}%"
+msgstr "Позиция {0}%"
 
 #: src/components/AccountDrawer/MiniPortfolio/constants.tsx
 msgid "Created pool"
-msgstr "Созданный пул"
+msgstr "Созданная позиция"
 
 #: src/components/AccountDrawer/MiniPortfolio/constants.tsx
 msgid "Creating pool"
-msgstr "Создание пула"
+msgstr "Создание позиции"
 
 #: src/nft/components/profile/list/ListingButton.tsx
 msgid "Resolve {issues} issues"
@@ -3005,7 +3005,7 @@ msgstr "Чеканка"
 #: src/components/NavBar/MenuDropdown.tsx
 #: src/pages/PoolDetails/PoolDetailsHeader.tsx
 msgid "Pool"
-msgstr "Пулы"
+msgstr "Позиции"
 
 #: src/pages/PoolFinder/index.tsx
 msgid "Invalid pair."
@@ -3065,7 +3065,7 @@ msgstr "Ваш обмен не может быть выполнен в это в
 
 #: src/components/AccountDrawer/MiniPortfolio/constants.tsx
 msgid "Create pool cancelled"
-msgstr "Создание пула отменено"
+msgstr "Создание позиции отменено"
 
 #: src/components/AccountDrawer/MiniPortfolio/Activity/parseRemote.tsx
 msgid "Revoked Approval"
@@ -3093,7 +3093,7 @@ msgstr "МЭВ защита"
 
 #: src/pages/PoolFinder/index.tsx
 msgid "<0>Tip:</0> Use this tool to find v2 pools that don't automatically appear in the interface."
-msgstr "<0> Подсказка:</0> Используйте этот инструмент для поиска пулов в V2, которые не отображаются автоматически в интерфейсе."
+msgstr "<0> Подсказка:</0> Используйте этот инструмент для поиска позиций в V2, которые не отображаются автоматически в интерфейсе."
 
 #: src/components/Popups/PopupContent.tsx
 msgid "To use Uniswap on {0}, switch the network in your wallet’s settings."
@@ -3187,7 +3187,7 @@ msgstr "Изучите Uniswap Analytics."
 
 #: src/pages/Pool/PositionPage.tsx
 msgid "← Back to Pools"
-msgstr "← Назад к Пулам"
+msgstr "← Назад к Позициям"
 
 #: src/nft/utils/time.ts
 msgid "{i, plural, one {day} other {days}}"
@@ -3195,7 +3195,7 @@ msgstr "{i, plural, one {день} other {дни}}"
 
 #: src/components/AccountDrawer/MiniPortfolio/constants.tsx
 msgid "Create pool failed"
-msgstr "Не удалось создать пул"
+msgstr "Не удалось создать позицию"
 
 #: src/components/PositionCard/index.tsx
 #: src/components/PositionCard/V2.tsx
@@ -3349,7 +3349,7 @@ msgstr "Получить"
 
 #: src/pages/Pool/v2.tsx
 msgid "Liquidity providers earn a 0.3% fee on all trades proportional to their share of the pool. Fees are added to the pool, accrue in real time and can be claimed by withdrawing your liquidity."
-msgstr "Поставщики ликвидности зарабатывают 0,3% от всех сделок пропорционально своей доле в пуле. Комиссии добавляются в пул, начисляются в режиме реального времени и могут быть востребованы путём вывода ликвидности."
+msgstr "Поставщики ликвидности зарабатывают 0,3% от всех сделок пропорционально своей доле в позиции. Комиссии добавляются в позицию, начисляются в режиме реального времени и могут быть востребованы путём вывода ликвидности."
 
 #: src/components/AccountDrawer/MiniPortfolio/constants.tsx
 msgid "Buy cancelled"
@@ -3377,7 +3377,7 @@ msgstr "{0} требует сброса одобрения, когда лими�
 
 #: src/pages/AddLiquidityV2/index.tsx
 msgid "Prices and pool share"
-msgstr "Цены и доля в пуле"
+msgstr "Цены и доля в позиции"
 
 #: src/nft/components/profile/list/PriceTextInput.tsx
 msgid "Remove item"
@@ -3391,7 +3391,7 @@ msgstr "Отменено"
 
 #: src/components/PositionCard/index.tsx
 msgid "Manage liquidity in rewards pool"
-msgstr "Управляйте ликвидностью в пуле вознаграждений"
+msgstr "Управляйте ликвидностью в позиции вознаграждений"
 
 #: src/components/AccountDetails/TransactionSummary.tsx
 msgid "Vote against proposal {proposalKey}"
@@ -3421,7 +3421,7 @@ msgstr "Претензия отменена"
 #: src/components/PositionCard/index.tsx
 #: src/components/PositionCard/V2.tsx
 msgid "Your pool share:"
-msgstr "Ваша доля в пуле:"
+msgstr "Ваша доля в позиции:"
 
 #: src/components/PositionCard/index.tsx
 #: src/components/PositionCard/index.tsx
@@ -3456,7 +3456,7 @@ msgstr "Это обеспечивает доступ протокола Uniswap 
 
 #: src/nft/components/profile/view/EmptyWalletContent.tsx
 msgid "Open a new position or create a pool to get started."
-msgstr "Откройте новую позицию или создайте пул, чтобы начать."
+msgstr "Откройте новую позицию или создайте позицию, чтобы начать."
 
 #: src/nft/components/profile/view/EmptyWalletContent.tsx
 msgid "Buy or transfer NFTs to this wallet to get started."
@@ -3503,7 +3503,7 @@ msgstr "Нет элементов для отображения"
 
 #: src/components/AccountDetails/TransactionSummary.tsx
 msgid "Create pool and add {0}/{1} V3 liquidity"
-msgstr "Создать пул и добавить ликвидность {0}/{1} в V3"
+msgstr "Создать позицию и добавить ликвидность {0}/{1} в V3"
 
 #: src/components/Tokens/TokenDetails/MobileBalanceSummaryFooter.tsx
 msgid "Your {0} balance"
@@ -3677,7 +3677,7 @@ msgstr "У вас должно быть {formattedProposalThreshold} голос�
 
 #: src/components/swap/PriceImpactModal.tsx
 msgid "This transaction will result in a <0>{0}</0> price impact on the market price of this pool. Do you wish to continue?"
-msgstr "Эта транзакция повлияет на рыночную цену этого пула в размере <0>{0}</0> . Вы хотите продолжить?"
+msgstr "Эта транзакция повлияет на рыночную цену этой позиции в размере <0>{0}</0> . Вы хотите продолжить?"
 
 #: src/nft/components/profile/list/SetDurationModal.tsx
 msgid "{amount, plural, =1 {month} other {months}}"
@@ -3689,7 +3689,7 @@ msgstr "{i, plural, one {час} other {часы}}"
 
 #: src/pages/MigrateV2/MigrateV2Pair.tsx
 msgid "Your transaction cost will be much higher as it includes the gas to create the pool."
-msgstr "Стоимость вашей транзакции будет гораздо выше, так как она включает газ для создания пула."
+msgstr "Стоимость вашей транзакции будет гораздо выше, так как она включает газ для создания позиции."
 
 #: src/components/Banner/BaseAnnouncementBanner/index.tsx
 #: src/components/Banner/BaseAnnouncementBanner/index.tsx
