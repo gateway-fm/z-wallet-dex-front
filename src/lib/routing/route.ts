@@ -4,7 +4,7 @@ import { prepareSwapCalldata } from './calldata'
 import { SwapParams } from './types'
 
 export async function getSwapData(params: SwapParams): Promise<{ callData: string; amountQuoted: bigint }> {
-  const routes = await getAllRoutes(params.tokenIn, params.tokenOut)
+  const routes = await getAllRoutes(params.tokenIn.toLowerCase(), params.tokenOut.toLowerCase())
   if (routes.length === 0) {
     throw new Error('No routes found for the given tokens')
   }

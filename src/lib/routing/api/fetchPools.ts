@@ -5,22 +5,24 @@ import { Route } from '../types'
 // GraphQL query to fetch pools
 const POOLS_QUERY = gql`
   query PoolsQuery {
-    pools(where: { liquidity_gt: "0" }) {
+    pools (where: { liquidity_gt: 0 }) {
+      id
+      feeTier
       token0 {
         id
       }
       token1 {
         id
       }
-      feeTier
     }
   }
 `
 
 interface Pool {
+  id: string
+  feeTier: string
   token0: { id: string }
   token1: { id: string }
-  feeTier: string
 }
 
 interface PoolsResponse {
@@ -35,10 +37,12 @@ export async function getAllRoutes(tokenIn: string, tokenOut: string): Promise<R
     // 1. Load pools using Apollo GraphQL client
     const { data } = await zephyrGraphQLClient.query<PoolsResponse>({
       query: POOLS_QUERY,
-      fetchPolicy: 'cache-first',
+      // fetchPolicy: 'cache-first',
     })
 
     const { pools } = data
+
+    console.log(`Loaded ${pools.length} pools from GraphQL`)
 
     type Edge = { next: string; fee: number }
     const adj: Map<string, Edge[]> = new Map()
@@ -80,6 +84,8 @@ export async function getAllRoutes(tokenIn: string, tokenOut: string): Promise<R
         })
       }
     }
+
+    console.log(`Found ${routes.length} routes from ${tokenIn} to ${tokenOut}`)
 
     // 4. Deduplication: unique by (tokenIn-tokenOut-fee) sequence
     const seen = new Set<string>()
