@@ -80,7 +80,7 @@ msgid "Try the"
 msgstr "Próbáld ki a"
 
 #: src/pages/PoolFinder/index.tsx
-msgid "Manage this pool."
+msgid "Manage this position."
 msgstr "Kezelje ezt a Poolt."
 
 #: src/nft/components/profile/list/ListPage.tsx
@@ -365,7 +365,7 @@ msgid "Popular NFT collections"
 msgstr "Népszerű NFT gyűjtemények"
 
 #: src/pages/PoolFinder/index.tsx
-msgid "Connect to a wallet to find pools"
+msgid "Connect to a wallet to find positions"
 msgstr "Csatlakozzon egy pénztárcához a poolok megtalálásához"
 
 #: src/components/swap/PendingModalContent/ErrorModalContent.tsx
@@ -558,7 +558,7 @@ msgid "Trade crypto with confidence"
 msgstr "Kereskedjen bizalommal kriptoval"
 
 #: src/pages/Pool/PositionPage.tsx
-msgid "Back to Pools"
+msgid "Back to Positions"
 msgstr "Vissza a medencékhez"
 
 #: src/components/AccountDrawer/MiniPortfolio/constants.tsx
@@ -1074,7 +1074,7 @@ msgid "Canceled"
 msgstr "Törölve"
 
 #: src/nft/components/profile/view/EmptyWalletContent.tsx
-msgid "No pools yet"
+msgid "No positions yet"
 msgstr "Még nincsenek medencék"
 
 #: src/components/PositionList/index.tsx
@@ -1773,7 +1773,7 @@ msgid "Select a token"
 msgstr "Token választása"
 
 #: src/pages/Pool/CTACards.tsx
-msgid "Top pools"
+msgid "Top positions"
 msgstr "Legjobb poolok"
 
 #: src/components/Settings/TransactionDeadlineSettings/index.tsx
@@ -2802,7 +2802,7 @@ msgstr "Erősítse meg a cserét"
 #: src/components/NavBar/index.tsx
 #: src/pages/Pool/index.tsx
 #: src/pages/Pool/index.tsx
-msgid "Pools"
+msgid Positions
 msgstr "Medencék"
 
 #: src/components/Tokens/TokenTable/TokenTable.tsx
@@ -2814,7 +2814,7 @@ msgid "You're in!"
 msgstr "Benne vagy!"
 
 #: src/pages/PoolFinder/index.tsx
-msgid "Pool found!"
+msgid "Position found!"
 msgstr "Medence található!"
 
 #: src/components/AccountDetails/TransactionSummary.tsx
@@ -3187,7 +3187,7 @@ msgid "Explore Uniswap Analytics."
 msgstr "Fedezze fel az Uniswap Analytics szolgáltatást."
 
 #: src/pages/Pool/PositionPage.tsx
-msgid "← Back to Pools"
+msgid "← Back to Positions"
 msgstr "← Vissza (Medencék)."
 
 #: src/nft/utils/time.ts
@@ -3456,7 +3456,7 @@ msgid "This provides the Uniswap protocol access to your token for trading. For 
 msgstr "Ez hozzáférést biztosít az Uniswap protokoll számára a tokenhez kereskedés céljából. Biztonsági okokból ez 30 nap múlva lejár."
 
 #: src/nft/components/profile/view/EmptyWalletContent.tsx
-msgid "Open a new position or create a pool to get started."
+msgid "Open a new position or create a position to get started."
 msgstr "A kezdéshez nyisson új pozíciót vagy hozzon létre egy készletet."
 
 #: src/nft/components/profile/view/EmptyWalletContent.tsx

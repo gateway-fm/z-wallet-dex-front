@@ -216,7 +216,7 @@ exports[`EmptyWalletContent.tsx matches base snapshot 1`] = `
       <div
         class="c3 c4 css-142zc9n"
       >
-        Open a new position or create a pool to get started.
+        Open a new position or create a position to get started.
       </div>
       <button
         class="c5"

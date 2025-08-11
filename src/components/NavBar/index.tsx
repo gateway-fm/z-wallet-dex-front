@@ -54,7 +54,7 @@ export const PageTabs = () => {
         <Trans>Swap</Trans>
       </MenuItem>
       <MenuItem href="/pools" dataTestId="pool-nav-link" isActive={isPoolActive}>
-        <Trans>Pools</Trans>
+        <Trans>Positions</Trans>
       </MenuItem>
     </>
   )

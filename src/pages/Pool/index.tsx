@@ -162,7 +162,7 @@ function WrongNetworkCard() {
           <AutoColumn gap="lg" style={{ width: '100%' }}>
             <TitleRow padding="0">
               <ThemedText.LargeHeader>
-                <Trans>Pools</Trans>
+                <Trans>Positions</Trans>
               </ThemedText.LargeHeader>
             </TitleRow>
 
@@ -255,7 +255,7 @@ export default function Pool() {
           <AutoColumn gap="lg" style={{ width: '100%' }}>
             <TitleRow padding="0">
               <ThemedText.LargeHeader>
-                <Trans>Pools</Trans>
+                <Trans>Positions</Trans>
               </ThemedText.LargeHeader>
               <ButtonRow>
                 {networkSupportsV2 && (

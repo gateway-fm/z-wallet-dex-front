@@ -375,7 +375,7 @@ export function PositionPageUnsupportedContent() {
           <Trans>To view a position, you must be connected to the network it belongs to.</Trans>
         </ThemedText.BodyPrimary>
         <PositionPageButtonPrimary as={Link} to="/pools" width="fit-content">
-          <Trans>Back to Pools</Trans>
+          <Trans>Back to Positions</Trans>
         </PositionPageButtonPrimary>
       </div>
     </PageWrapper>
@@ -711,7 +711,7 @@ function PositionPageContent() {
               to="/pools"
             >
               <HoverText>
-                <Trans>← Back to Pools</Trans>
+                <Trans>← Back to Positions</Trans>
               </HoverText>
             </Link>
             <ResponsiveRow>
