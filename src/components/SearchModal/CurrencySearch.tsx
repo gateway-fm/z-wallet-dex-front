@@ -16,7 +16,7 @@ import { CloseIcon, ThemedText } from 'theme/components'
 
 import { ZEPHYR_CHAIN_ID } from '../../constants/chains'
 import { useIsUserAddedToken, useSearchInactiveTokenLists, useToken } from '../../hooks/Tokens'
-import { useZephyrTokens, useZephyrTokenSearch } from '../../hooks/useZephyrTokens'
+import { useZephyrTokens, useZephyrTokenSearch } from '../../hooks/useZephyrTokensV2'
 import { isAddress } from '../../utils'
 import Column from '../Column'
 import Row, { RowBetween } from '../Row'

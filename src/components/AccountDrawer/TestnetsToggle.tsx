@@ -1,6 +1,6 @@
 import { t } from '@lingui/macro'
-import { useAtom } from 'jotai'
-import { atomWithStorage } from 'jotai/utils'
+import { useSetAtom } from 'jotai'
+import { atomWithStorage, useAtomValue } from 'jotai/utils'
 
 import { SettingsToggle } from './SettingsToggle'
 
@@ -8,7 +8,8 @@ import { SettingsToggle } from './SettingsToggle'
 export const showTestnetsAtom = atomWithStorage<boolean>('showTestnets', false)
 
 export function TestnetsToggle() {
-  const [showTestnets, updateShowTestnets] = useAtom(showTestnetsAtom)
+  const showTestnets = useAtomValue(showTestnetsAtom)
+  const updateShowTestnets = useSetAtom(showTestnetsAtom)
 
   return (
     <SettingsToggle

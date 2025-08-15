@@ -80,7 +80,7 @@ msgid "Try the"
 msgstr "Покушајте"
 
 #: src/pages/PoolFinder/index.tsx
-msgid "Manage this pool."
+msgid "Manage this position."
 msgstr "Управљајте овим фондом."
 
 #: src/nft/components/profile/list/ListPage.tsx
@@ -365,7 +365,7 @@ msgid "Popular NFT collections"
 msgstr "Популарне НФТ колекције"
 
 #: src/pages/PoolFinder/index.tsx
-msgid "Connect to a wallet to find pools"
+msgid "Connect to a wallet to find positions"
 msgstr "Повежите се са новчаником да бисте пронашли фондове"
 
 #: src/components/swap/PendingModalContent/ErrorModalContent.tsx
@@ -558,7 +558,7 @@ msgid "Trade crypto with confidence"
 msgstr "Тргујте криптовалутама са поверењем"
 
 #: src/pages/Pool/PositionPage.tsx
-msgid "Back to Pools"
+msgid "Back to Positions"
 msgstr "Назад на базене"
 
 #: src/components/AccountDrawer/MiniPortfolio/constants.tsx
@@ -1073,7 +1073,7 @@ msgid "Canceled"
 msgstr "Отказано"
 
 #: src/nft/components/profile/view/EmptyWalletContent.tsx
-msgid "No pools yet"
+msgid "No positions yet"
 msgstr "Још нема базена"
 
 #: src/components/PositionList/index.tsx
@@ -1772,7 +1772,7 @@ msgid "Select a token"
 msgstr "Изаберите жетон"
 
 #: src/pages/Pool/CTACards.tsx
-msgid "Top pools"
+msgid "Top positions"
 msgstr "Врхунски фондови"
 
 #: src/components/Settings/TransactionDeadlineSettings/index.tsx
@@ -2801,7 +2801,7 @@ msgstr "Потврдите замену"
 #: src/components/NavBar/index.tsx
 #: src/pages/Pool/index.tsx
 #: src/pages/Pool/index.tsx
-msgid "Pools"
+msgid Positions
 msgstr "Базени"
 
 #: src/components/Tokens/TokenTable/TokenTable.tsx
@@ -2813,7 +2813,7 @@ msgid "You're in!"
 msgstr "Ти си у!"
 
 #: src/pages/PoolFinder/index.tsx
-msgid "Pool found!"
+msgid "Position found!"
 msgstr "Пронађен базен!"
 
 #: src/components/AccountDetails/TransactionSummary.tsx
@@ -3186,7 +3186,7 @@ msgid "Explore Uniswap Analytics."
 msgstr "Истражите Унисвап Аналитицс."
 
 #: src/pages/Pool/PositionPage.tsx
-msgid "← Back to Pools"
+msgid "← Back to Positions"
 msgstr "← Назад на Базени"
 
 #: src/nft/utils/time.ts
@@ -3455,7 +3455,7 @@ msgid "This provides the Uniswap protocol access to your token for trading. For 
 msgstr "Ово омогућава Унисвап протоколу приступ вашем токену за трговање. Због сигурности, ово ће истећи након 30 дана."
 
 #: src/nft/components/profile/view/EmptyWalletContent.tsx
-msgid "Open a new position or create a pool to get started."
+msgid "Open a new position or create a position to get started."
 msgstr "Отворите нову позицију или креирајте групу да бисте започели."
 
 #: src/nft/components/profile/view/EmptyWalletContent.tsx

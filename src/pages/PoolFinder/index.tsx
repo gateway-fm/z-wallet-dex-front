@@ -88,7 +88,7 @@ export default function PoolFinder() {
     <LightCard padding="45px 10px">
       <Text textAlign="center">
         {!account ? (
-          <Trans>Connect to a wallet to find pools</Trans>
+          <Trans>Connect to a wallet to find positions</Trans>
         ) : (
           <Trans>Select a token to find your v2 liquidity.</Trans>
         )}
@@ -162,11 +162,11 @@ export default function PoolFinder() {
               style={{ justifyItems: 'center', backgroundColor: '', padding: '12px 0px', borderRadius: '12px' }}
             >
               <Text textAlign="center" fontWeight={535}>
-                <Trans>Pool found!</Trans>
+                <Trans>Position found!</Trans>
               </Text>
               <StyledInternalLink to="pools/v2">
                 <Text textAlign="center">
-                  <Trans>Manage this pool.</Trans>
+                  <Trans>Manage this position.</Trans>
                 </Text>
               </StyledInternalLink>
             </ColumnCenter>

@@ -74,8 +74,8 @@ const EMPTY_WALLET_CONTENT: { [key in EmptyWalletContentType]: EmptyWalletConten
     icon: <EmptyActivityIcon />,
   },
   pool: {
-    title: <Trans>No pools yet</Trans>,
-    subtitle: <Trans>Open a new position or create a pool to get started.</Trans>,
+    title: <Trans>No positions yet</Trans>,
+    subtitle: <Trans>Open a new position or create a position to get started.</Trans>,
     actionText: <Trans>+ New position</Trans>,
     urlPath: '/pool',
     icon: <EmptyPoolsIcon />,

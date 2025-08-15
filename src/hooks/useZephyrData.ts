@@ -1,5 +1,5 @@
 import { useTopPools } from './useProtocolStats'
-import { useZephyrTokens } from './useZephyrTokens'
+import { useZephyrTokens } from './useZephyrTokensV2'
 
 type PoolData = ReturnType<typeof useTopPools>['pools']
 type TokenData = ReturnType<typeof useZephyrTokens>

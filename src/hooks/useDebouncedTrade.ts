@@ -14,7 +14,7 @@ import { getZephyrPoolParams } from '../constants/zephyr'
 import { useRoutingAPITrade } from '../state/routing/useRoutingAPITrade'
 import useAutoRouterSupported from './useAutoRouterSupported'
 import useDebounce from './useDebounce'
-import { useZephyrRouting } from './useZephyrRouting'
+import { useZephyrRoutingV2 } from './useZephyrRoutingV2'
 
 const DEBOUNCE_TIME = 350
 
@@ -65,7 +65,7 @@ export function useDebouncedTrade(
   const skipRoutingFetch = skipBothFetches || isDebouncing
 
   // Use Zephyr routing for Zephyr network
-  const zephyrRouting = useZephyrRouting(tradeType, amountSpecified, otherCurrency)
+  const zephyrRouting = useZephyrRoutingV2(tradeType, amountSpecified, otherCurrency)
   const isZephyrNetwork = chainId === ZEPHYR_CHAIN_ID
 
   const routingApiTradeResult = useRoutingAPITrade(

@@ -25,7 +25,7 @@ function createTokenFromGraphQL(tokenData: {
 }
 
 /**
- * Hook that uses only GraphQL tokens for Zephyr network
+ * Hook that uses GraphQL tokens for Zephyr network - V2 version
  */
 export function useZephyrTokens(): { [address: string]: Token } {
   const { tokens: graphqlTokens } = useTrendingTokens(20)
@@ -48,7 +48,7 @@ export function useZephyrTokens(): { [address: string]: Token } {
 }
 
 /**
- * Hook for searching tokens with GraphQL integration
+ * Hook for searching tokens with GraphQL integration - V2 version
  */
 export function useZephyrTokenSearch(searchQuery: string, chainId: number | undefined) {
   const { tokens: searchResults, loading } = useTokenSearch(searchQuery, 20)

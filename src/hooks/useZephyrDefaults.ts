@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 
 import { ZEPHYR_CHAIN_ID } from '../constants/chains'
 import { useTopPools } from './useProtocolStats'
-import { useZephyrTokens } from './useZephyrTokens'
+import { useZephyrTokens } from './useZephyrTokensV2'
 
 /**
  * Hook that returns the first token as default for Zephyr network

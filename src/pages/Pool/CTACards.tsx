@@ -80,7 +80,7 @@ export default function CTACards() {
       <CTA data-testid="cta-infolink" href={infoLink + 'pools'}>
         <ResponsiveColumn>
           <HeaderText style={{ alignSelf: 'flex-start' }}>
-            <Trans>Top pools</Trans> ↗
+            <Trans>Top positions</Trans> ↗
           </HeaderText>
           <ThemedText.DeprecatedBody style={{ alignSelf: 'flex-start', fontWeight: 485 }}>
             <Trans>Explore Uniswap Analytics.</Trans>

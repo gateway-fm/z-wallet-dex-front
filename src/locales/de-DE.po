@@ -80,7 +80,7 @@ msgid "Try the"
 msgstr "Probieren Sie es aus"
 
 #: src/pages/PoolFinder/index.tsx
-msgid "Manage this pool."
+msgid "Manage this position."
 msgstr "Diesen Pool verwalten."
 
 #: src/nft/components/profile/list/ListPage.tsx
@@ -365,7 +365,7 @@ msgid "Popular NFT collections"
 msgstr "Beliebte NFT-Sammlungen"
 
 #: src/pages/PoolFinder/index.tsx
-msgid "Connect to a wallet to find pools"
+msgid "Connect to a wallet to find positions"
 msgstr "Mit einer Wallet verbinden, um Pools zu finden"
 
 #: src/components/swap/PendingModalContent/ErrorModalContent.tsx
@@ -558,7 +558,7 @@ msgid "Trade crypto with confidence"
 msgstr "Handeln Sie mit Vertrauen mit Kryptowährungen"
 
 #: src/pages/Pool/PositionPage.tsx
-msgid "Back to Pools"
+msgid "Back to Positions"
 msgstr "Zurück zu Pools"
 
 #: src/components/AccountDrawer/MiniPortfolio/constants.tsx
@@ -1073,7 +1073,7 @@ msgid "Canceled"
 msgstr "Abgesagt"
 
 #: src/nft/components/profile/view/EmptyWalletContent.tsx
-msgid "No pools yet"
+msgid "No positions yet"
 msgstr "Noch keine Pools"
 
 #: src/components/PositionList/index.tsx
@@ -1772,7 +1772,7 @@ msgid "Select a token"
 msgstr "Token auswählen"
 
 #: src/pages/Pool/CTACards.tsx
-msgid "Top pools"
+msgid "Top positions"
 msgstr "Top Pools"
 
 #: src/components/Settings/TransactionDeadlineSettings/index.tsx
@@ -2801,8 +2801,8 @@ msgstr "Bestätigen Sie den Tausch"
 #: src/components/NavBar/index.tsx
 #: src/pages/Pool/index.tsx
 #: src/pages/Pool/index.tsx
-msgid "Pools"
-msgstr "Pools"
+msgid Positions
+msgstr Positions
 
 #: src/components/Tokens/TokenTable/TokenTable.tsx
 msgid "An error occurred loading tokens. Please try again."
@@ -2813,7 +2813,7 @@ msgid "You're in!"
 msgstr "Du bist in!"
 
 #: src/pages/PoolFinder/index.tsx
-msgid "Pool found!"
+msgid "Position found!"
 msgstr "Pool gefunden!"
 
 #: src/components/AccountDetails/TransactionSummary.tsx
@@ -3186,7 +3186,7 @@ msgid "Explore Uniswap Analytics."
 msgstr "Entdecken Sie Uniswap Analytics."
 
 #: src/pages/Pool/PositionPage.tsx
-msgid "← Back to Pools"
+msgid "← Back to Positions"
 msgstr "← Zurück zu Pools"
 
 #: src/nft/utils/time.ts
@@ -3455,7 +3455,7 @@ msgid "This provides the Uniswap protocol access to your token for trading. For 
 msgstr "Dadurch erhält das Uniswap-Protokoll Zugriff auf Ihren Token für den Handel. Aus Sicherheitsgründen läuft diese nach 30 Tagen ab."
 
 #: src/nft/components/profile/view/EmptyWalletContent.tsx
-msgid "Open a new position or create a pool to get started."
+msgid "Open a new position or create a position to get started."
 msgstr "Eröffnen Sie eine neue Position oder erstellen Sie einen Pool, um loszulegen."
 
 #: src/nft/components/profile/view/EmptyWalletContent.tsx
