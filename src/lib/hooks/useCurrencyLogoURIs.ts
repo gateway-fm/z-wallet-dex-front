@@ -8,10 +8,12 @@ import AvaxLogo from '../../assets/svg/avax_logo.svg'
 import BnbLogo from '../../assets/svg/bnb-logo.svg'
 import CeloLogo from '../../assets/svg/celo_logo.svg'
 import MaticLogo from '../../assets/svg/matic-token-icon.svg'
+import { ZEPHYR_CHAIN_ID } from '../../constants/chains'
 import { isCelo, NATIVE_CHAIN_ID, nativeOnChain } from '../../constants/tokens'
 
 type Network = 'ethereum' | 'arbitrum' | 'optimism' | 'polygon' | 'smartchain' | 'celo' | 'avalanchec'
 
+// eslint-disable-next-line import/no-unused-modules
 export function chainIdToNetworkName(networkId: ChainId): Network {
   switch (networkId) {
     case ChainId.MAINNET:
@@ -51,15 +53,16 @@ export function getNativeLogoURI(chainId: ChainId = ChainId.MAINNET): string {
 }
 
 function getTokenLogoURI(address: string, chainId: ChainId = ChainId.MAINNET): string | void {
-  const networkName = chainIdToNetworkName(chainId)
-  const networksWithUrls = [ChainId.ARBITRUM_ONE, ChainId.MAINNET, ChainId.OPTIMISM, ChainId.BNB, ChainId.AVALANCHE]
+  // Skip logo requests for Zephyr network
+  if (Number(chainId) === ZEPHYR_CHAIN_ID) {
+    return undefined
+  }
+
   if (isCelo(chainId) && address === nativeOnChain(chainId).wrapped.address) {
     return CeloLogo
   }
 
-  if (networksWithUrls.includes(chainId)) {
-    return `https://raw.githubusercontent.com/Uniswap/assets/master/blockchains/${networkName}/assets/${address}/logo.png`
-  }
+  return undefined
 }
 
 export default function useCurrencyLogoURIs(
