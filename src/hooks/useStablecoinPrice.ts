@@ -7,10 +7,9 @@ import { useRoutingAPITrade } from 'state/routing/useRoutingAPITrade'
 
 import { ZEPHYR_CHAIN_ID } from '../constants/chains'
 import { USDC_ZEPHYR } from '../constants/tokens'
-import { useGraphQLTokenPrice } from './useTokenPricesFromGraphQL'
+import { useTokenPrice } from './useTokenPrices'
 
-// Stablecoin amounts used when calculating spot price for a given currency.
-// The amount is large enough to filter low liquidity pairs.
+// NOTE: Stablecoin amounts used when calculating spot price for a given currency
 const STABLECOIN_AMOUNT_OUT: { [chainId: number]: CurrencyAmount<Token> } = {
   [ZEPHYR_CHAIN_ID]: CurrencyAmount.fromRawAmount(USDC_ZEPHYR, 10_000e6),
 }
@@ -24,10 +23,10 @@ export default function useStablecoinPrice(currency?: Currency): Price<Currency,
   const amountOut = chainId ? STABLECOIN_AMOUNT_OUT[chainId] : undefined
   const stablecoin = amountOut?.currency
 
-  const graphQLPrice = useGraphQLTokenPrice(currency)
+  const tokenPrice = useTokenPrice(currency)
 
   const { trade } = useRoutingAPITrade(
-    chainId === ZEPHYR_CHAIN_ID /* skip for Zephyr - use GraphQL */,
+    chainId === ZEPHYR_CHAIN_ID /* skip for Zephyr */,
     TradeType.EXACT_OUTPUT,
     amountOut,
     currency,
@@ -39,14 +38,14 @@ export default function useStablecoinPrice(currency?: Currency): Price<Currency,
       return undefined
     }
 
-    // handle usdc
+    // Handle USDC
     if (currency?.wrapped.equals(stablecoin)) {
       return new Price(stablecoin, stablecoin, '1', '1')
     }
 
-    // For Zephyr network, use GraphQL price if available
-    if (chainId === ZEPHYR_CHAIN_ID && graphQLPrice) {
-      return graphQLPrice as Price<Currency, Token>
+    // For Zephyr network, use API price if available
+    if (chainId === ZEPHYR_CHAIN_ID && tokenPrice) {
+      return tokenPrice as Price<Currency, Token>
     }
 
     // Fallback to routing API for other networks
@@ -56,7 +55,7 @@ export default function useStablecoinPrice(currency?: Currency): Price<Currency,
     }
 
     return undefined
-  }, [currency, stablecoin, trade, chainId, graphQLPrice])
+  }, [currency, stablecoin, trade, chainId, tokenPrice])
 
   const lastPrice = useRef(price)
   if (
@@ -96,11 +95,9 @@ export function useStablecoinAmountFromFiatValue(fiatValue: number | null | unde
     if (fiatValue === null || fiatValue === undefined || !chainId || !stablecoin) {
       return undefined
     }
-
-    // trim for decimal precision when parsing
     const parsedForDecimals = fiatValue.toFixed(stablecoin.decimals).toString()
     try {
-      // parse USD string into CurrencyAmount based on stablecoin decimals
+      // Parse USD string into CurrencyAmount based on stablecoin decimals
       return tryParseCurrencyAmount(parsedForDecimals, stablecoin)
     } catch (error) {
       return undefined

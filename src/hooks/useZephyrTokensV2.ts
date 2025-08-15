@@ -4,38 +4,29 @@ import { useMemo } from 'react'
 import { ZEPHYR_CHAIN_ID } from '../constants/chains'
 import { useTokenSearch, useTrendingTokens } from './useTokenSearch'
 
-/**
- * Convert GraphQL token data to Token instance
- */
-function createTokenFromGraphQL(tokenData: {
-  id: string
+function createTokenFromApiData(tokenData: {
+  address: string
   symbol: string
   name: string
-  decimals: string | number
+  decimals: number
 }): Token | null {
   try {
-    // Convert decimals to number if it's a string
-    const decimals = typeof tokenData.decimals === 'string' ? parseInt(tokenData.decimals, 10) : tokenData.decimals
-
-    return new Token(ZEPHYR_CHAIN_ID, tokenData.id, decimals, tokenData.symbol, tokenData.name)
+    return new Token(ZEPHYR_CHAIN_ID, tokenData.address, tokenData.decimals, tokenData.symbol, tokenData.name)
   } catch (error) {
-    console.warn('Failed to create token from GraphQL data:', tokenData, error)
+    console.warn('Failed to create token from API data:', tokenData, error)
     return null
   }
 }
 
-/**
- * Hook that uses GraphQL tokens for Zephyr network - V2 version
- */
 export function useZephyrTokens(): { [address: string]: Token } {
-  const { tokens: graphqlTokens } = useTrendingTokens(20)
+  const { tokens: apiTokens } = useTrendingTokens(20)
 
   return useMemo(() => {
     const tokens: { [address: string]: Token } = {}
 
-    if (graphqlTokens) {
-      for (const tokenData of graphqlTokens) {
-        const token = createTokenFromGraphQL(tokenData)
+    if (apiTokens) {
+      for (const tokenData of apiTokens) {
+        const token = createTokenFromApiData(tokenData)
         if (token) {
           const address = token.address.toLowerCase()
           tokens[address] = token
@@ -44,12 +35,9 @@ export function useZephyrTokens(): { [address: string]: Token } {
     }
 
     return tokens
-  }, [graphqlTokens])
+  }, [apiTokens])
 }
 
-/**
- * Hook for searching tokens with GraphQL integration - V2 version
- */
 export function useZephyrTokenSearch(searchQuery: string, chainId: number | undefined) {
   const { tokens: searchResults, loading } = useTokenSearch(searchQuery, 20)
 
@@ -60,7 +48,7 @@ export function useZephyrTokenSearch(searchQuery: string, chainId: number | unde
 
     if (!shouldSkip && searchResults) {
       for (const tokenData of searchResults) {
-        const token = createTokenFromGraphQL(tokenData)
+        const token = createTokenFromApiData(tokenData)
         if (token) {
           const address = token.address.toLowerCase()
           tokens[address] = token

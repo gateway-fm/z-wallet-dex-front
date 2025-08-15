@@ -1,54 +1,42 @@
-import { useQuery } from '@apollo/client'
 import { useMemo } from 'react'
 
-import { handleGraphQLError, zephyrGraphQLClient } from '../data/graphql/client'
-import { CACHE_POLICIES, POLLING_INTERVALS, QUERY_LIMITS } from '../data/graphql/constants'
-import { SEARCH_TOKENS, TRENDING_TOKENS } from '../data/graphql/queries'
-import { UseTokenSearchResult } from '../data/graphql/types'
+import { useSearchTokens as useApiSearchTokens, useTrendingTokens as useApiTrendingTokens } from '../api'
+import { UseTokenSearchResult } from '../types/api'
 
-export function useTokenSearch(searchTerm: string, first = QUERY_LIMITS.DEFAULT_TOKEN_SEARCH): UseTokenSearchResult {
-  const { data, loading, error } = useQuery(SEARCH_TOKENS, {
-    variables: { search: searchTerm, first },
-    skip: !searchTerm || searchTerm.length < 2,
-    client: zephyrGraphQLClient,
-    errorPolicy: CACHE_POLICIES.ERROR_POLICY,
-    fetchPolicy: CACHE_POLICIES.DEFAULT,
-  })
+const DEFAULT_TOKEN_SEARCH = 20
+const DEFAULT_TRENDING_TOKENS = 10
+
+export function useTokenSearch(searchTerm: string, first = DEFAULT_TOKEN_SEARCH): UseTokenSearchResult {
+  const { data, isLoading, error } = useApiSearchTokens(searchTerm, Boolean(searchTerm && searchTerm.length >= 2))
 
   const tokens = useMemo(() => {
     if (error && !data) {
-      return handleGraphQLError(error, [])
+      return []
     }
-    return data?.tokens || []
-  }, [data, error])
+    const tokensData = data?.data || []
+    return tokensData.slice(0, first)
+  }, [data, error, first])
 
   return {
     tokens,
-    loading: loading && searchTerm.length >= 2,
+    loading: isLoading && searchTerm.length >= 2,
     error: error && !data ? error : null,
   }
 }
 
-// eslint-disable-next-line import/no-unused-modules
-export function useTrendingTokens(first: number = QUERY_LIMITS.DEFAULT_TRENDING_TOKENS): UseTokenSearchResult {
-  const { data, loading, error } = useQuery(TRENDING_TOKENS, {
-    variables: { first },
-    client: zephyrGraphQLClient,
-    errorPolicy: CACHE_POLICIES.ERROR_POLICY,
-    fetchPolicy: CACHE_POLICIES.DEFAULT,
-    pollInterval: POLLING_INTERVALS.ANALYTICS,
-  })
+export function useTrendingTokens(first: number = DEFAULT_TRENDING_TOKENS): UseTokenSearchResult {
+  const { data, isLoading, error } = useApiTrendingTokens(first)
 
   const tokens = useMemo(() => {
     if (error && !data) {
-      return handleGraphQLError(error, [])
+      return []
     }
-    return data?.tokens || []
+    return data?.data || []
   }, [data, error])
 
   return {
     tokens,
-    loading,
+    loading: isLoading,
     error: error && !data ? error : null,
   }
 }
