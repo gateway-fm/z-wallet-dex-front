@@ -91,12 +91,12 @@ function usePools(
   const { chainId } = useWeb3React()
   const isZephyrNetwork = chainId === ZEPHYR_CHAIN_ID
 
-  // Only fetch GraphQL pools when we actually need them for Zephyr network
+  // Only fetch pools when we actually need them for Zephyr network
   const shouldFetchGraphQL = useMemo(() => {
     return isZephyrNetwork && poolKeys.some(([currencyA, currencyB]) => currencyA && currencyB)
   }, [isZephyrNetwork, poolKeys])
 
-  const { pools: graphqlPools, loading: graphqlLoading } = useTopPools(shouldFetchGraphQL ? 100 : 0)
+  const { pools: customPools, loading: customPoolsLoading } = useTopPools(shouldFetchGraphQL ? 100 : 0)
 
   const poolTokens: ([Token, Token, FeeAmount] | undefined)[] = useMemo(() => {
     if (!chainId) return new Array(poolKeys.length)
@@ -145,12 +145,12 @@ function usePools(
       if (!tokens) return [PoolState.INVALID, null]
       const [token0, token1, fee] = tokens
 
-      // For Zephyr network, use GraphQL data
+      // For Zephyr network, use custom data
       if (isZephyrNetwork) {
-        if (graphqlLoading) return [PoolState.LOADING, null]
+        if (customPoolsLoading) return [PoolState.LOADING, null]
 
-        // Find matching pool in GraphQL data by tokens AND fee tier
-        const graphqlPool = graphqlPools?.find((pool) => {
+        // Find matching pool in custom data by tokens AND fee tier
+        const customPool = customPools?.find((pool) => {
           const pool0Address = pool.token0.id.toLowerCase()
           const pool1Address = pool.token1.id.toLowerCase()
           const token0Address = token0.address.toLowerCase()
@@ -161,8 +161,8 @@ function usePools(
             (pool0Address === token0Address && pool1Address === token1Address) ||
             (pool0Address === token1Address && pool1Address === token0Address)
 
-          // For fee matching, convert GraphQL feeTier to number and compare
-          // NOTE: GraphQL sometimes returns string like "3000" or "10000"
+          // For fee matching, convert feeTier to number and compare
+          // NOTE: sometimes returns string like "3000" or "10000"
           const poolFee = typeof pool.feeTier === 'string' ? parseInt(pool.feeTier, 10) : pool.feeTier
           const feeMatches = poolFee === fee
 
@@ -170,15 +170,15 @@ function usePools(
         })
 
         try {
-          if (graphqlPool) {
-            // Pool exists in GraphQL - create with proper 1:1 price accounting for decimals
+          if (customPool) {
+            // Pool exists in custom data - create with proper 1:1 price accounting for decimals
             // Use the actual fee amount (could be 3000 for old positions or 10000 for new ones)
             const { sqrtPriceX96, tick, liquidity } = getZephyrPoolParams(token0, token1)
             const pool = new Pool(token0, token1, fee, sqrtPriceX96, liquidity, tick) // Use fee from tokens instead of hardcoded FeeAmount.HIGH
             return [PoolState.EXISTS, pool]
           } else {
-            // Pool doesn't exist in GraphQL but we have valid tokens and fee
-            // Create mock pool for existing positions that may not be in GraphQL yet
+            // Pool doesn't exist in custom data but we have valid tokens and fee
+            // Create mock pool for existing positions that may not be in custom data yet
             try {
               const { sqrtPriceX96, tick, liquidity } = getZephyrPoolParams(token0, token1)
               const mockPool = new Pool(token0, token1, fee, sqrtPriceX96, liquidity, tick)
@@ -219,7 +219,7 @@ function usePools(
         return [PoolState.NOT_EXISTS, null]
       }
     })
-  }, [liquidities, poolKeys, slot0s, poolTokens, isZephyrNetwork, graphqlPools, graphqlLoading])
+  }, [liquidities, poolKeys, slot0s, poolTokens, isZephyrNetwork, customPools, customPoolsLoading])
 }
 
 export function usePool(
