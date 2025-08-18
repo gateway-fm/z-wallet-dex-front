@@ -1,5 +1,5 @@
+export { useProtocolStats, useTopPools } from './useProtocolStats'
 export { default as useStablecoinPrice } from './useStablecoinPrice'
 export { useTokenPrice, useTokenPrices, useUSDCPrices } from './useTokenPrices'
 export { useTokenSearch, useTrendingTokens } from './useTokenSearch'
 export { useUserPositions, useUserTransactions } from './useUserPositions'
-export { useProtocolStats, useTopPools } from './useProtocolStats'

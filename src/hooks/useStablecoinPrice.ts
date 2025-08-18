@@ -1,9 +1,7 @@
-import { Currency, CurrencyAmount, Price, Token, TradeType } from '@uniswap/sdk-core'
+import { Currency, CurrencyAmount, Price, Token } from '@uniswap/sdk-core'
 import { useWeb3React } from '@web3-react/core'
 import tryParseCurrencyAmount from 'lib/utils/tryParseCurrencyAmount'
-import { useMemo, useRef } from 'react'
-import { INTERNAL_ROUTER_PREFERENCE_PRICE } from 'state/routing/types'
-import { useRoutingAPITrade } from 'state/routing/useRoutingAPITrade'
+import { useMemo } from 'react'
 
 import { ZEPHYR_CHAIN_ID } from '../constants/chains'
 import { USDC_ZEPHYR } from '../constants/tokens'
@@ -20,53 +18,29 @@ const STABLECOIN_AMOUNT_OUT: { [chainId: number]: CurrencyAmount<Token> } = {
  */
 export default function useStablecoinPrice(currency?: Currency): Price<Currency, Token> | undefined {
   const chainId = currency?.chainId
-  const amountOut = chainId ? STABLECOIN_AMOUNT_OUT[chainId] : undefined
-  const stablecoin = amountOut?.currency
+  const stablecoin = chainId ? STABLECOIN_AMOUNT_OUT[chainId]?.currency : undefined
 
+  // For Zephyr network, use simplified API-based pricing
   const tokenPrice = useTokenPrice(currency)
 
-  const { trade } = useRoutingAPITrade(
-    chainId === ZEPHYR_CHAIN_ID /* skip for Zephyr */,
-    TradeType.EXACT_OUTPUT,
-    amountOut,
-    currency,
-    INTERNAL_ROUTER_PREFERENCE_PRICE
-  )
-
-  const price = useMemo(() => {
+  return useMemo(() => {
     if (!currency || !stablecoin) {
       return undefined
     }
 
-    // Handle USDC
+    // Handle USDC/stablecoin (1:1 price)
     if (currency?.wrapped.equals(stablecoin)) {
       return new Price(stablecoin, stablecoin, '1', '1')
     }
 
-    // For Zephyr network, use API price if available
+    // For Zephyr network, use API price
     if (chainId === ZEPHYR_CHAIN_ID && tokenPrice) {
       return tokenPrice as Price<Currency, Token>
     }
 
-    // Fallback to routing API for other networks
-    if (trade) {
-      const { numerator, denominator } = trade.routes[0].midPrice
-      return new Price(currency, stablecoin, denominator, numerator)
-    }
-
+    // For other networks, return undefined (not supported in this version)
     return undefined
-  }, [currency, stablecoin, trade, chainId, tokenPrice])
-
-  const lastPrice = useRef(price)
-  if (
-    !price ||
-    !lastPrice.current ||
-    !price.equalTo(lastPrice.current) ||
-    !price.baseCurrency.equals(lastPrice.current.baseCurrency)
-  ) {
-    lastPrice.current = price
-  }
-  return lastPrice.current
+  }, [currency, stablecoin, chainId, tokenPrice])
 }
 
 export function useStablecoinValue(currencyAmount: CurrencyAmount<Currency> | undefined | null) {
