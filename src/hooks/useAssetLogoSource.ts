@@ -1,6 +1,7 @@
+import { ZEPHYR_CHAIN_ID } from 'constants/chains'
 import tokenLogoLookup from 'constants/tokenLogoLookup'
 import { isCelo, nativeOnChain } from 'constants/tokens'
-import { chainIdToNetworkName, getNativeLogoURI } from 'lib/hooks/useCurrencyLogoURIs'
+import { getNativeLogoURI } from 'lib/hooks/useCurrencyLogoURIs'
 import uriToHttp from 'lib/utils/uriToHttp'
 import { useCallback, useEffect, useState } from 'react'
 import { isAddress } from 'utils'
@@ -45,15 +46,19 @@ function getInitialUrl(
 ) {
   if (chainId && isNative) return getNativeLogoURI(chainId)
 
-  const networkName = chainId ? chainIdToNetworkName(chainId) : 'ethereum'
   const checksummedAddress = isAddress(address)
 
   if (chainId && isCelo(chainId) && address === nativeOnChain(chainId).wrapped.address) {
     return celoLogo
   }
 
+  // Skip logo requests for Zephyr network
+  if (chainId === ZEPHYR_CHAIN_ID) {
+    return backupImg ?? undefined
+  }
+
   if (checksummedAddress) {
-    return `https://raw.githubusercontent.com/Uniswap/assets/master/blockchains/${networkName}/assets/${checksummedAddress}/logo.png`
+    return backupImg ?? undefined
   } else {
     return backupImg ?? undefined
   }
