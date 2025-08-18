@@ -1,41 +1,20 @@
 import { Currency, Price } from '@uniswap/sdk-core'
 import JSBI from 'jsbi'
 import { useMemo } from 'react'
-import { useQuery } from 'react-query'
 
-import { Api } from '../api/Api'
-import { getApiBaseUrl } from '../api/helpers'
+import { useTokensList } from '../api'
 import { USDC_ZEPHYR } from '../constants/tokens'
 import { TokenPriceData } from '../types/api'
 
-// Create API instance
-const api = new Api({ baseURL: getApiBaseUrl() })
+const TOKEN_LIST_DEFAULT_LIMIT = 25
 
-// Hook for getting token prices from the new API
 export function useTokenPrices(tokenAddresses: string[]): {
   data: { [address: string]: TokenPriceData }
   loading: boolean
   error: any
 } {
   const normalizedAddresses = useMemo(() => tokenAddresses.map((addr) => addr.toLowerCase()), [tokenAddresses])
-
-  // Fetch tokens list with prices from API
-  const {
-    data: tokensResponse,
-    isLoading,
-    error,
-  } = useQuery(
-    ['tokensList', 'prices'],
-    async () => {
-      const response = await api.tokens.listTokens({ page: 1, per_page: 100 })
-      return response.data
-    },
-    {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      cacheTime: 10 * 60 * 1000, // 10 minutes
-      retry: 2,
-    }
-  )
+  const { data: tokensResponse, isLoading, error } = useTokensList(1, TOKEN_LIST_DEFAULT_LIMIT)
 
   const pricesMap = useMemo(() => {
     const pricesMap: { [address: string]: TokenPriceData } = {}

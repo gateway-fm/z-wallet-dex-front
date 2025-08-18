@@ -1,10 +1,7 @@
 import { useQuery } from 'react-query'
 
-import { Api } from './Api'
 import { API_CACHE } from './constants'
-import { getApiBaseUrl } from './helpers'
-
-const api = new Api({ baseURL: getApiBaseUrl() })
+import apiInstance from './index'
 
 export function useSearchTokens(searchQuery: string, enabled = true) {
   return useQuery(
@@ -12,7 +9,7 @@ export function useSearchTokens(searchQuery: string, enabled = true) {
     async () => {
       if (!searchQuery) return { data: [] }
 
-      const response = await api.tokens.searchToken({ q: searchQuery })
+      const response = await apiInstance.tokens.searchToken({ q: searchQuery })
       return response.data
     },
     {
@@ -27,7 +24,7 @@ export function useTrendingTokens(limit = 10) {
   return useQuery(
     ['trendingTokens', limit],
     async () => {
-      const response = await api.tokens.listTokens({ page: 1, per_page: limit })
+      const response = await apiInstance.tokens.listTokens({ page: 1, per_page: limit })
       return response.data
     },
     {
@@ -41,7 +38,7 @@ export function useTokenDetails(address: string, enabled = true) {
   return useQuery(
     ['tokenDetails', address],
     async () => {
-      const response = await api.tokens.getToken(address)
+      const response = await apiInstance.tokens.getToken(address)
       return response.data
     },
     {
@@ -52,17 +49,17 @@ export function useTokenDetails(address: string, enabled = true) {
   )
 }
 
-export function useHealthCheck() {
+export function useTokensList(page = 1, perPage = 100) {
   return useQuery(
-    ['healthCheck'],
+    ['tokensList', page, perPage],
     async () => {
-      await api.health.healthCheck()
-      return true
+      const response = await apiInstance.tokens.listTokens({ page, per_page: perPage })
+      return response.data
     },
     {
       staleTime: API_CACHE.STALE_TIME,
       cacheTime: API_CACHE.GC_TIME,
-      retry: 3,
+      retry: 2,
     }
   )
 }
