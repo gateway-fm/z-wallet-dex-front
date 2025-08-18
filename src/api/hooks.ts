@@ -1,7 +1,10 @@
 import { useQuery } from 'react-query'
 
-import { apiClient } from './config'
+import { Api } from './Api'
 import { API_CACHE } from './constants'
+import { getApiBaseUrl } from './helpers'
+
+const api = new Api({ baseURL: getApiBaseUrl() })
 
 export function useSearchTokens(searchQuery: string, enabled = true) {
   return useQuery(
@@ -9,7 +12,7 @@ export function useSearchTokens(searchQuery: string, enabled = true) {
     async () => {
       if (!searchQuery) return { data: [] }
 
-      const response = await apiClient.get(`/tokens/search?q=${encodeURIComponent(searchQuery)}`)
+      const response = await api.tokens.searchToken({ q: searchQuery })
       return response.data
     },
     {
@@ -24,7 +27,7 @@ export function useTrendingTokens(limit = 10) {
   return useQuery(
     ['trendingTokens', limit],
     async () => {
-      const response = await apiClient.get(`/tokens?page=1&per_page=${limit}`)
+      const response = await api.tokens.listTokens({ page: 1, per_page: limit })
       return response.data
     },
     {
@@ -38,7 +41,7 @@ export function useTokenDetails(address: string, enabled = true) {
   return useQuery(
     ['tokenDetails', address],
     async () => {
-      const response = await apiClient.get(`/tokens/${address}`)
+      const response = await api.tokens.getToken(address)
       return response.data
     },
     {
@@ -53,7 +56,7 @@ export function useHealthCheck() {
   return useQuery(
     ['healthCheck'],
     async () => {
-      await apiClient.get('/health')
+      await api.health.healthCheck()
       return true
     },
     {
