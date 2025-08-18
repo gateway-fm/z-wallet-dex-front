@@ -1,4 +1,4 @@
-import { getAllRoutes } from './api/fetchPools'
+import { getAllRoutes } from './api/pools'
 import { prepareSwapCalldata } from './calldata'
 import { findBestRoute } from './quote'
 import { SwapParams } from './types'

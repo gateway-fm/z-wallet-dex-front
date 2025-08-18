@@ -1,4 +1,5 @@
 import path from 'node:path'
+import process from 'node:process'
 
 import * as dotenv from 'dotenv'
 import { generateApi } from 'swagger-typescript-api'

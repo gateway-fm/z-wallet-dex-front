@@ -1,5 +1,7 @@
-export { getSwapData } from './route'
-export { getAllRoutes } from './api/fetchPools'
+/* eslint-disable import/no-unused-modules */
+
+export { getAllRoutes } from './api/pools'
+export { ProviderUrl, UniswapV3Contracts } from './config'
 export { findBestRoute } from './quote'
-export * from './types'
-export * from './config'
+export { getSwapData } from './route'
+export type { QuoteResult, Route, SwapParams } from './types'
