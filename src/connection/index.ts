@@ -5,12 +5,15 @@ import { Network } from '@web3-react/network'
 import { Connector } from '@web3-react/types'
 import HORSWAP_LOGO from 'assets/svg/logo.svg'
 import COINBASE_ICON from 'assets/wallets/coinbase-icon.svg'
+import Z_WALLET_ICON from 'assets/wallets/z-wallet-icon.svg'
 import { isMobile } from 'utils/userAgent'
 
+import { EXTERNAL_SERVICES_CONFIG, NETWORK_CONFIG } from '../config/zephyr'
 import { ZEPHYR_CHAIN_ID } from '../constants/chains'
 import { RPC_URLS } from '../constants/networks'
 import { Connection, ConnectionType } from './types'
 import { getInjection, getIsCoinbaseWallet, getIsInjected, getIsMetaMaskWallet } from './utils'
+import { ZWalletConnector } from './zWalletConnector'
 
 function onError(error: Error) {
   console.debug(`web3-react error: ${error}`)
@@ -90,7 +93,23 @@ const coinbaseWalletConnection: Connection = {
   },
 }
 
-export const connections = [injectedConnection, coinbaseWalletConnection, networkConnection]
+const [web3ZWallet, web3ZWalletHooks] = initializeConnector<ZWalletConnector>(
+  (actions) =>
+    new ZWalletConnector(actions, {
+      clientUrl: EXTERNAL_SERVICES_CONFIG.Z_WALLET_CLIENT_URL,
+      chainId: NETWORK_CONFIG.CHAIN_ID,
+    })
+)
+const zWalletConnection: Connection = {
+  getName: () => 'Z Wallet',
+  connector: web3ZWallet,
+  hooks: web3ZWalletHooks,
+  type: ConnectionType.Z_WALLET,
+  getIcon: () => Z_WALLET_ICON,
+  shouldDisplay: () => true,
+}
+
+export const connections = [injectedConnection, coinbaseWalletConnection, zWalletConnection, networkConnection]
 
 export function getConnection(c: Connector | ConnectionType) {
   if (c instanceof Connector) {
@@ -105,6 +124,8 @@ export function getConnection(c: Connector | ConnectionType) {
         return injectedConnection
       case ConnectionType.COINBASE_WALLET:
         return coinbaseWalletConnection
+      case ConnectionType.Z_WALLET:
+        return zWalletConnection
       case ConnectionType.NETWORK:
         return networkConnection
     }

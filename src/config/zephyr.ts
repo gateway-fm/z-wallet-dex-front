@@ -111,6 +111,7 @@ export const EXTERNAL_SERVICES_CONFIG = {
   INFURA_KEY: process.env.REACT_APP_INFURA_KEY || '',
   ALCHEMY_API_KEY: process.env.REACT_APP_ALCHEMY_API_KEY || '',
   WALLET_CONNECT_PROJECT_ID: process.env.REACT_APP_WALLET_CONNECT_PROJECT_ID || '',
+  Z_WALLET_CLIENT_URL: process.env.REACT_APP_Z_WALLET_CLIENT_URL || 'https://z-wallet-dev.zero.tech',
 } as const
 
 // Type-safe exports

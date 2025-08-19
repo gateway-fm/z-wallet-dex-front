@@ -5,6 +5,7 @@ import { Connector } from '@web3-react/types'
 export enum ConnectionType {
   INJECTED = 'INJECTED',
   COINBASE_WALLET = 'COINBASE_WALLET',
+  Z_WALLET = 'Z_WALLET',
   NETWORK = 'NETWORK',
 }
 
