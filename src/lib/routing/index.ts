@@ -1,5 +1,5 @@
-export { getSwapData } from './route'
 export { getAllRoutes } from './api/fetchPools'
-export { findBestRoute } from './quote'
-export * from './types'
 export * from './config'
+export { findBestRoute } from './quote'
+export { getSwapData } from './route'
+export * from './types'
