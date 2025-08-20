@@ -3004,7 +3004,7 @@ msgstr "Чеканка"
 
 #: src/components/NavBar/MenuDropdown.tsx
 #: src/pages/PoolDetails/PoolDetailsHeader.tsx
-msgid "Pool"
+msgid "Positions"
 msgstr "Позиции"
 
 #: src/pages/PoolFinder/index.tsx
