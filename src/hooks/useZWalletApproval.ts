@@ -1,4 +1,5 @@
 import { MaxUint256, Token } from '@uniswap/sdk-core'
+import { useCallback } from 'react'
 import { useTransactionAdder } from 'state/transactions/hooks'
 import { TransactionType } from 'state/transactions/types'
 import { zWalletClient } from 'z-wallet-sdk'
@@ -39,7 +40,7 @@ export async function approveWithZWallet(
     chainId,
     wait: () =>
       Promise.resolve({
-        transactionHash: response.data!.transactionHash,
+        transactionHash: response.data?.transactionHash,
         blockNumber: 0,
         blockHash: '0x',
         confirmations: 1,
@@ -47,10 +48,23 @@ export async function approveWithZWallet(
     to: token.address,
   } as any
 
+  console.log('[DEBUG] Z Wallet approval result:', approvalResult)
+
   addTransaction(approvalResult, {
     type: TransactionType.APPROVAL,
     tokenAddress: token.address,
     spender,
     amount: MaxUint256.toString(),
   })
+}
+
+// eslint-disable-next-line import/no-unused-modules
+export function useZWalletApproval() {
+  const addTransaction = useTransactionAdder()
+  return useCallback(
+    async (token: Token, spender: string, chainId: number, account: string): Promise<void> => {
+      await approveWithZWallet(token, spender, chainId, account, addTransaction)
+    },
+    [addTransaction]
+  )
 }

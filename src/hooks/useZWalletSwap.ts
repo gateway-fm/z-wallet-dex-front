@@ -1,3 +1,4 @@
+import { useCallback } from 'react'
 import { zWalletClient } from 'z-wallet-sdk'
 
 interface SwapTransaction {
@@ -23,6 +24,8 @@ export async function swapWithZWallet(chainId: number, account: string, transact
 
   const response = await zWalletClient.callContract(zWalletTx)
 
+  console.log('[DEBUG] Z Wallet swap response:', response)
+
   if (!response || !response.data) {
     throw new Error((response && response.error) || 'Z Wallet swap failed')
   }
@@ -39,11 +42,18 @@ export async function swapWithZWallet(chainId: number, account: string, transact
     chainId,
     wait: () =>
       Promise.resolve({
-        transactionHash: response.data!.transactionHash,
+        transactionHash: response.data?.transactionHash,
         blockNumber: 0,
         blockHash: '0x',
         confirmations: 1,
       }),
     to: transaction.to,
   } as any
+}
+
+// eslint-disable-next-line import/no-unused-modules
+export function useZWalletSwap() {
+  return useCallback(async (chainId: number, account: string, transaction: SwapTransaction): Promise<any> => {
+    return await swapWithZWallet(chainId, account, transaction)
+  }, [])
 }
