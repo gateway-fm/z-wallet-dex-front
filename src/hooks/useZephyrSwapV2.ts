@@ -5,13 +5,13 @@ import { ConnectionType } from 'connection/types'
 import { ApprovalState } from 'lib/hooks/useApproval'
 import { useMemo } from 'react'
 import { TradeFillType } from 'state/routing/types'
-import { zWalletClient } from 'z-wallet-sdk'
 
 import ZephyrSwapRouterABI from '../abis/zephyr-swap-router.json'
 import { CONTRACTS_CONFIG } from '../config/zephyr'
 import { ZEPHYR_CHAIN_ID } from '../constants/chains'
 import { useContract } from './useContract'
 import { useZephyrTokenApproval } from './useZephyrApproval'
+import { swapWithZWallet } from './useZWalletSwap'
 
 interface SimpleTrade {
   inputAmount: CurrencyAmount<Currency>
@@ -19,9 +19,6 @@ interface SimpleTrade {
   tradeType: TradeType
 }
 
-/**
- * Returns the swap call parameters for a trade on Zephyr network using the new routing
- */
 export function useZephyrSwapV2(
   trade: SimpleTrade | undefined,
   _allowedSlippage: number,
@@ -92,40 +89,7 @@ export function useZephyrSwapV2(
         let swapResult
 
         if (currentIsZWallet) {
-          const zWalletTx = {
-            chainId,
-            contractAddress: transaction.to,
-            method: 'fallback',
-            params: [],
-            value: transaction.value || '0',
-            data: transaction.data,
-          }
-
-          const response = await zWalletClient.callContract(zWalletTx)
-
-          if (!response.data) {
-            throw new Error(response.error || 'Z Wallet transaction failed')
-          }
-
-          swapResult = {
-            hash: response.data!.transactionHash,
-            confirmations: 0,
-            from: account || '',
-            nonce: 0,
-            gasLimit: BigInt(transaction.gasLimit || 0),
-            gasPrice: BigInt(0),
-            data: transaction.data || '0x',
-            value: BigInt(transaction.value || 0),
-            chainId,
-            wait: () =>
-              Promise.resolve({
-                transactionHash: response.data!.transactionHash,
-                blockNumber: 0,
-                blockHash: '0x',
-                confirmations: 1,
-              }),
-            to: transaction.to,
-          } as any
+          swapResult = await swapWithZWallet(chainId, account || '', transaction)
         } else {
           if (!provider || !swapRouter) {
             throw new Error('Provider or swapRouter not available for standard wallet')
