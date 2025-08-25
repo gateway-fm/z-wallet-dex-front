@@ -1,7 +1,6 @@
 import { ChainId } from '@uniswap/sdk-core'
 import { Connection } from 'connection/types'
-import { atom, useSetAtom } from 'jotai'
-import { useAtomValue } from 'jotai/utils'
+import { atom, useAtomValue, useSetAtom } from 'jotai'
 import { useCallback } from 'react'
 import { useAppDispatch } from 'state/hooks'
 import { updateSelectedWallet } from 'state/user/reducer'
