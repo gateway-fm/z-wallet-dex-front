@@ -18,7 +18,7 @@ export async function approveWithZWallet(
   const approvalTx = {
     chainId,
     contractAddress: token.address,
-    method: 'approve(address spender, uint256 amount)',
+    method: 'function approve(address spender, uint256 amount)',
     params: [spender, MaxUint256.toString()],
   }
 
@@ -47,8 +47,6 @@ export async function approveWithZWallet(
       }),
     to: token.address,
   } as any
-
-  console.log('[DEBUG] Z Wallet approval result:', approvalResult)
 
   addTransaction(approvalResult, {
     type: TransactionType.APPROVAL,

@@ -73,8 +73,13 @@ export function useZephyrSwapV2(
           throw new Error('Both currencies must be tokens for Zephyr swaps')
         }
 
-        if (approvalState !== ApprovalState.APPROVED) {
+        const currentConnection = getConnection(connector)
+        const isZWallet = currentConnection.type === ConnectionType.Z_WALLET
+
+        let justApproved = false
+        if (isZWallet && approvalState !== ApprovalState.APPROVED) {
           await approve()
+          justApproved = true
         }
 
         const transaction = {
@@ -84,11 +89,12 @@ export function useZephyrSwapV2(
           gasLimit: 500000,
         }
 
-        const currentConnection = getConnection(connector)
-        const currentIsZWallet = currentConnection.type === ConnectionType.Z_WALLET
         let swapResult
-
-        if (currentIsZWallet) {
+        if (isZWallet) {
+          if (justApproved) {
+            // NOTE: Wait 5 seconds before calling swap to give Z Wallet time to close approval popu
+            await new Promise((resolve) => setTimeout(resolve, 5000))
+          }
           swapResult = await swapWithZWallet(chainId, account || '', transaction)
         } else {
           if (!provider || !swapRouter) {
