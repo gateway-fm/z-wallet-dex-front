@@ -25,7 +25,9 @@ export function useZephyrRoutingV2(
   const [result, setResult] = useState<Omit<RoutingResult, 'loading'>>({ route: '' })
 
   const swapParams = useMemo((): SwapParams | null => {
-    if (!amountSpecified || !otherCurrency) return null
+    if (!amountSpecified || !otherCurrency) {
+      return null
+    }
 
     return {
       signer: account || '0x0000000000000000000000000000000000000000', // Use real account if available

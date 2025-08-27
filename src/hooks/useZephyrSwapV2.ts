@@ -43,17 +43,15 @@ export function useZephyrSwapV2(
       return { callback: null }
     }
 
+    if (!trade || !account || !recipientAddress) {
+      return { callback: null }
+    }
+
     const connection = getConnection(connector)
     const isZWallet = connection.type === ConnectionType.Z_WALLET
 
-    if (isZWallet) {
-      if (!trade || !account || !recipientAddress) {
+    if (!isZWallet && (!provider || !swapRouter)) {
         return { callback: null }
-      }
-    } else {
-      if (!trade || !provider || !account || !swapRouter || !recipientAddress) {
-        return { callback: null }
-      }
     }
 
     if (!callData) {
