@@ -67,7 +67,10 @@ export function useZephyrSwapV2(
       type: TradeFillType.Classic
       response: any
     }> => {
-      console.log('[Zephyr Swap DEBUG] Callback started:', {
+      // NOTE: workaround to ensure everything is properly initialized
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
+      console.log('[Zephyr Swap DEBUG] Starting swap:', {
         trade,
         chainId,
         account,
@@ -87,12 +90,16 @@ export function useZephyrSwapV2(
 
       const currentConnection = getConnection(connector)
       const isZWallet = currentConnection.type === ConnectionType.Z_WALLET
+      let needApproval = false
+
       if (isZWallet && approvalState !== ApprovalState.APPROVED) {
+        needApproval = true
         try {
           await approve()
+          console.log('[Z Wallet DEBUG] Approval completed')
         } catch (approvalError) {
           throw new Error(
-            `Token approval failed: ${approvalError instanceof Error ? approvalError.message : 'Unknown error'}`
+            `Approval failed: ${approvalError instanceof Error ? approvalError.message : 'Unknown error'}`
           )
         }
       }
@@ -124,9 +131,11 @@ export function useZephyrSwapV2(
 
       let swapResult
       if (isZWallet) {
-        // NOTE: waiting after approval
-        // FIXME: find a better way to do this
-        await new Promise((resolve) => setTimeout(resolve, Z_WALLET_APPROVAL_WAIT_TIME))
+        if (needApproval) {
+          // NOTE: Wait after approval for Z-Wallet to ensure it's processed
+          // FIXME: find a better way to do this
+          await new Promise((resolve) => setTimeout(resolve, Z_WALLET_APPROVAL_WAIT_TIME))
+        }
         swapResult = await swapWithZWallet(chainId, account || '', transaction)
       } else {
         if (!provider || !swapRouter) {

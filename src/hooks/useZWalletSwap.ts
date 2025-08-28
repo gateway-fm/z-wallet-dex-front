@@ -44,6 +44,7 @@ function decodeCalldata(calldata: string): {
     const methodSignature = `function ${decoded.name}(${inputs})`
 
     console.log('[Z Wallet DEBUG] Method signature:', methodSignature)
+
     console.log('[Z Wallet DEBUG] Raw decoded args:', decoded.args)
     console.log('[Z Wallet DEBUG] Function inputs:', decoded.functionFragment.inputs)
 
@@ -55,6 +56,8 @@ function decodeCalldata(calldata: string): {
       }
       return convertValue(arg)
     })
+
+    console.log('[Z Wallet DEBUG] Processed params:', processedParams)
 
     return {
       method: methodSignature,
