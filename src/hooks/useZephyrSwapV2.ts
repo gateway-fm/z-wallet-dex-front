@@ -13,6 +13,8 @@ import { useContract } from './useContract'
 import { useZephyrTokenApproval } from './useZephyrApproval'
 import { swapWithZWallet } from './useZWalletSwap'
 
+const Z_WALLET_APPROVAL_WAIT_TIME = 5000
+
 interface SimpleTrade {
   inputAmount: CurrencyAmount<Currency>
   outputAmount: CurrencyAmount<Currency>
@@ -51,7 +53,7 @@ export function useZephyrSwapV2(
     const isZWallet = connection.type === ConnectionType.Z_WALLET
 
     if (!isZWallet && (!provider || !swapRouter)) {
-        return { callback: null }
+      return { callback: null }
     }
 
     if (!callData) {
@@ -62,52 +64,65 @@ export function useZephyrSwapV2(
       type: TradeFillType.Classic
       response: any
     }> => {
-      try {
-        const { inputAmount, outputAmount } = trade
-        const tokenIn = inputAmount.currency
-        const tokenOut = outputAmount.currency
+      console.log('[Zephyr Swap DEBUG] Callback started:', {
+        trade,
+        chainId,
+        account,
+        recipientAddress,
+        callData,
+      })
 
-        if (!tokenIn.isToken || !tokenOut.isToken) {
-          throw new Error('Both currencies must be tokens for Zephyr swaps')
-        }
+      const { inputAmount, outputAmount } = trade
+      const tokenIn = inputAmount.currency
+      const tokenOut = outputAmount.currency
 
-        const currentConnection = getConnection(connector)
-        const isZWallet = currentConnection.type === ConnectionType.Z_WALLET
+      console.log('[Zephyr Swap DEBUG] Currencies:', { tokenIn, tokenOut })
 
-        let justApproved = false
-        if (isZWallet && approvalState !== ApprovalState.APPROVED) {
+      if (!tokenIn.isToken || !tokenOut.isToken) {
+        throw new Error('Both currencies must be tokens for Zephyr swaps')
+      }
+
+      const currentConnection = getConnection(connector)
+      const isZWallet = currentConnection.type === ConnectionType.Z_WALLET
+      if (isZWallet && approvalState !== ApprovalState.APPROVED) {
+        try {
           await approve()
-          justApproved = true
+        } catch (approvalError) {
+          throw new Error(
+            `Token approval failed: ${approvalError instanceof Error ? approvalError.message : 'Unknown error'}`
+          )
         }
+      }
 
-        const transaction = {
-          to: CONTRACTS_CONFIG.SWAP_ROUTER_02,
-          data: callData,
-          value: tokenIn.isNative ? inputAmount.quotient.toString() : '0',
-          gasLimit: 500000,
-        }
+      const transaction = {
+        to: CONTRACTS_CONFIG.SWAP_ROUTER_02,
+        data: callData,
+        value: tokenIn.isNative ? inputAmount.quotient.toString() : '0',
+        gasLimit: 500000, // TODO: get gas limit from the swap router
+      }
 
-        let swapResult
-        if (isZWallet) {
-          if (justApproved) {
-            // NOTE: Wait 5 seconds before calling swap to give Z Wallet time to close approval popu
-            await new Promise((resolve) => setTimeout(resolve, 5000))
-          }
-          swapResult = await swapWithZWallet(chainId, account || '', transaction)
-        } else {
-          if (!provider || !swapRouter) {
-            throw new Error('Provider or swapRouter not available for standard wallet')
-          }
-          swapResult = await provider.getSigner().sendTransaction(transaction)
-        }
+      console.log('[Zephyr Swap DEBUG] Starting swap execution:', {
+        transaction,
+        chainId,
+        account,
+      })
 
-        return {
-          type: TradeFillType.Classic,
-          response: swapResult,
+      let swapResult
+      if (isZWallet) {
+        // NOTE: waiting after approval
+        // FIXME: find a better way to do this
+        await new Promise((resolve) => setTimeout(resolve, Z_WALLET_APPROVAL_WAIT_TIME))
+        swapResult = await swapWithZWallet(chainId, account || '', transaction)
+      } else {
+        if (!provider || !swapRouter) {
+          throw new Error('Provider or swapRouter not available for standard wallet')
         }
-      } catch (error) {
-        console.error('Zephyr swap V2 failed:', error)
-        throw error
+        swapResult = await provider.getSigner().sendTransaction(transaction)
+      }
+
+      return {
+        type: TradeFillType.Classic,
+        response: swapResult,
       }
     }
 
