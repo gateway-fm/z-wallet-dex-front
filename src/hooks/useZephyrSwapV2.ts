@@ -9,6 +9,7 @@ import { TradeFillType } from 'state/routing/types'
 import ZephyrSwapRouterABI from '../abis/zephyr-swap-router.json'
 import { CONTRACTS_CONFIG } from '../config/zephyr'
 import { ZEPHYR_CHAIN_ID } from '../constants/chains'
+import { useTokenBalance } from '../lib/hooks/useCurrencyBalance'
 import { useContract } from './useContract'
 import { useZephyrTokenApproval } from './useZephyrApproval'
 import { swapWithZWallet } from './useZWalletSwap'
@@ -39,6 +40,8 @@ export function useZephyrSwapV2(
     CONTRACTS_CONFIG.SWAP_ROUTER_02,
     inputAmount
   )
+
+  const tokenBalance = useTokenBalance(account ?? undefined, tokenIn?.isToken ? tokenIn : undefined)
 
   return useMemo(() => {
     if (!chainId || chainId !== ZEPHYR_CHAIN_ID || !connector) {
@@ -107,6 +110,18 @@ export function useZephyrSwapV2(
         account,
       })
 
+      console.log('[Balance DEBUG] Trade details:', {
+        inputToken: tokenIn.address,
+        inputSymbol: tokenIn.symbol,
+        inputAmount: inputAmount.quotient.toString(),
+        actualBalance: tokenBalance?.quotient?.toString() || '0',
+        hasEnoughBalance:
+          tokenBalance && inputAmount && tokenBalance.quotient.toString() >= inputAmount.quotient.toString(),
+        outputToken: tokenOut.address,
+        outputSymbol: tokenOut.symbol,
+        expectedOutput: outputAmount.quotient.toString(),
+      })
+
       let swapResult
       if (isZWallet) {
         // NOTE: waiting after approval
@@ -127,5 +142,17 @@ export function useZephyrSwapV2(
     }
 
     return { callback }
-  }, [trade, recipientAddress, account, chainId, provider, swapRouter, callData, approvalState, connector, approve])
+  }, [
+    trade,
+    recipientAddress,
+    account,
+    chainId,
+    provider,
+    swapRouter,
+    callData,
+    approvalState,
+    connector,
+    approve,
+    tokenBalance,
+  ])
 }
