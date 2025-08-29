@@ -45,9 +45,6 @@ function decodeCalldata(calldata: string): {
 
     console.log('[Z Wallet DEBUG] Method signature:', methodSignature)
 
-    console.log('[Z Wallet DEBUG] Raw decoded args:', decoded.args)
-    console.log('[Z Wallet DEBUG] Function inputs:', decoded.functionFragment.inputs)
-
     const processedParams = decoded.args.map((arg, index) => {
       const inputType = decoded.functionFragment.inputs[index]
       if (inputType.type === 'tuple') {
@@ -90,14 +87,7 @@ export async function swapWithZWallet(chainId: number, account: string, transact
     params,
   }
 
-  console.log('[Z Wallet DEBUG] Calling Z Wallet contract:', contractCall)
-  console.log('[Z Wallet DEBUG] Contract call details:', {
-    chainId: contractCall.chainId,
-    contractAddress: contractCall.contractAddress,
-    method: contractCall.method,
-    params: contractCall.params,
-  })
-
+  console.log('[Z Wallet DEBUG] Calling Z Wallet contract', contractCall)
   const response = await zWalletClient.callContract(contractCall)
   console.log('[Z Wallet DEBUG] Z Wallet response:', response)
 
