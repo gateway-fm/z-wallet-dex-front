@@ -80,19 +80,9 @@ export function useZephyrSwapV2(
       // NOTE: workaround to ensure everything is properly initialized
       await new Promise((resolve) => setTimeout(resolve, 1000))
 
-      console.log('[Zephyr Swap DEBUG] Starting swap:', {
-        trade,
-        chainId,
-        account,
-        recipientAddress,
-        callData,
-      })
-
       const { inputAmount, outputAmount } = trade
       const tokenIn = inputAmount.currency
       const tokenOut = outputAmount.currency
-
-      console.log('[Zephyr Swap DEBUG] Currencies:', { tokenIn, tokenOut })
 
       if (!tokenIn.isToken || !tokenOut.isToken) {
         throw new Error('Both currencies must be tokens for Zephyr swaps')
@@ -106,7 +96,6 @@ export function useZephyrSwapV2(
         needApproval = true
         try {
           await approve()
-          console.log('[Z Wallet DEBUG] Approval completed')
         } catch (approvalError) {
           throw new Error(
             `Approval failed: ${approvalError instanceof Error ? approvalError.message : 'Unknown error'}`
@@ -121,29 +110,15 @@ export function useZephyrSwapV2(
         gasLimit: 500000, // TODO: get gas limit from the swap router
       }
 
-      console.log('[Zephyr Swap DEBUG] Starting swap execution:', {
-        transaction,
-        chainId,
-        account,
-      })
-
-      console.log('[Balance DEBUG] Trade details:', {
-        inputToken: tokenIn.address,
-        inputSymbol: tokenIn.symbol,
-        inputAmount: inputAmount.quotient.toString(),
-        actualBalance: tokenBalance?.quotient?.toString() || '0',
-        hasEnoughBalance:
-          tokenBalance && inputAmount && tokenBalance.quotient.toString() >= inputAmount.quotient.toString(),
-        outputToken: tokenOut.address,
-        outputSymbol: tokenOut.symbol,
-        expectedOutput: outputAmount.quotient.toString(),
-      })
+      // Warn if balance seems low (but don't block the swap)
+      if (tokenBalance && inputAmount && tokenBalance.quotient.toString() < inputAmount.quotient.toString()) {
+        console.warn('Token balance may be insufficient for swap')
+      }
 
       let swapResult
       if (isZWallet) {
         if (needApproval) {
-          // NOTE: Wait after approval for Z-Wallet to ensure it's processed
-          // FIXME: find a better way to do this
+          // Wait after approval for Z-Wallet to ensure it's processed
           await new Promise((resolve) => setTimeout(resolve, Z_WALLET_APPROVAL_WAIT_TIME))
         }
         // Create swap info for Z-Wallet transaction
@@ -193,7 +168,7 @@ export function useZephyrSwapV2(
               }),
         }
 
-        console.log('[Standard Wallet DEBUG] Adding transaction to store:', swapResult.hash)
+        // Add transaction to store for standard wallets
         addTransaction(swapResult, swapInfo)
       }
 

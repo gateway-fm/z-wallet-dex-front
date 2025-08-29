@@ -11,14 +11,6 @@ export async function approveWithZWallet(
   account: string,
   addTransaction: ReturnType<typeof useTransactionAdder>
 ): Promise<void> {
-  console.log('[Z Wallet Approval DEBUG] Starting approval:', {
-    token: token.address,
-    tokenSymbol: token.symbol,
-    spender,
-    chainId,
-    account,
-  })
-
   if (!zWalletClient.isConnected) {
     throw new Error('Z Wallet is not connected')
   }
@@ -30,16 +22,14 @@ export async function approveWithZWallet(
     params: [spender, MaxUint256.toString()],
   }
 
-  console.log('[Z Wallet Approval DEBUG] Calling approve contract:', approvalTx)
   const response = await zWalletClient.callContract(approvalTx)
-  console.log('[Z Wallet Approval DEBUG] Approve response:', response)
 
   if (!response || !response.data) {
     throw new Error((response && response.error) || 'Z Wallet approval failed')
   }
 
   const approvalResult = {
-    hash: response.data.transactionHash,
+    hash: response.data?.transactionHash || '',
     confirmations: 0,
     from: account,
     nonce: 0,
@@ -50,9 +40,9 @@ export async function approveWithZWallet(
     chainId,
     wait: () =>
       Promise.resolve({
-        transactionHash: response.data?.transactionHash,
-        blockNumber: 0,
-        blockHash: '0x',
+        transactionHash: response.data?.transactionHash || '',
+        blockNumber: 1,
+        blockHash: '0x0',
         confirmations: 1,
       }),
     to: token.address,

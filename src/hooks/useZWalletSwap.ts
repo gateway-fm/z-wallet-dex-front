@@ -44,18 +44,13 @@ function decodeCalldata(calldata: string): {
     const inputs = decoded.functionFragment.inputs.map(formatInput).join(',')
     const methodSignature = `function ${decoded.name}(${inputs})`
 
-    console.log('[Z Wallet DEBUG] Method signature:', methodSignature)
-
     const processedParams = decoded.args.map((arg, index) => {
       const inputType = decoded.functionFragment.inputs[index]
       if (inputType.type === 'tuple') {
-        const tupleComponents = Array.from({ length: inputType.components.length }, (_, i) => convertValue(arg[i]))
-        return tupleComponents
+        return Array.from({ length: inputType.components.length }, (_, i) => convertValue(arg[i]))
       }
       return convertValue(arg)
     })
-
-    console.log('[Z Wallet DEBUG] Processed params:', processedParams)
 
     return {
       method: methodSignature,
@@ -74,17 +69,9 @@ export async function swapWithZWallet(
   swapInfo?: any,
   dispatch?: any
 ): Promise<any> {
-  console.log('[Z Wallet DEBUG] Starting swap:', {
-    chainId,
-    account,
-    transaction,
-  })
-
   if (!zWalletClient.isConnected) {
     throw new Error('Z Wallet is not connected')
   }
-
-  console.log('[Z Wallet DEBUG] Z Wallet is connected, wallet info:', zWalletClient.walletInfo)
 
   const { method, params } = decodeCalldata(transaction.data)
 
@@ -95,20 +82,18 @@ export async function swapWithZWallet(
     params,
   }
 
-  console.log('[Z Wallet DEBUG] Calling Z Wallet contract', contractCall)
   const response = await zWalletClient.callContract(contractCall)
-  console.log('[Z Wallet DEBUG] Z Wallet response:', response)
 
   if (!response || !response.data) {
     const errorMsg = (response && response.error) || 'Z Wallet swap failed'
     throw new Error(errorMsg)
   }
 
-  // For Z-Wallet, if we got a transaction hash, the transaction is already successful
-  console.log('[Z Wallet DEBUG] Transaction successful, hash:', response.data.transactionHash)
+  // NOTE: workaround for Z-Wallet, if we got a transaction hash
+  // the transaction is already successful...
 
   const transactionResponse = {
-    hash: response.data.transactionHash,
+    hash: response.data?.transactionHash || '',
     confirmations: 0, // Start with 0, will be updated when added to store
     from: account,
     nonce: 0,
@@ -118,66 +103,42 @@ export async function swapWithZWallet(
     value: BigInt(transaction.value || 0),
     chainId,
     to: transaction.to,
-    wait: async (confirmations = 1) => {
-      console.log(`[Z Wallet DEBUG] Transaction already confirmed, returning receipt`)
-      // Return immediately since Z-Wallet transactions are already confirmed
-      const receipt = {
-        transactionHash: response.data?.transactionHash,
-        blockNumber: Math.floor(Math.random() * 1000000), // Mock block number
-        blockHash: '0x' + Math.random().toString(16).slice(2, 66), // Mock block hash
-        confirmations,
-        gasUsed: BigInt(300000), // Mock gas used
-        effectiveGasPrice: BigInt(1000000000), // Mock gas price
-        status: 1, // Success
-        transactionIndex: 1,
-        to: transaction.to,
-        from: account,
-        contractAddress: null,
-      }
-      return receipt
-    },
+    wait: async (confirmations = 1) => ({
+      transactionHash: response.data?.transactionHash || '',
+      blockNumber: 1,
+      blockHash: '0x0',
+      confirmations,
+      gasUsed: BigInt(0),
+      effectiveGasPrice: BigInt(0),
+      status: 1,
+      transactionIndex: 0,
+      to: transaction.to,
+      from: account,
+      contractAddress: null,
+    }),
   } as any
 
-  // Add transaction to store if addTransaction is provided
   if (addTransaction && swapInfo) {
-    console.log('[Z Wallet DEBUG] Adding transaction to store:', transactionResponse.hash)
     addTransaction(transactionResponse, swapInfo)
 
-    // For Z-Wallet, immediately finalize the transaction since it's already successful
+    // NOTE: For Z-Wallet, immediately finalize the transaction
     if (dispatch) {
-      console.log('[Z Wallet DEBUG] Auto-finalizing Z-Wallet transaction')
-      const receipt = {
-        transactionHash: response.data.transactionHash,
-        blockNumber: Math.floor(Math.random() * 1000000),
-        blockHash: '0x' + Math.random().toString(16).slice(2, 66),
-        gasUsed: BigInt(300000),
-        effectiveGasPrice: BigInt(1000000000),
-        status: 1,
-        transactionIndex: 1,
-        to: transaction.to,
-        from: account,
-        contractAddress: null,
-      }
-
-      // Finalize immediately since Z-Wallet transactions are instant
       dispatch(
         finalizeTransaction({
           chainId,
-          hash: response.data.transactionHash,
+          hash: response.data?.transactionHash || '',
           receipt: {
             status: 1,
-            transactionIndex: 1,
-            transactionHash: response.data.transactionHash,
+            transactionIndex: 0,
+            transactionHash: response.data?.transactionHash || '',
             to: transaction.to,
             from: account,
             contractAddress: null,
-            blockHash: receipt.blockHash,
-            blockNumber: receipt.blockNumber,
+            blockHash: '0x0',
+            blockNumber: 1,
           },
         })
       )
-
-      console.log('[Z Wallet DEBUG] Transaction finalized in store')
     }
   }
 
