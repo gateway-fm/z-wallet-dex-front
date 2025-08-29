@@ -1,5 +1,6 @@
 import { Interface } from '@ethersproject/abi'
 import { useCallback } from 'react'
+import { finalizeTransaction } from 'state/transactions/reducer'
 import { zWalletClient } from 'z-wallet-sdk'
 
 import SwapRouterABI from '../lib/routing/abis/SwapRouter.json'
@@ -65,7 +66,14 @@ function decodeCalldata(calldata: string): {
   }
 }
 
-export async function swapWithZWallet(chainId: number, account: string, transaction: SwapTransaction): Promise<any> {
+export async function swapWithZWallet(
+  chainId: number,
+  account: string,
+  transaction: SwapTransaction,
+  addTransaction?: any,
+  swapInfo?: any,
+  dispatch?: any
+): Promise<any> {
   console.log('[Z Wallet DEBUG] Starting swap:', {
     chainId,
     account,
@@ -96,9 +104,12 @@ export async function swapWithZWallet(chainId: number, account: string, transact
     throw new Error(errorMsg)
   }
 
-  return {
+  // For Z-Wallet, if we got a transaction hash, the transaction is already successful
+  console.log('[Z Wallet DEBUG] Transaction successful, hash:', response.data.transactionHash)
+
+  const transactionResponse = {
     hash: response.data.transactionHash,
-    confirmations: 0,
+    confirmations: 0, // Start with 0, will be updated when added to store
     from: account,
     nonce: 0,
     gasLimit: BigInt(transaction.gasLimit || 0),
@@ -106,15 +117,71 @@ export async function swapWithZWallet(chainId: number, account: string, transact
     data: transaction.data || '0x',
     value: BigInt(transaction.value || 0),
     chainId,
-    wait: () =>
-      Promise.resolve({
-        transactionHash: response.data?.transactionHash,
-        blockNumber: 0,
-        blockHash: '0x',
-        confirmations: 1,
-      }),
     to: transaction.to,
-  } as any // TODO: fix this
+    wait: async (confirmations = 1) => {
+      console.log(`[Z Wallet DEBUG] Transaction already confirmed, returning receipt`)
+      // Return immediately since Z-Wallet transactions are already confirmed
+      const receipt = {
+        transactionHash: response.data?.transactionHash,
+        blockNumber: Math.floor(Math.random() * 1000000), // Mock block number
+        blockHash: '0x' + Math.random().toString(16).slice(2, 66), // Mock block hash
+        confirmations,
+        gasUsed: BigInt(300000), // Mock gas used
+        effectiveGasPrice: BigInt(1000000000), // Mock gas price
+        status: 1, // Success
+        transactionIndex: 1,
+        to: transaction.to,
+        from: account,
+        contractAddress: null,
+      }
+      return receipt
+    },
+  } as any
+
+  // Add transaction to store if addTransaction is provided
+  if (addTransaction && swapInfo) {
+    console.log('[Z Wallet DEBUG] Adding transaction to store:', transactionResponse.hash)
+    addTransaction(transactionResponse, swapInfo)
+
+    // For Z-Wallet, immediately finalize the transaction since it's already successful
+    if (dispatch) {
+      console.log('[Z Wallet DEBUG] Auto-finalizing Z-Wallet transaction')
+      const receipt = {
+        transactionHash: response.data.transactionHash,
+        blockNumber: Math.floor(Math.random() * 1000000),
+        blockHash: '0x' + Math.random().toString(16).slice(2, 66),
+        gasUsed: BigInt(300000),
+        effectiveGasPrice: BigInt(1000000000),
+        status: 1,
+        transactionIndex: 1,
+        to: transaction.to,
+        from: account,
+        contractAddress: null,
+      }
+
+      // Finalize immediately since Z-Wallet transactions are instant
+      dispatch(
+        finalizeTransaction({
+          chainId,
+          hash: response.data.transactionHash,
+          receipt: {
+            status: 1,
+            transactionIndex: 1,
+            transactionHash: response.data.transactionHash,
+            to: transaction.to,
+            from: account,
+            contractAddress: null,
+            blockHash: receipt.blockHash,
+            blockNumber: receipt.blockNumber,
+          },
+        })
+      )
+
+      console.log('[Z Wallet DEBUG] Transaction finalized in store')
+    }
+  }
+
+  return transactionResponse
 }
 
 // eslint-disable-next-line import/no-unused-modules

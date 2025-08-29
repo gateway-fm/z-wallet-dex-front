@@ -224,7 +224,14 @@ function useConfirmModalState({
     setApprovalError(undefined)
   }
 
-  return { startSwapFlow, onCancel, confirmModalState, approvalError, pendingModalSteps, wrapTxHash }
+  return {
+    startSwapFlow,
+    onCancel,
+    confirmModalState,
+    approvalError,
+    pendingModalSteps,
+    wrapTxHash,
+  }
 }
 
 export default function ConfirmSwapModal({

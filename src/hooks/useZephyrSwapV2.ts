@@ -4,7 +4,15 @@ import { getConnection } from 'connection'
 import { ConnectionType } from 'connection/types'
 import { ApprovalState } from 'lib/hooks/useApproval'
 import { useMemo } from 'react'
+import { useAppDispatch } from 'state/hooks'
 import { TradeFillType } from 'state/routing/types'
+import { useTransactionAdder } from 'state/transactions/hooks'
+import {
+  ExactInputSwapTransactionInfo,
+  ExactOutputSwapTransactionInfo,
+  TransactionType,
+} from 'state/transactions/types'
+import { currencyId } from 'utils/currencyId'
 
 import ZephyrSwapRouterABI from '../abis/zephyr-swap-router.json'
 import { CONTRACTS_CONFIG } from '../config/zephyr'
@@ -32,6 +40,8 @@ export function useZephyrSwapV2(
 } {
   const { account, chainId, provider, connector } = useWeb3React()
   const swapRouter = useContract(CONTRACTS_CONFIG.SWAP_ROUTER_02, ZephyrSwapRouterABI, true)
+  const addTransaction = useTransactionAdder()
+  const dispatch = useAppDispatch()
 
   const tokenIn = trade?.inputAmount?.currency
   const inputAmount = trade?.inputAmount?.quotient?.toString()
@@ -136,12 +146,55 @@ export function useZephyrSwapV2(
           // FIXME: find a better way to do this
           await new Promise((resolve) => setTimeout(resolve, Z_WALLET_APPROVAL_WAIT_TIME))
         }
-        swapResult = await swapWithZWallet(chainId, account || '', transaction)
+        // Create swap info for Z-Wallet transaction
+        const swapInfo: ExactInputSwapTransactionInfo | ExactOutputSwapTransactionInfo = {
+          type: TransactionType.SWAP,
+          inputCurrencyId: currencyId(trade.inputAmount.currency),
+          outputCurrencyId: currencyId(trade.outputAmount.currency),
+          ...(trade.tradeType === TradeType.EXACT_INPUT
+            ? {
+                tradeType: TradeType.EXACT_INPUT,
+                inputCurrencyAmountRaw: trade.inputAmount.quotient.toString(),
+                expectedOutputCurrencyAmountRaw: trade.outputAmount.quotient.toString(),
+                minimumOutputCurrencyAmountRaw: trade.outputAmount.quotient.toString(),
+              }
+            : {
+                tradeType: TradeType.EXACT_OUTPUT,
+                maximumInputCurrencyAmountRaw: trade.inputAmount.quotient.toString(),
+                outputCurrencyAmountRaw: trade.outputAmount.quotient.toString(),
+                expectedInputCurrencyAmountRaw: trade.inputAmount.quotient.toString(),
+              }),
+        }
+
+        swapResult = await swapWithZWallet(chainId, account || '', transaction, addTransaction, swapInfo, dispatch)
       } else {
         if (!provider || !swapRouter) {
           throw new Error('Provider or swapRouter not available for standard wallet')
         }
         swapResult = await provider.getSigner().sendTransaction(transaction)
+
+        // Add transaction to store for standard wallets
+        const swapInfo: ExactInputSwapTransactionInfo | ExactOutputSwapTransactionInfo = {
+          type: TransactionType.SWAP,
+          inputCurrencyId: currencyId(trade.inputAmount.currency),
+          outputCurrencyId: currencyId(trade.outputAmount.currency),
+          ...(trade.tradeType === TradeType.EXACT_INPUT
+            ? {
+                tradeType: TradeType.EXACT_INPUT,
+                inputCurrencyAmountRaw: trade.inputAmount.quotient.toString(),
+                expectedOutputCurrencyAmountRaw: trade.outputAmount.quotient.toString(),
+                minimumOutputCurrencyAmountRaw: trade.outputAmount.quotient.toString(),
+              }
+            : {
+                tradeType: TradeType.EXACT_OUTPUT,
+                maximumInputCurrencyAmountRaw: trade.inputAmount.quotient.toString(),
+                outputCurrencyAmountRaw: trade.outputAmount.quotient.toString(),
+                expectedInputCurrencyAmountRaw: trade.inputAmount.quotient.toString(),
+              }),
+        }
+
+        console.log('[Standard Wallet DEBUG] Adding transaction to store:', swapResult.hash)
+        addTransaction(swapResult, swapInfo)
       }
 
       return {
@@ -163,5 +216,7 @@ export function useZephyrSwapV2(
     connector,
     approve,
     tokenBalance,
+    addTransaction,
+    dispatch,
   ])
 }

@@ -84,25 +84,29 @@ export function useSwapCallback(
 
     const result = await swapCallback()
 
-    const swapInfo: ExactInputSwapTransactionInfo | ExactOutputSwapTransactionInfo = {
-      type: TransactionType.SWAP,
-      inputCurrencyId: currencyId(trade.inputAmount.currency),
-      outputCurrencyId: currencyId(trade.outputAmount.currency),
-      ...(trade.tradeType === TradeType.EXACT_INPUT
-        ? {
-            tradeType: TradeType.EXACT_INPUT,
-            inputCurrencyAmountRaw: trade.inputAmount.quotient.toString(),
-            expectedOutputCurrencyAmountRaw: trade.postTaxOutputAmount.quotient.toString(),
-            minimumOutputCurrencyAmountRaw: trade.minimumAmountOut(allowedSlippage).quotient.toString(),
-          }
-        : {
-            tradeType: TradeType.EXACT_OUTPUT,
-            maximumInputCurrencyAmountRaw: trade.maximumAmountIn(allowedSlippage).quotient.toString(),
-            outputCurrencyAmountRaw: trade.postTaxOutputAmount.quotient.toString(),
-            expectedInputCurrencyAmountRaw: trade.inputAmount.quotient.toString(),
-          }),
+    // For Zephyr network, transaction is already added to store in useZWalletSwap
+    // For other networks, add transaction to store
+    if (chainId !== ZEPHYR_CHAIN_ID) {
+      const swapInfo: ExactInputSwapTransactionInfo | ExactOutputSwapTransactionInfo = {
+        type: TransactionType.SWAP,
+        inputCurrencyId: currencyId(trade.inputAmount.currency),
+        outputCurrencyId: currencyId(trade.outputAmount.currency),
+        ...(trade.tradeType === TradeType.EXACT_INPUT
+          ? {
+              tradeType: TradeType.EXACT_INPUT,
+              inputCurrencyAmountRaw: trade.inputAmount.quotient.toString(),
+              expectedOutputCurrencyAmountRaw: trade.postTaxOutputAmount.quotient.toString(),
+              minimumOutputCurrencyAmountRaw: trade.minimumAmountOut(allowedSlippage).quotient.toString(),
+            }
+          : {
+              tradeType: TradeType.EXACT_OUTPUT,
+              maximumInputCurrencyAmountRaw: trade.maximumAmountIn(allowedSlippage).quotient.toString(),
+              outputCurrencyAmountRaw: trade.postTaxOutputAmount.quotient.toString(),
+              expectedInputCurrencyAmountRaw: trade.inputAmount.quotient.toString(),
+            }),
+      }
+      addTransaction(result.response, swapInfo, deadline?.toNumber())
     }
-    addTransaction(result.response, swapInfo, deadline?.toNumber())
 
     return result
   }, [trade, account, chainId, swapCallback, allowedSlippage, addTransaction, deadline, routingResult])
