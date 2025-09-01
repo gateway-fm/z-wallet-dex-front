@@ -1,6 +1,6 @@
 import { Interface } from '@ethersproject/abi'
 import { useCallback } from 'react'
-import { finalizeTransaction } from 'state/transactions/reducer'
+import { addTransaction } from 'state/transactions/reducer'
 import { zWalletClient } from 'z-wallet-sdk'
 
 import SwapRouterABI from '../lib/routing/abis/SwapRouter.json'
@@ -65,7 +65,7 @@ export async function swapWithZWallet(
   chainId: number,
   account: string,
   transaction: SwapTransaction,
-  addTransaction?: any,
+  addTransactionHook?: any,
   swapInfo?: any,
   dispatch?: any
 ): Promise<any> {
@@ -118,28 +118,28 @@ export async function swapWithZWallet(
     }),
   } as any
 
-  if (addTransaction && swapInfo) {
-    addTransaction(transactionResponse, swapInfo)
-
-    // NOTE: For Z-Wallet, immediately finalize the transaction
-    if (dispatch) {
-      dispatch(
-        finalizeTransaction({
-          chainId,
-          hash: response.data?.transactionHash || '',
-          receipt: {
-            status: 1,
-            transactionIndex: 0,
-            transactionHash: response.data?.transactionHash || '',
-            to: transaction.to,
-            from: account,
-            contractAddress: null,
-            blockHash: '0x0',
-            blockNumber: 1,
-          },
-        })
-      )
+  // Add transaction to store with receipt so it appears as confirmed
+  if (dispatch && swapInfo) {
+    const receipt = {
+      status: 1,
+      transactionIndex: 0,
+      transactionHash: response.data?.transactionHash || '',
+      to: transaction.to,
+      from: account,
+      contractAddress: transaction.to,
+      blockHash: '0x0',
+      blockNumber: 1,
     }
+
+    dispatch(
+      addTransaction({
+        chainId,
+        hash: response.data?.transactionHash || '',
+        from: account,
+        info: swapInfo,
+        receipt,
+      })
+    )
   }
 
   return transactionResponse

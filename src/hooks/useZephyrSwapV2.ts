@@ -121,6 +121,7 @@ export function useZephyrSwapV2(
           // Wait after approval for Z-Wallet to ensure it's processed
           await new Promise((resolve) => setTimeout(resolve, Z_WALLET_APPROVAL_WAIT_TIME))
         }
+
         // Create swap info for Z-Wallet transaction
         const swapInfo: ExactInputSwapTransactionInfo | ExactOutputSwapTransactionInfo = {
           type: TransactionType.SWAP,
@@ -141,7 +142,7 @@ export function useZephyrSwapV2(
               }),
         }
 
-        swapResult = await swapWithZWallet(chainId, account || '', transaction, addTransaction, swapInfo, dispatch)
+        swapResult = await swapWithZWallet(chainId, account || '', transaction, undefined, swapInfo, dispatch)
       } else {
         if (!provider || !swapRouter) {
           throw new Error('Provider or swapRouter not available for standard wallet')

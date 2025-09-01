@@ -3,6 +3,8 @@ import type { TransactionResponse } from '@ethersproject/providers'
 import { ChainId, SUPPORTED_CHAINS, Token } from '@uniswap/sdk-core'
 import { useWeb3React } from '@web3-react/core'
 import { getTransactionStatus } from 'components/AccountDrawer/MiniPortfolio/Activity/parseLocal'
+import { getConnection } from 'connection'
+import { ConnectionType } from 'connection/types'
 import { SwapResult } from 'hooks/useSwapCallback'
 import { useCallback, useMemo } from 'react'
 import { useAppDispatch, useAppSelector } from 'state/hooks'
@@ -150,10 +152,15 @@ export function isPendingTx(tx: TransactionDetails): boolean {
 
 export function usePendingTransactions(): TransactionDetails[] {
   const allTransactions = useAllTransactions()
-  const { account } = useWeb3React()
+  const { account, connector } = useWeb3React()
 
-  return useMemo(
-    () => Object.values(allTransactions).filter((tx) => tx.from === account && isPendingTx(tx)),
-    [account, allTransactions]
-  )
+  return useMemo(() => {
+    // For Z-Wallet, don't show pending transactions as they are processed instantly
+    const connection = getConnection(connector)
+    if (connection.type === ConnectionType.Z_WALLET) {
+      return []
+    }
+
+    return Object.values(allTransactions).filter((tx) => tx.from === account && isPendingTx(tx))
+  }, [account, allTransactions, connector])
 }
