@@ -214,11 +214,9 @@ export function useTrackedTokenPairs(): [Token, Token][] {
   const { chainId } = useWeb3React()
   const tokens = useDefaultActiveTokens(chainId)
 
-  // Dynamic hooks for Zephyr
   const zephyrPinnedPairs = usePinnedPairs()
   const zephyrBasesToTrack = useBasesToTrackLiquidityFor()
 
-  // pinned pairs
   const pinnedPairs = useMemo(() => {
     if (chainId === ZEPHYR_CHAIN_ID) {
       return zephyrPinnedPairs

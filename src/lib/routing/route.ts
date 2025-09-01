@@ -17,8 +17,8 @@ export async function getSwapData(params: SwapParams): Promise<{ callData: strin
   try {
     const routeType = params.swapType === SwapType.EXACT_INPUT ? 'input' : 'output'
     const bestRouteResponse = await apiInstance.routing.bestRoute({
-      tknIn: params.tokenIn,
-      tknOut: params.tokenOut,
+      tknA: params.tokenIn,
+      tknB: params.tokenOut,
       amount: params.amount.toString(),
       routeType,
     })

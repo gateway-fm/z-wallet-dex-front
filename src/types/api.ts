@@ -1,6 +1,7 @@
-import { RefPrice, Token, TokenResp, TokensList, TokensResp } from '../api/Api'
+/* eslint-disable import/no-unused-modules */
+import { Token, TokenResp, TokensList, TokensResp } from '../api/Api'
 
-export type { RefPrice, Token }
+export type { Token }
 export type TokenDetailsResponse = TokenResp
 export type TokenListResponse = TokensList
 export type SearchTokensResponse = TokensResp

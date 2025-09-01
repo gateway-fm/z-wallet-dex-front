@@ -6,7 +6,7 @@ import { useTokensList } from '../api'
 import { USDC_ZEPHYR } from '../constants/tokens'
 import { TokenPriceData } from '../types/api'
 
-const TOKEN_LIST_DEFAULT_LIMIT = 25
+const TOKEN_LIST_DEFAULT_LIMIT = 100
 
 export function useTokenPrices(tokenAddresses: string[]): {
   data: { [address: string]: TokenPriceData }
@@ -24,30 +24,19 @@ export function useTokenPrices(tokenAddresses: string[]): {
     }
 
     const { ref_price, data: tokens } = tokensResponse
-    const stableToken = ref_price.stable_token
+    const basePrice = parseFloat(ref_price) || 1.0
 
-    // Add stable token (USDC) with price 1.0
-    const stableTokenAddress = stableToken.address.toLowerCase()
-    if (normalizedAddresses.length === 0 || normalizedAddresses.includes(stableTokenAddress)) {
-      pricesMap[stableTokenAddress] = {
-        address: stableToken.address,
-        symbol: stableToken.symbol,
-        priceUSD: 1.0,
-      }
-    }
-
-    // Add requested tokens from API with their derived prices
     tokens.forEach((token) => {
       const address = token.address.toLowerCase()
-
-      // Only include tokens that were requested (if any specific addresses provided)
       if (normalizedAddresses.length === 0 || normalizedAddresses.includes(address)) {
-        const derivedPrice = parseFloat(token.derived_base)
+        // NOTE: price_in_base is the price relative to the base token (USDC)
+        const priceInBase = parseFloat(token.price_in_base) || 0
+        const priceUSD = priceInBase * basePrice
 
         pricesMap[address] = {
           address: token.address,
           symbol: token.symbol,
-          priceUSD: derivedPrice, // derived_base is price relative to stable token
+          priceUSD,
         }
       }
     })

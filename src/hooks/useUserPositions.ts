@@ -6,8 +6,7 @@ import { UseUserPositionsResult, UseUserTransactionsResult } from '../types/api'
 
 export function useUserPositions(account?: string): UseUserPositionsResult {
   const positions = useMemo(() => {
-    // NOTE: This is a placeholder implementation, BE not ready yet
-    console.warn('useUserPositions: REST API user positions not implemented', { account })
+    // NOTE: API doesn't provide user positions data yet
     return []
   }, [account])
 
@@ -20,8 +19,7 @@ export function useUserPositions(account?: string): UseUserPositionsResult {
 
 export function useUserTransactions(account?: string, first = 50, skip = 0): UseUserTransactionsResult {
   const transactions = useMemo(() => {
-    // NOTE: This is a placeholder implementation, BE not ready yet
-    console.warn('useUserTransactions: REST API user transactions not implemented', { account, first, skip })
+    // NOTE: API doesn't provide user transactions data yet
     return []
   }, [account, first, skip])
 

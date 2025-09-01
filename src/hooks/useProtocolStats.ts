@@ -4,8 +4,7 @@ import { ProtocolStats, UseProtocolStatsResult, UseTopPoolsResult } from '../typ
 
 export function useProtocolStats(): UseProtocolStatsResult {
   const stats = useMemo((): ProtocolStats => {
-    // NOTE: This is a placeholder implementation, BE not ready yet
-    console.warn('useProtocolStats: REST API protocol stats not implemented')
+    // API doesn't provide protocol stats yet
     return {
       totalVolumeUSD: '0',
       totalValueLockedUSD: '0',
@@ -25,9 +24,7 @@ export function useProtocolStats(): UseProtocolStatsResult {
 
 export function useTopPools(first = 10): UseTopPoolsResult {
   const pools = useMemo(() => {
-    // NOTE: This is a placeholder implementation, BE not ready yet
-    console.warn('useTopPools: REST API top pools not implemented', { first })
-    console.log('Top pools limit:', first)
+    // API doesn't provide pools data, return empty array
     return []
   }, [first])
 
