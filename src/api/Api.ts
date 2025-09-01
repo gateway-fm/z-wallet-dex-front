@@ -49,11 +49,6 @@ export interface Error {
   message: string;
 }
 
-export interface RefPrice {
-  base_token: Token;
-  stable_token: Token;
-}
-
 export interface Route {
   /** Encoded Route */
   encoded: string;
@@ -64,23 +59,25 @@ export interface Token {
   address: string;
   symbol: string;
   name: string;
-  /** @format int64 */
+  /** @format uint32 */
   decimals: number;
   /** @format float */
-  volume_usd: string;
+  volume: string;
   /** @format float */
-  derived_base: string;
+  price_in_base: string;
 }
 
 export interface TokenResp {
-  ref_price: RefPrice;
+  /** @format float */
+  ref_price: string;
   data: Token;
 }
 
 export type Tokens = Token[];
 
 export interface TokensList {
-  ref_price: RefPrice;
+  /** @format float */
+  ref_price: string;
   data: Tokens;
   /** @format int64 */
   page: number;
@@ -93,7 +90,8 @@ export interface TokensList {
 }
 
 export interface TokensResp {
-  ref_price: RefPrice;
+  /** @format float */
+  ref_price: string;
   data: Tokens;
 }
 
@@ -315,8 +313,8 @@ export class Api<
      */
     bestRoute: (
       query: {
-        tknA: string;
-        tknB: string;
+        tknIn: string;
+        tknOut: string;
         amount: string;
         routeType: "input" | "output";
       },
