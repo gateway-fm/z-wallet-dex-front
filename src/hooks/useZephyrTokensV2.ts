@@ -1,8 +1,24 @@
 import { Token } from '@uniswap/sdk-core'
 import { useMemo } from 'react'
 
+import { NETWORK_CONFIG } from '../config/zephyr'
 import { ZEPHYR_CHAIN_ID } from '../constants/chains'
 import { useTokenSearch, useTrendingTokens } from './useTokenSearch'
+
+function isTokenPreferrable(newToken: Token, existingToken: Token): boolean {
+  const baseTokenAddress = NETWORK_CONFIG.BASE_TOKEN.ADDRESS.toLowerCase()
+  const isBaseToken =
+    newToken.address.toLowerCase() === baseTokenAddress &&
+    (newToken.symbol === NETWORK_CONFIG.BASE_TOKEN.SYMBOL || newToken.name === NETWORK_CONFIG.BASE_TOKEN.NAME)
+  const existingIsBaseToken =
+    existingToken.address.toLowerCase() === baseTokenAddress &&
+    (existingToken.symbol === NETWORK_CONFIG.BASE_TOKEN.SYMBOL || existingToken.name === NETWORK_CONFIG.BASE_TOKEN.NAME)
+
+  // Base token always wins
+  if (isBaseToken && !existingIsBaseToken) return true
+  if (!isBaseToken && existingIsBaseToken) return false
+  return false
+}
 
 function createTokenFromApiData(tokenData: {
   address: string
@@ -19,27 +35,36 @@ function createTokenFromApiData(tokenData: {
 }
 
 export function useZephyrTokens(): { [address: string]: Token } {
-  const { tokens: apiTokens } = useTrendingTokens(20)
+  const { tokens: apiTokens, error } = useTrendingTokens(100)
 
   return useMemo(() => {
     const tokens: { [address: string]: Token } = {}
+
+    if (error) console.error('Error loading tokens:', error)
 
     if (apiTokens) {
       for (const tokenData of apiTokens) {
         const token = createTokenFromApiData(tokenData)
         if (token) {
           const address = token.address.toLowerCase()
-          tokens[address] = token
+          if (tokens[address]) {
+            const existingToken = tokens[address]
+            if (isTokenPreferrable(token, existingToken)) {
+              tokens[address] = token
+            }
+          } else {
+            tokens[address] = token
+          }
         }
       }
     }
 
     return tokens
-  }, [apiTokens])
+  }, [apiTokens, error])
 }
 
 export function useZephyrTokenSearch(searchQuery: string, chainId: number | undefined) {
-  const { tokens: searchResults, loading } = useTokenSearch(searchQuery, 20)
+  const { tokens: searchResults, loading } = useTokenSearch(searchQuery, 100)
 
   const shouldSkip = chainId !== ZEPHYR_CHAIN_ID || !searchQuery || searchQuery.length < 2
 
