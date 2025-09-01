@@ -1,5 +1,6 @@
 import { useQuery } from 'react-query'
 
+import { RouteType } from './Api'
 import { API_CACHE } from './constants'
 import apiInstance from './index'
 
@@ -62,4 +63,38 @@ export function useTokensList(page = 1, perPage = 100) {
       retry: 2,
     }
   )
+}
+
+export function useBestRoute(
+  tknIn: string,
+  tknOut: string,
+  amount: string,
+  routeType: 'input' | 'output',
+  enabled = true
+) {
+  return useQuery(
+    ['bestRoute', tknIn, tknOut, amount, routeType],
+    async () => {
+      const response = await apiInstance.routing.bestRoute({ tknIn, tknOut, amount, routeType })
+      return response.data
+    },
+    {
+      enabled: enabled && Boolean(tknIn && tknOut && amount),
+      staleTime: API_CACHE.STALE_TIME,
+      cacheTime: API_CACHE.GC_TIME,
+      retry: 1,
+    }
+  )
+}
+
+export async function getCalldata(calldataReq: {
+  route: { encoded: string }
+  route_type: RouteType
+  recipient: string
+  amount: string
+  slippage: number
+  deadline: number
+}) {
+  const response = await apiInstance.routing.getCalldata(calldataReq)
+  return response.data
 }
