@@ -27,9 +27,12 @@ export function useZephyrRoutingV2(
   const swapParams = useMemo((): SwapParams | null => {
     if (!amountSpecified || !otherCurrency) return null
 
+    // Use account if available, otherwise use a placeholder for quote purposes
+    const signerAddress = account || '0x0000000000000000000000000000000000000000'
+
     return {
-      signer: account || '0x0000000000000000000000000000000000000000', // Use real account if available
-      recipient: account, // Set recipient to account
+      signer: signerAddress,
+      recipient: account || signerAddress, // Use account if connected, otherwise signer
       tokenIn: amountSpecified.currency.wrapped.address,
       tokenOut: otherCurrency.wrapped.address,
       amount: BigInt(amountSpecified.quotient.toString()),

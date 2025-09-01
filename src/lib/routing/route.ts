@@ -1,4 +1,5 @@
 import apiInstance from '../../api'
+import { extractRecipientFromCalldata, replaceRecipientInCalldata } from './calldata-utils'
 import { SwapParams, SwapType } from './types'
 
 export async function getSwapData(params: SwapParams): Promise<{ callData: string; amountQuoted: bigint }> {
@@ -16,6 +17,7 @@ export async function getSwapData(params: SwapParams): Promise<{ callData: strin
 
   try {
     const routeType = params.swapType === SwapType.EXACT_INPUT ? 'input' : 'output'
+
     const bestRouteResponse = await apiInstance.routing.bestRoute({
       tknA: params.tokenIn,
       tknB: params.tokenOut,
@@ -28,22 +30,49 @@ export async function getSwapData(params: SwapParams): Promise<{ callData: strin
       throw new Error(`No liquidity routes found between ${params.tokenIn} and ${params.tokenOut}`)
     }
 
-    const calldataResponse = await apiInstance.routing.getCalldata({
+    const calldataPayload = {
       route: bestRoute.route,
       route_type: bestRoute.type,
       recipient: params.recipient || params.signer,
       amount: bestRoute.amount_quoted,
       slippage: (params.slippage || 1) * 100, // Convert to basis points (1% = 100)
       deadline: Math.floor(Date.now() / 1000) + 1200, // 20 minutes from now // TODO: make this configurable
-    })
+    }
+
+    const calldataResponse = await apiInstance.routing.getCalldata(calldataPayload)
 
     const calldata = calldataResponse.data
     if (!calldata || !calldata.data) {
       throw new Error('Failed to get calldata for the route')
     }
 
+    // Extract recipient from calldata and validate
+    const expectedRecipient = params.recipient || params.signer
+    const actualRecipient = extractRecipientFromCalldata(calldata.data)
+
+    let finalCallData = calldata.data
+
+    if (actualRecipient && actualRecipient.toLowerCase() !== expectedRecipient.toLowerCase()) {
+      console.warn('Recipient mismatch in calldata:', {
+        expected: expectedRecipient,
+        actual: actualRecipient,
+        message: 'Attempting to fix calldata',
+      })
+
+      finalCallData = replaceRecipientInCalldata(calldata.data, expectedRecipient)
+      const fixedRecipient = extractRecipientFromCalldata(finalCallData)
+      if (fixedRecipient && fixedRecipient.toLowerCase() === expectedRecipient.toLowerCase()) {
+        console.log('Successfully fixed recipient in calldata')
+      } else {
+        console.error('Failed to fix recipient in calldata, using original')
+        finalCallData = calldata.data
+      }
+    } else {
+      console.log('Recipient in calldata matches expected recipient')
+    }
+
     return {
-      callData: calldata.data,
+      callData: finalCallData,
       amountQuoted: BigInt(bestRoute.amount_quoted),
     }
   } catch (error) {

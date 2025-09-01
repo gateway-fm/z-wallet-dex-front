@@ -76,7 +76,18 @@ export function useZephyrSwapV2(
           expectedAmountOut: outputAmount.quotient.toString(),
           callData: callData.slice(0, 50) + '...',
           recipient: account,
+          recipientAddress,
+          swapRouter: CONTRACTS_CONFIG.SWAP_ROUTER_02,
         })
+
+        // Validate recipient matches account
+        if (recipientAddress !== account) {
+          console.warn('Recipient address mismatch:', {
+            account,
+            recipientAddress,
+            message: 'This might cause the swap to fail',
+          })
+        }
 
         // Handle token approval if needed
         if (approvalState !== ApprovalState.APPROVED) {
