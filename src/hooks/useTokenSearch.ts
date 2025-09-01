@@ -3,8 +3,8 @@ import { useMemo } from 'react'
 import { useSearchTokens as useApiSearchTokens, useTrendingTokens as useApiTrendingTokens } from '../api'
 import { UseTokenSearchResult } from '../types/api'
 
-const DEFAULT_TOKEN_SEARCH = 20
-const DEFAULT_TRENDING_TOKENS = 10
+const DEFAULT_TOKEN_SEARCH = 100
+const DEFAULT_TRENDING_TOKENS = 100
 
 export function useTokenSearch(searchTerm: string, first = DEFAULT_TOKEN_SEARCH): UseTokenSearchResult {
   const { data, isLoading, error } = useApiSearchTokens(searchTerm, Boolean(searchTerm && searchTerm.length >= 2))
@@ -29,6 +29,7 @@ export function useTrendingTokens(first: number = DEFAULT_TRENDING_TOKENS): UseT
 
   const tokens = useMemo(() => {
     if (error && !data) {
+      console.error('useTrendingTokens error:', error)
       return []
     }
     return data?.data || []

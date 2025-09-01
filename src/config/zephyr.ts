@@ -14,6 +14,11 @@ export const NETWORK_CONFIG = {
   },
   BRIDGE_URL: process.env.REACT_APP_CUSTOM_NETWORK_BRIDGE_URL || 'https://zephyr-bridge.eu-north-2.gateway.fm',
   FAUCET_URL: process.env.REACT_APP_CUSTOM_NETWORK_FAUCET_URL || 'https://zephyr-faucet.eu-north-2.gateway.fm',
+  BASE_TOKEN: {
+    ADDRESS: process.env.REACT_APP_ZEPHYR_BASE_TOKEN_ADDRESS || '0xdf4bdac4ba259127d1c53c07cdd005ad54ccafb0',
+    SYMBOL: process.env.REACT_APP_ZEPHYR_BASE_TOKEN_SYMBOL || 'USDC',
+    NAME: process.env.REACT_APP_ZEPHYR_BASE_TOKEN_NAME || 'USD Coin',
+  },
 } as const
 
 export const ZEPHYR_CHAIN_ID = NETWORK_CONFIG.CHAIN_ID
