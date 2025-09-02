@@ -94,18 +94,6 @@ export function useDebouncedTrade(
     try {
       // Calculate actual price based on API routing results
       const actualPrice = zephyrRouting.outputAmount.divide(zephyrRouting.inputAmount)
-      console.log('Calculated actual price from API:', {
-        inputAmount: zephyrRouting.inputAmount.toSignificant(),
-        inputAmountRaw: zephyrRouting.inputAmount.quotient.toString(),
-        inputDecimals: zephyrRouting.inputAmount.currency.decimals,
-        outputAmount: zephyrRouting.outputAmount.toSignificant(),
-        outputAmountRaw: zephyrRouting.outputAmount.quotient.toString(),
-        outputDecimals: zephyrRouting.outputAmount.currency.decimals,
-        price: actualPrice.toSignificant(),
-        priceNum: parseFloat(actualPrice.toSignificant()),
-        priceRaw: actualPrice.quotient.toString(),
-      })
-
       // Use actual price for pool parameters instead of 1:1
       const inputToken = zephyrRouting.inputAmount.currency.wrapped
       const outputToken = zephyrRouting.outputAmount.currency.wrapped
@@ -130,16 +118,6 @@ export function useDebouncedTrade(
           denominator: actualPrice.asFraction.numerator,
         }
       }
-
-      console.log('Pool creation details:', {
-        inputToken: inputToken.address,
-        outputToken: outputToken.address,
-        token0: token0.address,
-        token1: token1.address,
-        isInputToken0: inputToken.sortsBefore(outputToken),
-        priceRatioNum: priceRatio.numerator.toString(),
-        priceRatioDen: priceRatio.denominator.toString(),
-      })
 
       const { sqrtPriceX96, tick, liquidity } = getZephyrPoolParams(token0, token1, priceRatio)
       const pool = new Pool(token0, token1, FeeAmount.MEDIUM, sqrtPriceX96, liquidity, tick)

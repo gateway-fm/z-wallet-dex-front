@@ -34,7 +34,7 @@ export async function getSwapData(params: SwapParams): Promise<{ callData: strin
       route: bestRoute.route,
       route_type: bestRoute.type,
       recipient: params.recipient || params.signer,
-      amount: bestRoute.amount_quoted,
+      amount: params.amount.toString(), // Use input amount, not quoted output amount
       slippage: (params.slippage || 1) * 100, // Convert to basis points (1% = 100)
       deadline: Math.floor(Date.now() / 1000) + 1200, // 20 minutes from now // TODO: make this configurable
     }

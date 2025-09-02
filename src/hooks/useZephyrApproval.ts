@@ -9,15 +9,13 @@ import { ZEPHYR_CHAIN_ID } from '../constants/chains'
 import { useTokenContract } from './useContract'
 import { useTokenAllowance } from './useTokenAllowance'
 
-// Unified Zephyr token approval hook
-// eslint-disable-next-line import/no-unused-modules
 export function useZephyrTokenApproval(
   token?: Token,
   spender?: string,
   amountToApprove?: string
 ): {
   approvalState: ApprovalState
-  approve: () => Promise<void>
+  approve: () => Promise<any>
 } {
   const { chainId, account } = useWeb3React()
   const tokenContract = useTokenContract(token?.address, true)
@@ -43,10 +41,10 @@ export function useZephyrTokenApproval(
     return ApprovalState.NOT_APPROVED
   }, [amountToApprove, spender, token, chainId, tokenAllowance])
 
-  const approve = useCallback(async (): Promise<void> => {
+  const approve = useCallback(async (): Promise<any> => {
     if (!tokenContract || !spender || !token || chainId !== ZEPHYR_CHAIN_ID) {
       console.error('Missing dependencies for approve')
-      return
+      throw new Error('Missing dependencies for approve')
     }
     const tx = await tokenContract.approve(spender, MaxUint256.toString())
     // Add the approval transaction to the UI transaction list
@@ -56,6 +54,7 @@ export function useZephyrTokenApproval(
       spender,
       amount: MaxUint256.toString(),
     })
+    return tx
   }, [tokenContract, spender, token, chainId, addTransaction])
 
   return {
@@ -63,36 +62,3 @@ export function useZephyrTokenApproval(
     approve,
   }
 }
-
-// TODO: Temporarily commented out unused export
-//
-// export function useLiquidityManagerApproval(
-// tokenA?: Token,
-// tokenB?: Token,
-// amountA?: string,
-// amountB?: string
-// ): {
-// tokenAApproval: { approvalState: ApprovalState; approve: () => Promise<void> }
-// tokenBApproval: { approvalState: ApprovalState; approve: () => Promise<void> }
-// needsApproval: boolean
-// } {
-// const { chainId } = useWeb3React()
-// const liquidityManagerAddress = chainId === ZEPHYR_CHAIN_ID ? CONTRACTS_CONFIG.LIQUIDITY_MANAGER : undefined
-//
-// const tokenAApproval = useZephyrTokenApproval(tokenA, liquidityManagerAddress, amountA)
-// const tokenBApproval = useZephyrTokenApproval(tokenB, liquidityManagerAddress, amountB)
-//
-// const needsApproval = useMemo(() => {
-//     return (
-//       tokenAApproval.approvalState === ApprovalState.NOT_APPROVED ||
-//       tokenBApproval.approvalState === ApprovalState.NOT_APPROVED
-//     )
-// }, [tokenAApproval.approvalState, tokenBApproval.approvalState])
-//
-// return {
-//     tokenAApproval,
-//     tokenBApproval,
-//     needsApproval,
-// }
-// }
-//
