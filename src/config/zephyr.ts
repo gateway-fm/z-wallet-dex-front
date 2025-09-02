@@ -118,10 +118,24 @@ export const EXTERNAL_SERVICES_CONFIG = {
   WALLET_CONNECT_PROJECT_ID: process.env.REACT_APP_WALLET_CONNECT_PROJECT_ID || '',
 } as const
 
-// Type-safe exports
-export type NetworkConfig = typeof NETWORK_CONFIG
-export type ContractsConfig = typeof CONTRACTS_CONFIG
-export type TokensConfig = typeof TOKENS_CONFIG
-export type FeaturesConfig = typeof FEATURES_CONFIG
-export type ApiConfig = typeof API_CONFIG
-export type ExternalServicesConfig = typeof EXTERNAL_SERVICES_CONFIG
+export const TOKEN_FILTER_CONFIG = {
+  // Quick access tokens (comma-separated symbols, default: empty - use top pools logic)
+  QUICK_ACCESS_TOKENS: process.env.REACT_APP_QUICK_ACCESS_TOKENS?.split(',').map((s) => s.trim()) || [],
+} as const
+
+export type TokenFilterConfig = typeof TOKEN_FILTER_CONFIG
+
+/**
+ * Utility function to check if a token should be included in quick access
+ */
+export function shouldIncludeInQuickAccess(token: { address: string; symbol?: string }): boolean {
+  // If no quick access tokens configured, include all (fallback to top pools logic)
+  if (TOKEN_FILTER_CONFIG.QUICK_ACCESS_TOKENS.length === 0) {
+    return true
+  }
+
+  const tokenSymbol = token.symbol?.toUpperCase() || ''
+
+  // Check if token symbol is in quick access list
+  return TOKEN_FILTER_CONFIG.QUICK_ACCESS_TOKENS.some((symbol) => tokenSymbol === symbol.toUpperCase())
+}

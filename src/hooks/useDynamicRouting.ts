@@ -2,7 +2,7 @@ import { Token } from '@uniswap/sdk-core'
 import { useWeb3React } from '@web3-react/core'
 import { useMemo } from 'react'
 
-import { NETWORK_CONFIG } from '../config/zephyr'
+import { NETWORK_CONFIG, shouldIncludeInQuickAccess } from '../config/zephyr'
 import { ZEPHYR_CHAIN_ID } from '../constants/chains'
 import { useZephyrTokens } from './useZephyrTokensV2'
 
@@ -24,7 +24,9 @@ export function useCommonBases(): Token[] {
       return []
     }
 
-    return tokens
+    const filteredTokens = tokens.filter((token) => shouldIncludeInQuickAccess(token))
+
+    return filteredTokens
       .sort((a, b) => {
         const baseTokenAddress = NETWORK_CONFIG.BASE_TOKEN.ADDRESS.toLowerCase()
 
@@ -72,8 +74,11 @@ export function useBasesToTrackLiquidityFor(): Token[] {
       return []
     }
 
+    // Use quick access filtering - if no tokens configured, include all (top pools logic)
+    const filteredTokens = tokens.filter((token) => shouldIncludeInQuickAccess(token))
+
     // Sort tokens with base token first, then alphabetically
-    return tokens
+    return filteredTokens
       .sort((a, b) => {
         const baseTokenAddress = NETWORK_CONFIG.BASE_TOKEN.ADDRESS.toLowerCase()
 

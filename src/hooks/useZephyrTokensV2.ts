@@ -1,7 +1,7 @@
 import { Token } from '@uniswap/sdk-core'
 import { useMemo } from 'react'
 
-import { NETWORK_CONFIG } from '../config/zephyr'
+import { NETWORK_CONFIG, shouldIncludeInQuickAccess } from '../config/zephyr'
 import { ZEPHYR_CHAIN_ID } from '../constants/chains'
 import { useTokenSearch, useTrendingTokens } from './useTokenSearch'
 
@@ -46,14 +46,16 @@ export function useZephyrTokens(): { [address: string]: Token } {
       for (const tokenData of apiTokens) {
         const token = createTokenFromApiData(tokenData)
         if (token) {
-          const address = token.address.toLowerCase()
-          if (tokens[address]) {
-            const existingToken = tokens[address]
-            if (isTokenPreferrable(token, existingToken)) {
+          if (shouldIncludeInQuickAccess(token)) {
+            const address = token.address.toLowerCase()
+            if (tokens[address]) {
+              const existingToken = tokens[address]
+              if (isTokenPreferrable(token, existingToken)) {
+                tokens[address] = token
+              }
+            } else {
               tokens[address] = token
             }
-          } else {
-            tokens[address] = token
           }
         }
       }
@@ -75,8 +77,10 @@ export function useZephyrTokenSearch(searchQuery: string, chainId: number | unde
       for (const tokenData of searchResults) {
         const token = createTokenFromApiData(tokenData)
         if (token) {
-          const address = token.address.toLowerCase()
-          tokens[address] = token
+          if (shouldIncludeInQuickAccess(token)) {
+            const address = token.address.toLowerCase()
+            tokens[address] = token
+          }
         }
       }
     }
