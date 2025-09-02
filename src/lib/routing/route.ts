@@ -19,8 +19,8 @@ export async function getSwapData(params: SwapParams): Promise<{ callData: strin
     const routeType = params.swapType === SwapType.EXACT_INPUT ? 'input' : 'output'
 
     const bestRouteResponse = await apiInstance.routing.bestRoute({
-      tknA: params.tokenIn,
-      tknB: params.tokenOut,
+      tknIn: params.tokenIn,
+      tknOut: params.tokenOut,
       amount: params.amount.toString(),
       routeType,
     })
@@ -62,17 +62,16 @@ export async function getSwapData(params: SwapParams): Promise<{ callData: strin
       finalCallData = replaceRecipientInCalldata(calldata.data, expectedRecipient)
       const fixedRecipient = extractRecipientFromCalldata(finalCallData)
       if (fixedRecipient && fixedRecipient.toLowerCase() === expectedRecipient.toLowerCase()) {
-        console.log('Successfully fixed recipient in calldata')
+        // Do nothing
       } else {
         console.error('Failed to fix recipient in calldata, using original')
         finalCallData = calldata.data
       }
-    } else {
-      console.log('Recipient in calldata matches expected recipient')
     }
 
+    const ensuredCallData = finalCallData.startsWith('0x') ? finalCallData : `0x${finalCallData}`
     return {
-      callData: finalCallData,
+      callData: ensuredCallData,
       amountQuoted: BigInt(bestRoute.amount_quoted),
     }
   } catch (error) {

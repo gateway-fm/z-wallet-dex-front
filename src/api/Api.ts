@@ -313,8 +313,8 @@ export class Api<
      */
     bestRoute: (
       query: {
-        tknA: string;
-        tknB: string;
+        tknIn: string;
+        tknOut: string;
         amount: string;
         routeType: "input" | "output";
       },

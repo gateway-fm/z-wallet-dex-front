@@ -66,20 +66,20 @@ export function useTokensList(page = 1, perPage = 100) {
 }
 
 export function useBestRoute(
-  tknA: string,
-  tknB: string,
+  tknIn: string,
+  tknOut: string,
   amount: string,
   routeType: 'input' | 'output',
   enabled = true
 ) {
   return useQuery(
-    ['bestRoute', tknA, tknB, amount, routeType],
+    ['bestRoute', tknIn, tknOut, amount, routeType],
     async () => {
-      const response = await apiInstance.routing.bestRoute({ tknA, tknB, amount, routeType })
+      const response = await apiInstance.routing.bestRoute({ tknIn, tknOut, amount, routeType })
       return response.data
     },
     {
-      enabled: enabled && Boolean(tknA && tknB && amount),
+      enabled: enabled && Boolean(tknIn && tknOut && amount),
       staleTime: API_CACHE.STALE_TIME,
       cacheTime: API_CACHE.GC_TIME,
       retry: 1,

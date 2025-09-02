@@ -57,7 +57,10 @@ export function useZephyrSwapV2(
       return { callback: null }
     }
 
-    const callback = async (): Promise<{ type: TradeFillType.Classic; response: any }> => {
+    const callback = async (): Promise<{
+      type: TradeFillType.Classic
+      response: any
+    }> => {
       try {
         console.log('Executing Zephyr swap with new routing system')
 
@@ -93,21 +96,18 @@ export function useZephyrSwapV2(
         if (approvalState !== ApprovalState.APPROVED) {
           console.log(`Token ${tokenIn.symbol} needs approval`)
           await approve()
-          console.log('Approval completed')
         }
 
-        // Execute the pre-calculated swap using callData
+        const ensuredCallData = callData.startsWith('0x') ? callData : `0x${callData}`
         const transaction = {
           to: CONTRACTS_CONFIG.SWAP_ROUTER_02,
-          data: callData,
+          data: ensuredCallData,
           value: tokenIn.isNative ? inputAmount.quotient.toString() : '0',
           gasLimit: 500000,
         }
 
         console.log('Executing swap transaction:', transaction)
-
         const swapResult = await provider.getSigner().sendTransaction(transaction)
-
         console.log('Swap transaction sent:', swapResult.hash)
 
         return {
