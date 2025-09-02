@@ -32,7 +32,8 @@ export function useTrendingTokens(first: number = DEFAULT_TRENDING_TOKENS): UseT
       console.error('useTrendingTokens error:', error)
       return []
     }
-    return data?.data || []
+    const tokensData = data?.data || []
+    return tokensData
   }, [data, error])
 
   return {

@@ -46,7 +46,7 @@ export function useZephyrTokens(): { [address: string]: Token } {
       for (const tokenData of apiTokens) {
         const token = createTokenFromApiData(tokenData)
         if (token) {
-          if (shouldIncludeInQuickAccess(token)) {
+          // For trending tokens, include all tokens to show more options
             const address = token.address.toLowerCase()
             if (tokens[address]) {
               const existingToken = tokens[address]
@@ -77,10 +77,9 @@ export function useZephyrTokenSearch(searchQuery: string, chainId: number | unde
       for (const tokenData of searchResults) {
         const token = createTokenFromApiData(tokenData)
         if (token) {
-          if (shouldIncludeInQuickAccess(token)) {
+          // For search results, include all tokens to show complete search results
             const address = token.address.toLowerCase()
             tokens[address] = token
-          }
         }
       }
     }
