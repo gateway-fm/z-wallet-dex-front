@@ -1,7 +1,7 @@
 import { Token } from '@uniswap/sdk-core'
 import { useMemo } from 'react'
 
-import { NETWORK_CONFIG, shouldIncludeInQuickAccess } from '../config/zephyr'
+import { NETWORK_CONFIG } from '../config/zephyr'
 import { ZEPHYR_CHAIN_ID } from '../constants/chains'
 import { useTokenSearch, useTrendingTokens } from './useTokenSearch'
 
@@ -47,15 +47,14 @@ export function useZephyrTokens(): { [address: string]: Token } {
         const token = createTokenFromApiData(tokenData)
         if (token) {
           // For trending tokens, include all tokens to show more options
-            const address = token.address.toLowerCase()
-            if (tokens[address]) {
-              const existingToken = tokens[address]
-              if (isTokenPreferrable(token, existingToken)) {
-                tokens[address] = token
-              }
-            } else {
+          const address = token.address.toLowerCase()
+          if (tokens[address]) {
+            const existingToken = tokens[address]
+            if (isTokenPreferrable(token, existingToken)) {
               tokens[address] = token
             }
+          } else {
+            tokens[address] = token
           }
         }
       }
@@ -78,8 +77,8 @@ export function useZephyrTokenSearch(searchQuery: string, chainId: number | unde
         const token = createTokenFromApiData(tokenData)
         if (token) {
           // For search results, include all tokens to show complete search results
-            const address = token.address.toLowerCase()
-            tokens[address] = token
+          const address = token.address.toLowerCase()
+          tokens[address] = token
         }
       }
     }

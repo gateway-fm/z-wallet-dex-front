@@ -21,7 +21,7 @@ export function useSearchTokens(searchQuery: string, enabled = true) {
   )
 }
 
-export function useTrendingTokens(limit = 100) {
+export function useTrendingTokens(limit = 25) {
   return useQuery(
     ['trendingTokens', limit],
     async () => {
