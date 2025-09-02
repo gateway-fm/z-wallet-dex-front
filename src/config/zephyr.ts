@@ -120,7 +120,7 @@ export const EXTERNAL_SERVICES_CONFIG = {
 
 export const TOKEN_FILTER_CONFIG = {
   // Quick access tokens (comma-separated symbols, default: empty - use top pools logic)
-  QUICK_ACCESS_TOKENS: process.env.REACT_APP_QUICK_ACCESS_TOKENS?.split(',').map((s) => s.trim()) || [],
+  QUICK_ACCESS_TOKENS: process.env.REACT_APP_QUICK_ACCESS_TOKENS?.split(',').map((s) => s.trim()) || ['USDC', 'TEST'],
 } as const
 
 export type TokenFilterConfig = typeof TOKEN_FILTER_CONFIG
