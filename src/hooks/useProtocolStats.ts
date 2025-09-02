@@ -22,11 +22,12 @@ export function useProtocolStats(): UseProtocolStatsResult {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useTopPools(first = 10): UseTopPoolsResult {
   const pools = useMemo(() => {
     // API doesn't provide pools data, return empty array
     return []
-  }, [first])
+  }, [])
 
   return {
     pools,

@@ -25,8 +25,15 @@ export function useCommonBases(): Token[] {
     }
 
     const filteredTokens = tokens.filter((token) => shouldIncludeInQuickAccess(token))
+    const uniqueTokens = filteredTokens.reduce((acc, token) => {
+      const symbol = token.symbol?.toUpperCase()
+      if (symbol && !acc.some((t) => t.symbol?.toUpperCase() === symbol)) {
+        acc.push(token)
+      }
+      return acc
+    }, [] as Token[])
 
-    return filteredTokens
+    return uniqueTokens
       .sort((a, b) => {
         const baseTokenAddress = NETWORK_CONFIG.BASE_TOKEN.ADDRESS.toLowerCase()
 
@@ -77,8 +84,17 @@ export function useBasesToTrackLiquidityFor(): Token[] {
     // Use quick access filtering - if no tokens configured, include all (top pools logic)
     const filteredTokens = tokens.filter((token) => shouldIncludeInQuickAccess(token))
 
+    // Remove duplicates by symbol to avoid showing multiple tokens with same symbol
+    const uniqueTokens = filteredTokens.reduce((acc, token) => {
+      const symbol = token.symbol?.toUpperCase()
+      if (symbol && !acc.some((t) => t.symbol?.toUpperCase() === symbol)) {
+        acc.push(token)
+      }
+      return acc
+    }, [] as Token[])
+
     // Sort tokens with base token first, then alphabetically
-    return filteredTokens
+    return uniqueTokens
       .sort((a, b) => {
         const baseTokenAddress = NETWORK_CONFIG.BASE_TOKEN.ADDRESS.toLowerCase()
 

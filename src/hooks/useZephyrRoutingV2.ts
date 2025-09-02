@@ -65,6 +65,7 @@ export function useZephyrRoutingV2(
         const routeDescription = `${inputSymbol} → ${outputSymbol}`
 
         // Convert bigint back to CurrencyAmount for return values
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const quotedAmount = CurrencyAmount.fromRawAmount(otherCurrency!, amountQuoted.toString())
 
         const routingResult: Omit<RoutingResult, 'loading'> = {
