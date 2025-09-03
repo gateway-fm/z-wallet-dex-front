@@ -66,7 +66,7 @@ export default createReducer<SwapState>(initialState, (builder) =>
     .addCase(switchCurrencies, (state, { payload: { newOutputHasTax, previouslyEstimatedOutput } }) => {
       if (newOutputHasTax && state.independentField === Field.INPUT) {
         // When the current output token (which becomes the new input after switch) has tax,
-        // to prevent swaps with FOT tokens as exact-outputs, we leave it as an exact-in swap 
+        // to prevent swaps with FOT tokens as exact-outputs, we leave it as an exact-in swap
         // and use the previously estimated output amount as the new exact-in amount.
         return {
           ...state,

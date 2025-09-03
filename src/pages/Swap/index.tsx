@@ -300,6 +300,7 @@ function Swap({
     outputTax,
   } = swapInfo
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [inputTokenHasTax, outputTokenHasTax] = useMemo(
     () => [!inputTax.equalTo(0), !outputTax.equalTo(0)],
     [inputTax, outputTax]
@@ -651,7 +652,7 @@ function Swap({
             data-testid="swap-currency-button"
             onClick={() => {
               if (disableTokenInputs) return
-              onSwitchTokens(outputTokenHasTax, formattedAmounts[dependentField])
+              onSwitchTokens(outputTokenHasTax, formattedAmounts[dependentField], formattedAmounts[independentField])
             }}
             color={theme.neutral1}
           >

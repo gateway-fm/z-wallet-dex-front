@@ -116,5 +116,5 @@ export function useSwapCallback(
     }
 
     return result
-  }, [trade, account, chainId, swapCallback, allowedSlippage, addTransaction, deadline, routingResult])
+  }, [trade, account, chainId, swapCallback, allowedSlippage, addTransaction, deadline, routingResult, inputBalance])
 }
