@@ -39,8 +39,15 @@ export function calculateOneToOneSqrtPriceX96(token0: Token, token1: Token): str
 /**
  * Get pool creation parameters for Zephyr network
  */
-export function getZephyrPoolParams(token0: Token, token1: Token) {
-  const sqrtPriceX96 = calculateOneToOneSqrtPriceX96(token0, token1)
+export function getZephyrPoolParams(token0: Token, token1: Token, priceRatio?: { numerator: JSBI; denominator: JSBI }) {
+  let sqrtPriceX96: string
+
+  if (priceRatio) {
+    sqrtPriceX96 = encodeSqrtRatioX96(priceRatio.numerator, priceRatio.denominator).toString()
+  } else {
+    sqrtPriceX96 = calculateOneToOneSqrtPriceX96(token0, token1)
+  }
+
   const tick = TickMath.getTickAtSqrtRatio(JSBI.BigInt(sqrtPriceX96))
 
   return {

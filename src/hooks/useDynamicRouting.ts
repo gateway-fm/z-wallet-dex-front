@@ -2,60 +2,48 @@ import { Token } from '@uniswap/sdk-core'
 import { useWeb3React } from '@web3-react/core'
 import { useMemo } from 'react'
 
+import { NETWORK_CONFIG, shouldIncludeInQuickAccess } from '../config/zephyr'
 import { ZEPHYR_CHAIN_ID } from '../constants/chains'
-import { useTopPools } from './useProtocolStats'
+import { useZephyrTokens } from './useZephyrTokensV2'
 
 /**
- * Hook that returns common base tokens from top pools for Zephyr network
+ * Hook that returns common base tokens for Zephyr network
+ * Returns available tokens with base token (USDC) prioritized
  */
 export function useCommonBases(): Token[] {
   const { chainId } = useWeb3React()
-  const { pools } = useTopPools(10) // Get top 10 pools
+  const zephyrTokens = useZephyrTokens()
 
   return useMemo(() => {
-    if (chainId !== ZEPHYR_CHAIN_ID || !pools || pools.length === 0) {
+    if (chainId !== ZEPHYR_CHAIN_ID) {
       return []
     }
 
-    // Extract unique tokens from top pools
-    const tokenSet = new Set<string>()
-    const tokens: Token[] = []
+    const tokens = Object.values(zephyrTokens)
+    if (tokens.length === 0) {
+      return []
+    }
 
-    pools.forEach((pool) => {
-      // Add token0
-      if (!tokenSet.has(pool.token0.id)) {
-        const decimals0 =
-          typeof pool.token0.decimals === 'string' ? parseInt(pool.token0.decimals, 10) : pool.token0.decimals
-        if (decimals0 >= 0 && decimals0 <= 255) {
-          tokenSet.add(pool.token0.id)
-          tokens.push(new Token(ZEPHYR_CHAIN_ID, pool.token0.id, decimals0, pool.token0.symbol, pool.token0.name))
-        }
+    const filteredTokens = tokens.filter((token) => shouldIncludeInQuickAccess(token))
+    const uniqueTokens = filteredTokens.reduce((acc, token) => {
+      const symbol = token.symbol?.toUpperCase()
+      if (symbol && !acc.some((t) => t.symbol?.toUpperCase() === symbol)) {
+        acc.push(token)
       }
+      return acc
+    }, [] as Token[])
 
-      // Add token1
-      if (!tokenSet.has(pool.token1.id)) {
-        const decimals1 =
-          typeof pool.token1.decimals === 'string' ? parseInt(pool.token1.decimals, 10) : pool.token1.decimals
-        if (decimals1 >= 0 && decimals1 <= 255) {
-          tokenSet.add(pool.token1.id)
-          tokens.push(new Token(ZEPHYR_CHAIN_ID, pool.token1.id, decimals1, pool.token1.symbol, pool.token1.name))
-        }
-      }
-    })
-
-    // Sort by volume (highest first)
-    return tokens
+    return uniqueTokens
       .sort((a, b) => {
-        const poolA = pools.find((p) => p.token0.id === a.address || p.token1.id === a.address)
-        const poolB = pools.find((p) => p.token0.id === b.address || p.token1.id === b.address)
+        const baseTokenAddress = NETWORK_CONFIG.BASE_TOKEN.ADDRESS.toLowerCase()
 
-        const volumeA = parseFloat(poolA?.volumeUSD || '0')
-        const volumeB = parseFloat(poolB?.volumeUSD || '0')
-
-        return volumeB - volumeA
+        // Base token always first
+        if (a.address.toLowerCase() === baseTokenAddress) return -1
+        if (b.address.toLowerCase() === baseTokenAddress) return 1
+        return (a.symbol || '').localeCompare(b.symbol || '')
       })
       .slice(0, 6) // Return top 6 tokens
-  }, [chainId, pools])
+  }, [chainId, zephyrTokens])
 }
 
 /**
@@ -63,75 +51,60 @@ export function useCommonBases(): Token[] {
  */
 export function usePinnedPairs(): [Token, Token][] {
   const { chainId } = useWeb3React()
-  const { pools } = useTopPools(5) // Get top 5 pools for pinned pairs
 
   return useMemo(() => {
-    if (chainId !== ZEPHYR_CHAIN_ID || !pools || pools.length === 0) {
+    if (chainId !== ZEPHYR_CHAIN_ID) {
       return []
     }
 
-    // Create pairs from top pools
-    return pools
-      .map((pool) => {
-        const decimals0 =
-          typeof pool.token0.decimals === 'string' ? parseInt(pool.token0.decimals, 10) : pool.token0.decimals
-        const decimals1 =
-          typeof pool.token1.decimals === 'string' ? parseInt(pool.token1.decimals, 10) : pool.token1.decimals
-
-        if (decimals0 < 0 || decimals0 > 255 || decimals1 < 0 || decimals1 > 255) {
-          return null
-        }
-
-        const token0 = new Token(ZEPHYR_CHAIN_ID, pool.token0.id, decimals0, pool.token0.symbol, pool.token0.name)
-        const token1 = new Token(ZEPHYR_CHAIN_ID, pool.token1.id, decimals1, pool.token1.symbol, pool.token1.name)
-
-        return [token0, token1] as [Token, Token]
-      })
-      .filter((pair): pair is [Token, Token] => pair !== null)
-  }, [chainId, pools])
+    // Without pool data, we can't determine popular pairs
+    // This could be enhanced later if needed
+    return []
+  }, [chainId])
 }
 
 /**
- * Hook that returns bases to track liquidity for from top pools
+ * Hook that returns bases to track liquidity for
+ * Uses available tokens instead of pool data
  */
 export function useBasesToTrackLiquidityFor(): Token[] {
   const { chainId } = useWeb3React()
-  const { pools } = useTopPools(15) // Get more pools for liquidity tracking
+  const zephyrTokens = useZephyrTokens()
 
   return useMemo(() => {
-    if (chainId !== ZEPHYR_CHAIN_ID || !pools || pools.length === 0) {
+    if (chainId !== ZEPHYR_CHAIN_ID) {
       return []
     }
 
-    // Extract unique tokens from all pools, prioritizing by TVL
-    const tokenSet = new Set<string>()
-    const tokens: Token[] = []
+    const tokens = Object.values(zephyrTokens)
+    if (tokens.length === 0) {
+      return []
+    }
 
-    // Sort pools by TVL first
-    const sortedPools = [...pools].sort((a, b) => parseFloat(b.totalValueLockedUSD) - parseFloat(a.totalValueLockedUSD))
+    // Use quick access filtering - if no tokens configured, include all (top pools logic)
+    const filteredTokens = tokens.filter((token) => shouldIncludeInQuickAccess(token))
 
-    sortedPools.forEach((pool) => {
-      // Add token0
-      if (!tokenSet.has(pool.token0.id)) {
-        const decimals0 =
-          typeof pool.token0.decimals === 'string' ? parseInt(pool.token0.decimals, 10) : pool.token0.decimals
-        if (decimals0 >= 0 && decimals0 <= 255) {
-          tokenSet.add(pool.token0.id)
-          tokens.push(new Token(ZEPHYR_CHAIN_ID, pool.token0.id, decimals0, pool.token0.symbol, pool.token0.name))
-        }
+    // Remove duplicates by symbol to avoid showing multiple tokens with same symbol
+    const uniqueTokens = filteredTokens.reduce((acc, token) => {
+      const symbol = token.symbol?.toUpperCase()
+      if (symbol && !acc.some((t) => t.symbol?.toUpperCase() === symbol)) {
+        acc.push(token)
       }
+      return acc
+    }, [] as Token[])
 
-      // Add token1
-      if (!tokenSet.has(pool.token1.id)) {
-        const decimals1 =
-          typeof pool.token1.decimals === 'string' ? parseInt(pool.token1.decimals, 10) : pool.token1.decimals
-        if (decimals1 >= 0 && decimals1 <= 255) {
-          tokenSet.add(pool.token1.id)
-          tokens.push(new Token(ZEPHYR_CHAIN_ID, pool.token1.id, decimals1, pool.token1.symbol, pool.token1.name))
-        }
-      }
-    })
+    // Sort tokens with base token first, then alphabetically
+    return uniqueTokens
+      .sort((a, b) => {
+        const baseTokenAddress = NETWORK_CONFIG.BASE_TOKEN.ADDRESS.toLowerCase()
 
-    return tokens
-  }, [chainId, pools])
+        // Base token always first
+        if (a.address.toLowerCase() === baseTokenAddress) return -1
+        if (b.address.toLowerCase() === baseTokenAddress) return 1
+
+        // Then by symbol alphabetically
+        return (a.symbol || '').localeCompare(b.symbol || '')
+      })
+      .slice(0, 10) // Return top 10 tokens for liquidity tracking
+  }, [chainId, zephyrTokens])
 }

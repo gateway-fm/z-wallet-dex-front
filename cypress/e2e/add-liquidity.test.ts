@@ -1,6 +1,6 @@
 import { CyHttpMessages } from 'cypress/types/net-stubbing'
 
-import { aliasQuery, hasQuery } from '../utils/graphql-test-utils'
+import { aliasQuery, hasQuery } from '../utils/query-test-utils'
 
 describe('Add Liquidity', () => {
   beforeEach(() => {

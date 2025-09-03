@@ -1,47 +1,42 @@
 import { useWeb3React } from '@web3-react/core'
 import { useMemo } from 'react'
 
+import { NETWORK_CONFIG } from '../config/zephyr'
 import { ZEPHYR_CHAIN_ID } from '../constants/chains'
-import { useTopPools } from './useProtocolStats'
 import { useZephyrTokens } from './useZephyrTokensV2'
 
 /**
- * Hook that returns the first token as default for Zephyr network
- * Tries pools first, falls back to first available token
+ * Hook that returns the default token for Zephyr network
+ * Prioritizes base token (USDC), then falls back to first available token
  */
 export function useZephyrDefaultToken(): string | undefined {
   const { chainId } = useWeb3React()
-  const { pools } = useTopPools(1) // Get top pool for default token
-  const zephyrTokens = useZephyrTokens() // Fallback to any available token
+  const zephyrTokens = useZephyrTokens()
 
   return useMemo(() => {
     if (chainId !== ZEPHYR_CHAIN_ID) {
       return undefined
     }
 
-    // First try: get token from top pool
-    if (pools && pools.length > 0) {
-      const firstPool = pools[0]
-      const firstToken = firstPool?.token0
-      if (firstToken) {
-        return `${ZEPHYR_CHAIN_ID}-${firstToken.id}`
-      }
-    }
-
-    // Fallback: get first available token from GraphQL (prefer USDC if available)
     const tokenAddresses = Object.keys(zephyrTokens)
-    if (tokenAddresses.length > 0) {
-      // Try to find USDC first
-      const usdcToken = Object.values(zephyrTokens).find((token) => token.symbol === 'USDC')
-      if (usdcToken) {
-        return `${ZEPHYR_CHAIN_ID}-${usdcToken.address}`
-      }
-
-      // Otherwise use first available token
-      const firstTokenAddress = tokenAddresses[0]
-      return `${ZEPHYR_CHAIN_ID}-${firstTokenAddress}`
+    if (tokenAddresses.length === 0) {
+      return undefined
     }
 
-    return undefined
-  }, [chainId, pools, zephyrTokens])
+    // First priority: base token (USDC)
+    const baseTokenAddress = NETWORK_CONFIG.BASE_TOKEN.ADDRESS.toLowerCase()
+    if (zephyrTokens[baseTokenAddress]) {
+      return `${ZEPHYR_CHAIN_ID}-${baseTokenAddress}`
+    }
+
+    // Second priority: find USDC by symbol
+    const usdcToken = Object.values(zephyrTokens).find((token) => token.symbol === 'USDC' || token.name === 'USD Coin')
+    if (usdcToken) {
+      return `${ZEPHYR_CHAIN_ID}-${usdcToken.address}`
+    }
+
+    // Fallback: use first available token
+    const firstTokenAddress = tokenAddresses[0]
+    return `${ZEPHYR_CHAIN_ID}-${firstTokenAddress}`
+  }, [chainId, zephyrTokens])
 }

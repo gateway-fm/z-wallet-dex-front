@@ -18,7 +18,7 @@ export function useZephyrTokenApproval(
   amountToApprove?: string
 ): {
   approvalState: ApprovalState
-  approve: () => Promise<void>
+  approve: () => Promise<any>
 } {
   const { chainId, account, connector } = useWeb3React()
   const tokenContract = useTokenContract(token?.address, true)
