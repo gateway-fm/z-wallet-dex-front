@@ -61,7 +61,6 @@ export function RoutingTooltip({ trade }: { trade: SubmittableTrade }) {
       <PriceImpactRow trade={trade} />
       <Separator />
       <RouteLabel trade={trade} />
-      <SwapRoute trade={trade} />
     </Column>
   ) : (
     <Column gap="md">
