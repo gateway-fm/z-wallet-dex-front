@@ -212,13 +212,9 @@ export class ClassicTrade extends Trade<Currency, Currency, TradeType> {
     return super.minimumAmountOut(slippageTolerance.add(this.totalTaxRate), amountOut)
   }
 
-  // gas estimate for maybe approve + swap
+  // gas estimate for maybe approve + swap - always 0 in this solution (no network fees)
   public get totalGasUseEstimateUSD(): number | undefined {
-    if (this.approveInfo.needsApprove && this.gasUseEstimateUSD) {
-      return this.approveInfo.approveGasEstimateUSD + this.gasUseEstimateUSD
-    }
-
-    return this.gasUseEstimateUSD
+    return 0
   }
 }
 

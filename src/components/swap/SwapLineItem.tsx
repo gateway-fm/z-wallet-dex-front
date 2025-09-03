@@ -4,7 +4,6 @@ import { LoadingRow } from 'components/Loader/styled'
 import RouterLabel from 'components/RouterLabel'
 import Row, { RowBetween } from 'components/Row'
 import { MouseoverTooltip, TooltipSize } from 'components/Tooltip'
-import { getChainInfo } from 'constants/chainInfo'
 import { ZEPHYR_CHAIN_ID } from 'constants/chains'
 import useHoverProps from 'hooks/useHoverProps'
 import { useIsMobile } from 'nft/hooks'
@@ -18,9 +17,7 @@ import { ExternalLink, ThemedText } from 'theme/components'
 import { NumberType, useFormatter } from 'utils/formatNumbers'
 import { getPriceImpactColor } from 'utils/prices'
 
-import { GasBreakdownTooltip } from './GasBreakdownTooltip'
 import { MaxSlippageTooltip } from './MaxSlippageTooltip'
-import { RoutingTooltip, SwapRoute } from './SwapRoute'
 import TradePrice from './TradePrice'
 
 export enum SwapLineItemType {
@@ -98,7 +95,7 @@ type LineItemData = {
 
 function useLineItem(props: SwapLineItemProps): LineItemData | undefined {
   const { trade, syncing, allowedSlippage, type } = props
-  const { formatNumber, formatSlippage } = useFormatter()
+  const { formatSlippage } = useFormatter()
   const isAutoSlippage = useUserSlippageTolerance()[0] === SlippageTolerance.Auto
 
   const isPreview = isPreviewTrade(trade)
@@ -118,24 +115,10 @@ function useLineItem(props: SwapLineItemProps): LineItemData | undefined {
       return {
         Label: () => <Trans>Rate</Trans>,
         Value: () => <TradePrice price={trade.executionPrice as any} />,
-        TooltipBody: !isPreview ? () => <RoutingTooltip trade={trade} /> : undefined,
-        tooltipSize: TooltipSize.Small,
       }
     case SwapLineItemType.NETWORK_COST:
-      if (chainId !== ZEPHYR_CHAIN_ID) return
-      return {
-        Label: () => <Trans>Network cost</Trans>,
-        TooltipBody: () => <GasBreakdownTooltip trade={trade} />,
-        Value: () => {
-          if (isPreview) return <Loading />
-          return (
-            <Row gap="4px">
-              <img src={getChainInfo(chainId)?.logoUrl} alt="gas cost icon" width={16} height={16} />
-              {formatNumber({ input: trade.totalGasUseEstimateUSD, type: NumberType.FiatGasPrice })}
-            </Row>
-          )
-        },
-      }
+      // NOTE: Network costs removed from DEX solution
+      return undefined
     case SwapLineItemType.PRICE_IMPACT:
       return {
         Label: () => <Trans>Price impact</Trans>,
@@ -187,10 +170,6 @@ function useLineItem(props: SwapLineItemProps): LineItemData | undefined {
       if (isPreview || syncing) return { Label: () => <Trans>Order routing</Trans>, Value: () => <Loading /> }
       return {
         Label: () => <Trans>Order routing</Trans>,
-        TooltipBody: () => {
-          return <SwapRoute data-testid="swap-route-info" trade={trade} />
-        },
-        tooltipSize: TooltipSize.Large,
         Value: () => <RouterLabel trade={trade} />,
       }
     case SwapLineItemType.INPUT_TOKEN_FEE_ON_TRANSFER:

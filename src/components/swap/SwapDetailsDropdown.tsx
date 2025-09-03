@@ -7,12 +7,10 @@ import { RowBetween, RowFixed } from 'components/Row'
 import { useState } from 'react'
 import { ChevronDown } from 'react-feather'
 import { InterfaceTrade } from 'state/routing/types'
-import { isSubmittableTrade } from 'state/routing/utils'
 import styled, { useTheme } from 'styled-components'
 import { Separator, ThemedText } from 'theme/components'
 import { useFormatter } from 'utils/formatNumbers'
 
-import GasEstimateTooltip from './GasEstimateTooltip'
 import SwapLineItem, { SwapLineItemType } from './SwapLineItem'
 import TradePrice from './TradePrice'
 
@@ -69,9 +67,6 @@ export default function SwapDetailsDropdown(props: SwapDetailsProps) {
           ) : null}
         </RowFixed>
         <RowFixed gap="xs">
-          {!showDetails && isSubmittableTrade(trade) && (
-            <GasEstimateTooltip trade={trade} loading={syncing || loading} />
-          )}
           <RotatingArrow stroke={trade ? theme.neutral3 : theme.surface2} open={Boolean(trade && showDetails)} />
         </RowFixed>
       </StyledHeaderRow>
@@ -96,7 +91,7 @@ function AdvancedSwapDetails(props: SwapDetailsProps & { open: boolean }) {
         <SwapLineItem {...lineItemProps} type={SwapLineItemType.MAX_SLIPPAGE} />
         <SwapLineItem {...lineItemProps} type={SwapLineItemType.INPUT_TOKEN_FEE_ON_TRANSFER} />
         <SwapLineItem {...lineItemProps} type={SwapLineItemType.OUTPUT_TOKEN_FEE_ON_TRANSFER} />
-        <SwapLineItem {...lineItemProps} type={SwapLineItemType.NETWORK_COST} />
+
         <Separator />
         <SwapLineItem {...lineItemProps} type={SwapLineItemType.ROUTING_INFO} />
       </SwapDetailsWrapper>
