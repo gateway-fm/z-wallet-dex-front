@@ -94,7 +94,6 @@ describe('Swap errors', () => {
       // Submit 2 transactions
       for (let i = 0; i < 2; i++) {
         cy.get('#swap-currency-input .token-amount-input').type('200')
-cy.get(.type('200').should( 1>.type('200').should(-).should('have.value', '200')
         cy.get('#swap-currency-output .token-amount-input').should('not.have.value', '')
         cy.get('#swap-button').click()
         cy.contains('Confirm swap').click()

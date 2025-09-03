@@ -33,11 +33,9 @@ function useTryActivation() {
       try {
         setActivationState({ status: ActivationStatus.PENDING, connection })
 
-        console.debug(`Connection activating: ${connection.getName()}`)
         dispatch(updateSelectedWallet({ wallet: undefined }))
         await connection.connector.activate()
 
-        console.debug(`Connection activated: ${connection.getName()}`)
         dispatch(updateSelectedWallet({ wallet: connection.type }))
 
         // Clears pending connection state

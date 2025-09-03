@@ -9,7 +9,6 @@ describe('swap flow logging', () => {
     // First swap in the session:
     // Enter amount to swap
     cy.get('#swap-currency-output .token-amount-input').type('1')
-cy.get(.type('1').should( 1>.type('1').should(-).should('have.value', '1')
     cy.get('#swap-currency-input .token-amount-input').should('not.have.value', '')
 
     // Submit transaction
@@ -22,7 +21,6 @@ cy.get(.type('1').should( 1>.type('1').should(-).should('have.value', '1')
     // Second swap in the session:
     // Enter amount to swap (different from first trade, to trigger a new quote request)
     cy.get('#swap-currency-output .token-amount-input').clear().type('10')
-cy.get(.type('10').should( 1>.type('10').should(-).should('have.value', '10')
     cy.get('#swap-currency-input .token-amount-input').should('not.have.value', '')
 
     // Submit transaction

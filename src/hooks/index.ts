@@ -1,3 +1,5 @@
+/* eslint-disable import/no-unused-modules */
+
 export { useProtocolStats, useTopPools } from './useProtocolStats'
 export { default as useStablecoinPrice } from './useStablecoinPrice'
 export { useTokenPrice, useTokenPrices, useUSDCPrices } from './useTokenPrices'

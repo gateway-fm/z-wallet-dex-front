@@ -14,11 +14,9 @@ import {
 } from 'state/transactions/types'
 import { currencyId } from 'utils/currencyId'
 
-import ZephyrSwapRouterABI from '../abis/zephyr-swap-router.json'
 import { CONTRACTS_CONFIG } from '../config/zephyr'
 import { ZEPHYR_CHAIN_ID } from '../constants/chains'
 import { useTokenBalance } from '../lib/hooks/useCurrencyBalance'
-import { useContract } from './useContract'
 import { useZephyrTokenApproval } from './useZephyrApproval'
 import { swapWithZWallet } from './useZWalletSwap'
 
@@ -39,7 +37,6 @@ export function useZephyrSwapV2(
   callback: (() => Promise<{ type: TradeFillType.Classic; response: any }>) | null
 } {
   const { account, chainId, provider, connector } = useWeb3React()
-  const swapRouter = useContract(CONTRACTS_CONFIG.SWAP_ROUTER_02, ZephyrSwapRouterABI, true)
   const addTransaction = useTransactionAdder()
   const dispatch = useAppDispatch()
 
@@ -65,7 +62,7 @@ export function useZephyrSwapV2(
     const connection = getConnection(connector)
     const isZWallet = connection.type === ConnectionType.Z_WALLET
 
-    if (!isZWallet && (!provider || !swapRouter)) {
+    if (!isZWallet && !provider) {
       return { callback: null }
     }
 
@@ -144,8 +141,8 @@ export function useZephyrSwapV2(
 
         swapResult = await swapWithZWallet(chainId, account || '', transaction, undefined, swapInfo, dispatch)
       } else {
-        if (!provider || !swapRouter) {
-          throw new Error('Provider or swapRouter not available for standard wallet')
+        if (!provider) {
+          throw new Error('Provider not available for standard wallet')
         }
         swapResult = await provider.getSigner().sendTransaction(transaction)
 
@@ -186,7 +183,6 @@ export function useZephyrSwapV2(
     account,
     chainId,
     provider,
-    swapRouter,
     callData,
     approvalState,
     connector,
