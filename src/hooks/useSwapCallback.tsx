@@ -6,6 +6,7 @@ import { useUniversalRouterSwapCallback } from 'hooks/useUniversalRouter'
 import { useZephyrRoutingV2 } from 'hooks/useZephyrRoutingV2'
 import { useZephyrSwapV2 } from 'hooks/useZephyrSwapV2'
 import { useCallback } from 'react'
+import { useCurrencyBalance } from 'state/connection/hooks'
 import { InterfaceTrade } from 'state/routing/types'
 import { isClassicTrade } from 'state/routing/utils'
 import { useTransactionAdder } from 'state/transactions/hooks'
@@ -29,9 +30,9 @@ export function useSwapCallback(
   allowedSlippage: Percent, // in bips
   permitSignature: PermitSignature | undefined
 ) {
+  const { account, chainId } = useWeb3React()
   const deadline = useTransactionDeadline()
   const addTransaction = useTransactionAdder()
-  const { account, chainId } = useWeb3React()
 
   const universalRouterSwapCallback = useUniversalRouterSwapCallback(isClassicTrade(trade) ? trade : undefined, {
     slippageTolerance: allowedSlippage,
@@ -60,8 +61,9 @@ export function useSwapCallback(
     routingResult.callData // Use callData from routing system
   )
 
-  // Use Universal Router for other networks, but SwapRouter02 for Zephyr
   const swapCallback = chainId === ZEPHYR_CHAIN_ID ? zephyrSwapCallback : universalRouterSwapCallback
+
+  const inputBalance = useCurrencyBalance(account, trade?.inputAmount.currency)
 
   return useCallback(async () => {
     if (!trade) throw new Error('missing trade')
@@ -81,6 +83,11 @@ export function useSwapCallback(
     }
 
     if (!swapCallback) throw new Error('swap callback not available')
+
+    // Check if user has sufficient balance before attempting the swap
+    if (inputBalance && trade.inputAmount && inputBalance.lessThan(trade.inputAmount)) {
+      throw new Error(`Insufficient ${trade.inputAmount.currency.symbol} balance`)
+    }
 
     const result = await swapCallback()
 

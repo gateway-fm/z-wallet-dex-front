@@ -1,6 +1,6 @@
 import apiInstance from '../../api'
 import { extractRecipientFromCalldata, replaceRecipientInCalldata } from './calldata-utils'
-import { SwapParams, SwapType } from './types'
+import { SwapParams } from './types'
 
 export async function getSwapData(params: SwapParams): Promise<{ callData: string; amountQuoted: bigint }> {
   if (!params.tokenIn || !params.tokenOut) {
