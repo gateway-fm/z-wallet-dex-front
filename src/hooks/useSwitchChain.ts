@@ -1,6 +1,5 @@
 import { ChainId } from '@uniswap/sdk-core'
 import { Connector } from '@web3-react/types'
-import { networkConnection } from 'connection'
 import { getChainInfo } from 'constants/chainInfo'
 import { isSupportedChain, SupportedInterfaceChain } from 'constants/chains'
 import { RPC_URLS } from 'constants/networks'
@@ -23,19 +22,15 @@ export function useSwitchChain() {
       } else {
         dispatch(startSwitchingChain(chainId))
         try {
-          if ([networkConnection.connector].includes(connector)) {
-            await connector.activate(chainId)
-          } else {
-            const info = getChainInfo(chainId)
-            const addChainParameter = {
-              chainId,
-              chainName: info.label,
-              rpcUrls: [getRpcUrl(chainId)],
-              nativeCurrency: info.nativeCurrency,
-              blockExplorerUrls: [info.explorer],
-            }
-            await connector.activate(addChainParameter)
+          const info = getChainInfo(chainId)
+          const addChainParameter = {
+            chainId,
+            chainName: info.label,
+            rpcUrls: [getRpcUrl(chainId)],
+            nativeCurrency: info.nativeCurrency,
+            blockExplorerUrls: [info.explorer],
           }
+          await connector.activate(addChainParameter)
         } catch (error) {
           // In activating a new chain, the connector passes through a deactivated state.
           // If we fail to switch chains, it may remain in this state, and no longer be usable.

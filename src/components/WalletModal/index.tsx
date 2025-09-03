@@ -1,10 +1,7 @@
-import { useWeb3React } from '@web3-react/core'
 import { AutoColumn } from 'components/Column'
 import { AutoRow } from 'components/Row'
-import { connections, networkConnection } from 'connection'
+import { connections } from 'connection'
 import { ActivationStatus, useActivationState } from 'connection/activate'
-import { isSupportedChain } from 'constants/chains'
-import { useEffect } from 'react'
 import styled from 'styled-components'
 import { ThemedText } from 'theme/components'
 import { flexColumnNoWrap } from 'theme/styles'
@@ -31,15 +28,7 @@ const OptionGrid = styled.div`
 `
 
 export default function WalletModal() {
-  const { connector, chainId } = useWeb3React()
-
   const { activationState } = useActivationState()
-  // Keep the network connector in sync with any active user connector to prevent chain-switching on wallet disconnection.
-  useEffect(() => {
-    if (chainId && isSupportedChain(chainId) && connector !== networkConnection.connector) {
-      networkConnection.connector.activate(chainId)
-    }
-  }, [chainId, connector])
 
   return (
     <Wrapper data-testid="wallet-modal">
