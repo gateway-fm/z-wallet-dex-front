@@ -651,7 +651,7 @@ function Swap({
             data-testid="swap-currency-button"
             onClick={() => {
               if (disableTokenInputs) return
-              onSwitchTokens(inputTokenHasTax, formattedAmounts[dependentField])
+              onSwitchTokens(outputTokenHasTax, formattedAmounts[dependentField])
             }}
             color={theme.neutral1}
           >
