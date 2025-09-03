@@ -65,7 +65,7 @@ export function useDebouncedTrade(
   const skipRoutingFetch = skipBothFetches || isDebouncing
 
   // Use Zephyr routing for Zephyr network
-  const zephyrRouting = useZephyrRoutingV2(tradeType, amountSpecified, otherCurrency)
+  const zephyrRouting = useZephyrRoutingV2(tradeType, amountSpecified, otherCurrency, account)
   const isZephyrNetwork = chainId === ZEPHYR_CHAIN_ID
 
   const routingApiTradeResult = useRoutingAPITrade(
@@ -92,19 +92,35 @@ export function useDebouncedTrade(
 
     // For now, return a synchronous result with fallback values
     try {
-      // Use proper 1:1 price accounting for decimals
-      const { sqrtPriceX96, tick, liquidity } = getZephyrPoolParams(
-        zephyrRouting.inputAmount.currency.wrapped,
-        zephyrRouting.outputAmount.currency.wrapped
-      )
-      const pool = new Pool(
-        zephyrRouting.inputAmount.currency.wrapped,
-        zephyrRouting.outputAmount.currency.wrapped,
-        FeeAmount.MEDIUM,
-        sqrtPriceX96,
-        liquidity,
-        tick
-      )
+      // Calculate actual price based on API routing results
+      const actualPrice = zephyrRouting.outputAmount.divide(zephyrRouting.inputAmount)
+      // Use actual price for pool parameters instead of 1:1
+      const inputToken = zephyrRouting.inputAmount.currency.wrapped
+      const outputToken = zephyrRouting.outputAmount.currency.wrapped
+
+      // Sort tokens for pool creation (Uniswap V3 requirement)
+      const [token0, token1] = inputToken.sortsBefore(outputToken)
+        ? [inputToken, outputToken]
+        : [outputToken, inputToken]
+
+      // Adjust price ratio based on token order
+      let priceRatio
+      if (inputToken.sortsBefore(outputToken)) {
+        // Input is token0, output is token1: price = output/input
+        priceRatio = {
+          numerator: actualPrice.asFraction.numerator,
+          denominator: actualPrice.asFraction.denominator,
+        }
+      } else {
+        // Input is token1, output is token0: price = input/output (inverted)
+        priceRatio = {
+          numerator: actualPrice.asFraction.denominator,
+          denominator: actualPrice.asFraction.numerator,
+        }
+      }
+
+      const { sqrtPriceX96, tick, liquidity } = getZephyrPoolParams(token0, token1, priceRatio)
+      const pool = new Pool(token0, token1, FeeAmount.MEDIUM, sqrtPriceX96, liquidity, tick)
 
       const v3Route = new V3Route([pool], zephyrRouting.inputAmount.currency, zephyrRouting.outputAmount.currency)
 

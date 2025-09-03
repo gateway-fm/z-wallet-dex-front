@@ -1,20 +1,20 @@
 export enum SwapMethod {
-  EXACT_INPUT = "exactInput",
-  EXACT_OUTPUT = "exactOutput",
-  EXACT_INPUT_SINGLE = "exactInputSingle",
-  EXACT_OUTPUT_SINGLE = "exactOutputSingle",
+  EXACT_INPUT = 'exactInput',
+  EXACT_OUTPUT = 'exactOutput',
+  EXACT_INPUT_SINGLE = 'exactInputSingle',
+  EXACT_OUTPUT_SINGLE = 'exactOutputSingle',
 }
 
 export enum QuoteMethod {
-  EXACT_INPUT = "quoteExactInput",
-  EXACT_OUTPUT = "quoteExactOutput",
-  EXACT_INPUT_SINGLE = "quoteExactInputSingle",
-  EXACT_OUTPUT_SINGLE = "quoteExactOutputSingle",
+  EXACT_INPUT = 'quoteExactInput',
+  EXACT_OUTPUT = 'quoteExactOutput',
+  EXACT_INPUT_SINGLE = 'quoteExactInputSingle',
+  EXACT_OUTPUT_SINGLE = 'quoteExactOutputSingle',
 }
 
 export enum SwapType {
-  EXACT_INPUT = "exactInput",
-  EXACT_OUTPUT = "exactOutput",
+  EXACT_INPUT = 'exactInput',
+  EXACT_OUTPUT = 'exactOutput',
 }
 
 export type SwapParams = {

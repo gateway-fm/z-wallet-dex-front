@@ -5,6 +5,7 @@
   "license": "GPL-3.0-or-later",
   "scripts": {
     "ajv": "node scripts/compile-ajv-validators.js",
+    "apigen": "node ./scripts/generate-api.mjs",
     "contracts:compile:abi": "typechain --target ethers-v5 --out-dir src/abis/types \"./src/abis/**/*.json\"",
     "contracts:compile:v3": "typechain --target ethers-v5 --out-dir src/types/v3 \"./node_modules/@uniswap/**/artifacts/contracts/**/*[!dbg].json\"",
     "contracts": "yarn contracts:compile:abi && yarn contracts:compile:v3",
@@ -118,6 +119,7 @@
     "concurrently": "^8.0.1",
     "cypress": "12.12.0",
     "cypress-hardhat": "^2.5.0",
+    "dotenv": "^17.2.1",
     "env-cmd": "^10.1.0",
     "eslint": "^7.11.0",
     "eslint-plugin-import": "^2.27",
@@ -142,6 +144,7 @@
     "serve": "^11.3.2",
     "source-map-explorer": "^2.5.3",
     "start-server-and-test": "^2.0.0",
+    "swagger-typescript-api": "^13.2.8",
     "terser": "^5.19.4",
     "terser-webpack-plugin": "^5.3.9",
     "ts-jest": "^29.1.1",
@@ -154,7 +157,7 @@
     "yarn-deduplicate": "^6.0.0"
   },
   "dependencies": {
-    "@apollo/client": "^3.7.2",
+
     "@coinbase/wallet-sdk": "^3.6.4",
     "@fontsource/ibm-plex-mono": "^4.5.1",
     "@fontsource/inter": "^4.5.1",
@@ -210,6 +213,7 @@
     "array.prototype.flat": "^1.2.4",
     "array.prototype.flatmap": "^1.2.4",
     "browserify-zlib": "^0.2.0",
+    "buffer": "^6.0.3",
     "cids": "^1.0.0",
     "clsx": "^1.1.1",
     "constants-browserify": "^1.0.0",
@@ -275,8 +279,7 @@
     "workbox-precaching": "^6.1.0",
     "workbox-routing": "^6.1.0",
     "xml2js": "^0.6.2",
-    "zustand": "^4.3.6",
-    "buffer": "^6.0.3"
+    "zustand": "^4.3.6"
   },
   "engines": {
     "node": ">=20.0.0",

@@ -1,57 +1,71 @@
 import { Token } from '@uniswap/sdk-core'
 import { useMemo } from 'react'
 
+import { NETWORK_CONFIG } from '../config/zephyr'
 import { ZEPHYR_CHAIN_ID } from '../constants/chains'
 import { useTokenSearch, useTrendingTokens } from './useTokenSearch'
 
-/**
- * Convert GraphQL token data to Token instance
- */
-function createTokenFromGraphQL(tokenData: {
-  id: string
+function isTokenPreferrable(newToken: Token, existingToken: Token): boolean {
+  const baseTokenAddress = NETWORK_CONFIG.BASE_TOKEN.ADDRESS.toLowerCase()
+  const isBaseToken =
+    newToken.address.toLowerCase() === baseTokenAddress &&
+    (newToken.symbol === NETWORK_CONFIG.BASE_TOKEN.SYMBOL || newToken.name === NETWORK_CONFIG.BASE_TOKEN.NAME)
+  const existingIsBaseToken =
+    existingToken.address.toLowerCase() === baseTokenAddress &&
+    (existingToken.symbol === NETWORK_CONFIG.BASE_TOKEN.SYMBOL || existingToken.name === NETWORK_CONFIG.BASE_TOKEN.NAME)
+
+  // Base token always wins
+  if (isBaseToken && !existingIsBaseToken) return true
+  if (!isBaseToken && existingIsBaseToken) return false
+  return false
+}
+
+function createTokenFromApiData(tokenData: {
+  address: string
   symbol: string
   name: string
-  decimals: string | number
+  decimals: number
 }): Token | null {
   try {
-    // Convert decimals to number if it's a string
-    const decimals = typeof tokenData.decimals === 'string' ? parseInt(tokenData.decimals, 10) : tokenData.decimals
-
-    return new Token(ZEPHYR_CHAIN_ID, tokenData.id, decimals, tokenData.symbol, tokenData.name)
+    return new Token(ZEPHYR_CHAIN_ID, tokenData.address, tokenData.decimals, tokenData.symbol, tokenData.name)
   } catch (error) {
-    console.warn('Failed to create token from GraphQL data:', tokenData, error)
+    console.warn('Failed to create token from API data:', tokenData, error)
     return null
   }
 }
 
-/**
- * Hook that uses GraphQL tokens for Zephyr network - V2 version
- */
 export function useZephyrTokens(): { [address: string]: Token } {
-  const { tokens: graphqlTokens } = useTrendingTokens(20)
+  const { tokens: apiTokens, error } = useTrendingTokens(100)
 
   return useMemo(() => {
     const tokens: { [address: string]: Token } = {}
 
-    if (graphqlTokens) {
-      for (const tokenData of graphqlTokens) {
-        const token = createTokenFromGraphQL(tokenData)
+    if (error) console.error('Error loading tokens:', error)
+
+    if (apiTokens) {
+      for (const tokenData of apiTokens) {
+        const token = createTokenFromApiData(tokenData)
         if (token) {
+          // For trending tokens, include all tokens to show more options
           const address = token.address.toLowerCase()
-          tokens[address] = token
+          if (tokens[address]) {
+            const existingToken = tokens[address]
+            if (isTokenPreferrable(token, existingToken)) {
+              tokens[address] = token
+            }
+          } else {
+            tokens[address] = token
+          }
         }
       }
     }
 
     return tokens
-  }, [graphqlTokens])
+  }, [apiTokens, error])
 }
 
-/**
- * Hook for searching tokens with GraphQL integration - V2 version
- */
 export function useZephyrTokenSearch(searchQuery: string, chainId: number | undefined) {
-  const { tokens: searchResults, loading } = useTokenSearch(searchQuery, 20)
+  const { tokens: searchResults, loading } = useTokenSearch(searchQuery, 100)
 
   const shouldSkip = chainId !== ZEPHYR_CHAIN_ID || !searchQuery || searchQuery.length < 2
 
@@ -60,8 +74,9 @@ export function useZephyrTokenSearch(searchQuery: string, chainId: number | unde
 
     if (!shouldSkip && searchResults) {
       for (const tokenData of searchResults) {
-        const token = createTokenFromGraphQL(tokenData)
+        const token = createTokenFromApiData(tokenData)
         if (token) {
+          // For search results, include all tokens to show complete search results
           const address = token.address.toLowerCase()
           tokens[address] = token
         }

@@ -1,4 +1,3 @@
-import { MockedProvider } from '@apollo/client/testing'
 import { i18n } from '@lingui/core'
 import { I18nProvider } from '@lingui/react'
 import { queries } from '@testing-library/dom'
@@ -35,11 +34,9 @@ const WithProviders = ({ children }: { children?: ReactNode }) => {
              * Web3Provider is mocked through setupTests.ts
              * To test behavior that depends on Web3Provider, use jest.unmock('@web3-react/core')
              */}
-            <MockedProvider>
-              <BlockNumberProvider>
-                <ThemeProvider>{children}</ThemeProvider>
-              </BlockNumberProvider>
-            </MockedProvider>
+            <BlockNumberProvider>
+              <ThemeProvider>{children}</ThemeProvider>
+            </BlockNumberProvider>
           </BrowserRouter>
         </QueryClientProvider>
       </Provider>

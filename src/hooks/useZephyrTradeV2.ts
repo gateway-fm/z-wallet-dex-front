@@ -15,7 +15,7 @@ export function useZephyrTradeV2(
   tradeType: TradeType,
   amountSpecified?: CurrencyAmount<Currency>,
   otherCurrency?: Currency,
-  allowedSlippage: number = 1
+  allowedSlippage = 1
 ): {
   inputAmount?: CurrencyAmount<Currency>
   outputAmount?: CurrencyAmount<Currency>

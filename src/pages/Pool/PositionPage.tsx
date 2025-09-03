@@ -17,7 +17,6 @@ import Toggle from 'components/Toggle'
 import TransactionConfirmationModal, { ConfirmationModalContent } from 'components/TransactionConfirmationModal'
 import { CHAIN_IDS_TO_NAMES, isSupportedChain } from 'constants/chains'
 import { ZEPHYR_CHAIN_ID } from 'constants/chains'
-import { isGqlSupportedChain } from 'graphql/data/util'
 import { useToken } from 'hooks/Tokens'
 import { useV3NFTPositionManagerContract } from 'hooks/useContract'
 import useIsTickAtLimit from 'hooks/useIsTickAtLimit'
@@ -226,7 +225,7 @@ function LinkedCurrency({ chainId, currency }: { chainId?: number; currency?: Cu
   const address = (currency as Token)?.address
 
   if (typeof chainId === 'number' && address) {
-    const Link = isGqlSupportedChain(chainId) ? TokenLink : ExternalTokenLink
+    const Link = isSupportedChain(chainId) ? TokenLink : ExternalTokenLink
     return (
       <Link chainId={chainId as any} address={address}>
         <RowFixed>
