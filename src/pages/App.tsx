@@ -1,7 +1,7 @@
 import ErrorBoundary from 'components/ErrorBoundary'
 import Loader from 'components/Icons/LoadingSpinner'
 import { IpfsSubpathRedirect } from 'components/IpfsSubpathRedirect'
-import NavBar, { PageTabs } from 'components/NavBar'
+import NavBar from 'components/NavBar'
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
@@ -129,9 +129,6 @@ export default function App() {
           </Routes>
         </Suspense>
       </BodyWrapper>
-      <MobileBottomBar>
-        <PageTabs />
-      </MobileBottomBar>
     </ErrorBoundary>
   )
 }
