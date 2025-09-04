@@ -52,6 +52,10 @@ function decodeCalldata(calldata: string): {
       return convertValue(arg)
     })
 
+    console.debug('Calling contract')
+    console.debug('  Method signature:', methodSignature)
+    console.debug('  Processed params:', processedParams)
+
     return {
       method: methodSignature,
       params: processedParams,
@@ -82,7 +86,9 @@ export async function swapWithZWallet(
     params,
   }
 
+  console.debug('Z-Wallet contract call:', contractCall)
   const response = await zWalletClient.callContract(contractCall)
+  console.debug('Z-Wallet response:', response)
 
   if (!response || !response.data) {
     const errorMsg = (response && response.error) || 'Z Wallet swap failed'
