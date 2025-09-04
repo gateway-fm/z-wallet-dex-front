@@ -1,5 +1,6 @@
 import { t } from '@lingui/macro'
 
+import { ZWalletUserRejectedError } from '../hooks/useZWalletSwap'
 import { UserRejectedRequestError } from './errors'
 
 function getReason(error: any): string | undefined {
@@ -20,7 +21,7 @@ export function didUserReject(error: any): boolean {
     // For Rainbow :
     (reason?.match(/request/i) && reason?.match(/reject/i)) ||
     // For Frame:
-    reason?.match(/declined/i) ||
+    reason?.match(/declined?/i) ||
     // For SafePal:
     reason?.match(/cancell?ed by user/i) ||
     // For Trust:
@@ -29,7 +30,12 @@ export function didUserReject(error: any): boolean {
     reason?.match(/user denied/i) ||
     // For Fireblocks
     reason?.match(/user rejected/i) ||
-    error instanceof UserRejectedRequestError
+    // For Z-Wallet specific cancellation:
+    reason?.match(/request_cancelled/i) ||
+    reason?.match(/request was cancelled by the user/i) ||
+    error instanceof UserRejectedRequestError ||
+    // For Z-Wallet:
+    error instanceof ZWalletUserRejectedError
   ) {
     return true
   }

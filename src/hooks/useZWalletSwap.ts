@@ -65,6 +65,34 @@ function decodeCalldata(calldata: string): {
   }
 }
 
+// Helper function to check if error message indicates user cancellation
+export function isUserCancellation(message: string): boolean {
+  const lowerMsg = message.toLowerCase()
+  return lowerMsg.includes('cancelled') || lowerMsg.includes('rejected') || lowerMsg.includes('decline')
+}
+
+// Custom error classes for Z-Wallet specific errors
+export class ZWalletUserRejectedError extends Error {
+  constructor(message?: string) {
+    super(message || 'User cancelled the transaction in Z-Wallet')
+    this.name = 'ZWalletUserRejectedError'
+  }
+}
+
+export class ZWalletConnectionError extends Error {
+  constructor(message?: string) {
+    super(message || 'Z-Wallet connection error')
+    this.name = 'ZWalletConnectionError'
+  }
+}
+
+export class ZWalletTransactionError extends Error {
+  constructor(message?: string) {
+    super(message || 'Z-Wallet transaction error')
+    this.name = 'ZWalletTransactionError'
+  }
+}
+
 export async function swapWithZWallet(
   chainId: number,
   account: string,
@@ -74,7 +102,7 @@ export async function swapWithZWallet(
   dispatch?: any
 ): Promise<any> {
   if (!zWalletClient.isConnected) {
-    throw new Error('Z Wallet is not connected')
+    throw new ZWalletConnectionError('Z Wallet is not connected')
   }
 
   const { method, params } = decodeCalldata(transaction.data)
@@ -87,12 +115,45 @@ export async function swapWithZWallet(
   }
 
   console.debug('Z-Wallet contract call:', contractCall)
-  const response = await zWalletClient.callContract(contractCall)
-  console.debug('Z-Wallet response:', response)
+
+  let response: any
+  try {
+    // Create a timeout promise that rejects after 10 seconds
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => {
+        reject(new ZWalletUserRejectedError('Transaction timeout - likely user cancelled or closed Z-Wallet'))
+      }, 10000) // 10 seconds timeout
+    })
+
+    // Race between the SDK call and timeout
+    response = await Promise.race([zWalletClient.callContract(contractCall), timeoutPromise])
+
+    console.debug('Z-Wallet response:', response)
+
+    // Special case: if response is null/undefined, it might be user cancellation
+    if (response === null || response === undefined) {
+      throw new ZWalletUserRejectedError('User cancelled transaction - SDK returned empty response')
+    }
+  } catch (error) {
+    // Check if user cancelled the transaction
+    if (error && typeof error === 'object' && 'message' in error) {
+      const errorMessage = (error as any).message || ''
+      if (isUserCancellation(errorMessage)) {
+        throw new ZWalletUserRejectedError()
+      }
+    }
+    throw new ZWalletTransactionError(
+      `Z-Wallet transaction failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+    )
+  }
 
   if (!response || !response.data) {
     const errorMsg = (response && response.error) || 'Z Wallet swap failed'
-    throw new Error(errorMsg)
+    // Check if this is a user cancellation
+    if (typeof errorMsg === 'string' && isUserCancellation(errorMsg)) {
+      throw new ZWalletUserRejectedError(errorMsg)
+    }
+    throw new ZWalletTransactionError(errorMsg)
   }
 
   // NOTE: workaround for Z-Wallet, if we got a transaction hash

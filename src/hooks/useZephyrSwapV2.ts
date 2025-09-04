@@ -18,7 +18,13 @@ import { CONTRACTS_CONFIG } from '../config/zephyr'
 import { ZEPHYR_CHAIN_ID } from '../constants/chains'
 import { useTokenBalance } from '../lib/hooks/useCurrencyBalance'
 import { useZephyrTokenApproval } from './useZephyrApproval'
-import { swapWithZWallet } from './useZWalletSwap'
+import {
+  isUserCancellation,
+  swapWithZWallet,
+  ZWalletConnectionError,
+  ZWalletTransactionError,
+  ZWalletUserRejectedError,
+} from './useZWalletSwap'
 
 const Z_WALLET_APPROVAL_WAIT_TIME = 5000
 
@@ -94,7 +100,13 @@ export function useZephyrSwapV2(
         try {
           await approve()
         } catch (approvalError) {
-          throw new Error(
+          if (approvalError && typeof approvalError === 'object' && 'message' in approvalError) {
+            const errorMessage = (approvalError as any).message || ''
+            if (isUserCancellation(errorMessage)) {
+              throw new ZWalletUserRejectedError('User cancelled approval in Z-Wallet')
+            }
+          }
+          throw new ZWalletTransactionError(
             `Approval failed: ${approvalError instanceof Error ? approvalError.message : 'Unknown error'}`
           )
         }
@@ -139,7 +151,20 @@ export function useZephyrSwapV2(
               }),
         }
 
-        swapResult = await swapWithZWallet(chainId, account || '', transaction, undefined, swapInfo, dispatch)
+        try {
+          swapResult = await swapWithZWallet(chainId, account || '', transaction, undefined, swapInfo, dispatch)
+        } catch (error) {
+          // Re-throw Z-Wallet specific errors to be handled by the UI
+          if (
+            error instanceof ZWalletUserRejectedError ||
+            error instanceof ZWalletConnectionError ||
+            error instanceof ZWalletTransactionError
+          ) {
+            throw error
+          }
+          // For any other errors, wrap them in a generic Z-Wallet transaction error
+          throw new ZWalletTransactionError(error instanceof Error ? error.message : 'Unknown Z-Wallet error')
+        }
       } else {
         if (!provider) {
           throw new Error('Provider not available for standard wallet')

@@ -31,6 +31,7 @@ const BodyWrapper = styled.div`
   }
 `
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const MobileBottomBar = styled.div`
   z-index: ${Z_INDEX.sticky};
   position: fixed;

@@ -14,6 +14,9 @@ export enum PendingModalError {
   PERMIT_ERROR,
   CONFIRMATION_ERROR,
   WRAP_ERROR,
+  ZWALLET_USER_REJECTED,
+  ZWALLET_CONNECTION_ERROR,
+  ZWALLET_TRANSACTION_ERROR,
 }
 
 interface ErrorModalContentProps {
@@ -49,6 +52,21 @@ function getErrorContent(errorType: PendingModalError) {
     case PendingModalError.WRAP_ERROR:
       return {
         title: <Trans>Wrap failed</Trans>,
+      }
+    case PendingModalError.ZWALLET_USER_REJECTED:
+      return {
+        title: <Trans>Transaction cancelled</Trans>,
+        label: <Trans>You cancelled the transaction or closed wallet</Trans>,
+      }
+    case PendingModalError.ZWALLET_CONNECTION_ERROR:
+      return {
+        title: <Trans>Connection failed</Trans>,
+        label: <Trans>Please check your wallet connection and try again</Trans>,
+      }
+    case PendingModalError.ZWALLET_TRANSACTION_ERROR:
+      return {
+        title: <Trans>Transaction failed</Trans>,
+        label: <Trans>Transaction execution failed</Trans>,
       }
   }
 }
