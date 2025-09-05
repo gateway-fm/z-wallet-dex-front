@@ -16,6 +16,8 @@ import { deserializeToken, useUserAddedTokens } from '../state/user/hooks'
 import { useUnsupportedTokenList } from './../state/lists/hooks'
 import { getTokenMetadata, useZephyrTokens } from './useZephyrTokensV2'
 
+const createdTokensCache: { [address: string]: Token } = {}
+
 type Maybe<T> = T | null | undefined
 
 // reduce token map into standard address <-> Token mapping, optionally include user added tokens
@@ -248,16 +250,27 @@ export function useCurrency(currencyId: string | null | undefined, chainId?: Cha
 
     // If we have a valid address, create the token anyway
     if (currencyId.startsWith('0x') && currencyId.length === 42) {
+      const lowerAddress = currencyId.toLowerCase()
+
+      // Return cached token if exists
+      if (createdTokensCache[lowerAddress]) {
+        return createdTokensCache[lowerAddress]
+      }
+
       const metadata = getTokenMetadata(currencyId)
 
       try {
-        return new Token(
+        const token = new Token(
           currentChainId,
           currencyId,
           metadata?.decimals || 18,
           metadata?.symbol || 'TOKEN',
           metadata?.name || 'Token'
         )
+
+        // Cache the created token
+        createdTokensCache[lowerAddress] = token
+        return token
       } catch (error) {
         return undefined
       }

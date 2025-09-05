@@ -50,7 +50,7 @@ function createTokenFromApiData(tokenData: {
 }
 
 export function useZephyrTokens(): { [address: string]: Token } {
-  const { tokens: apiTokens, error } = useTrendingTokens(100)
+  const { tokens: apiTokens } = useTrendingTokens(100)
 
   return useMemo(() => {
     const tokens: { [address: string]: Token } = { ...globalTokenCache }
@@ -60,22 +60,15 @@ export function useZephyrTokens(): { [address: string]: Token } {
         const token = createTokenFromApiData(tokenData)
         if (token) {
           const address = token.address.toLowerCase()
-          if (tokens[address]) {
-            const existingToken = tokens[address]
-            if (isTokenPreferrable(token, existingToken)) {
-              tokens[address] = token
-              globalTokenCache[address] = token
-            }
-          } else {
+          if (!tokens[address] || isTokenPreferrable(token, tokens[address])) {
             tokens[address] = token
-            globalTokenCache[address] = token
           }
         }
       }
     }
 
     return tokens
-  }, [apiTokens, error])
+  }, [apiTokens])
 }
 
 export function useZephyrTokenSearch(searchQuery: string, chainId: number | undefined) {
@@ -92,7 +85,6 @@ export function useZephyrTokenSearch(searchQuery: string, chainId: number | unde
         if (token) {
           const address = token.address.toLowerCase()
           tokens[address] = token
-          globalTokenCache[address] = token
         }
       }
     }
