@@ -5,6 +5,12 @@ import { NETWORK_CONFIG } from '../config/zephyr'
 import { ZEPHYR_CHAIN_ID } from '../constants/chains'
 import { useTokenSearch, useTrendingTokens } from './useTokenSearch'
 
+// Global cache for all discovered tokens
+const globalTokenCache: { [address: string]: Token } = {}
+
+// Global cache for token metadata (symbol, name)
+const globalTokenMetadata: { [address: string]: { symbol: string; name: string; decimals: number } } = {}
+
 function isTokenPreferrable(newToken: Token, existingToken: Token): boolean {
   const baseTokenAddress = NETWORK_CONFIG.BASE_TOKEN.ADDRESS.toLowerCase()
   const isBaseToken =
@@ -25,11 +31,20 @@ function createTokenFromApiData(tokenData: {
   symbol: string
   name: string
   decimals: number
+  volume: string
+  price_in_base: string
 }): Token | null {
   try {
-    return new Token(ZEPHYR_CHAIN_ID, tokenData.address, tokenData.decimals, tokenData.symbol, tokenData.name)
+    const token = new Token(ZEPHYR_CHAIN_ID, tokenData.address, tokenData.decimals, tokenData.symbol, tokenData.name)
+    const address = token.address.toLowerCase()
+    globalTokenCache[address] = token
+    globalTokenMetadata[address] = {
+      symbol: tokenData.symbol,
+      name: tokenData.name,
+      decimals: tokenData.decimals,
+    }
+    return token
   } catch (error) {
-    console.warn('Failed to create token from API data:', tokenData, error)
     return null
   }
 }
@@ -38,23 +53,22 @@ export function useZephyrTokens(): { [address: string]: Token } {
   const { tokens: apiTokens, error } = useTrendingTokens(100)
 
   return useMemo(() => {
-    const tokens: { [address: string]: Token } = {}
-
-    if (error) console.error('Error loading tokens:', error)
+    const tokens: { [address: string]: Token } = { ...globalTokenCache }
 
     if (apiTokens) {
       for (const tokenData of apiTokens) {
         const token = createTokenFromApiData(tokenData)
         if (token) {
-          // For trending tokens, include all tokens to show more options
           const address = token.address.toLowerCase()
           if (tokens[address]) {
             const existingToken = tokens[address]
             if (isTokenPreferrable(token, existingToken)) {
               tokens[address] = token
+              globalTokenCache[address] = token
             }
           } else {
             tokens[address] = token
+            globalTokenCache[address] = token
           }
         }
       }
@@ -76,13 +90,19 @@ export function useZephyrTokenSearch(searchQuery: string, chainId: number | unde
       for (const tokenData of searchResults) {
         const token = createTokenFromApiData(tokenData)
         if (token) {
-          // For search results, include all tokens to show complete search results
           const address = token.address.toLowerCase()
           tokens[address] = token
+          globalTokenCache[address] = token
         }
       }
     }
 
     return { tokens, loading: loading && !shouldSkip }
   }, [searchResults, loading, shouldSkip])
+}
+
+// eslint-disable-next-line import/no-unused-modules
+export function getTokenMetadata(address: string): { symbol: string; name: string; decimals: number } | null {
+  const lowerAddress = address.toLowerCase()
+  return globalTokenMetadata[lowerAddress] || null
 }

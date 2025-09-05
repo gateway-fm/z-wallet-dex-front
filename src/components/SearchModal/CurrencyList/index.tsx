@@ -97,7 +97,8 @@ export function CurrencyRow({
   const key = currencyKey(currency)
 
   const handleClick = () => {
-    return isSelected ? null : onSelect(false)
+    if (isSelected) return
+    onSelect(false)
   }
 
   return (

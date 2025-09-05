@@ -29,8 +29,8 @@ export default memo(function CurrencySearchModal({
   onlyShowCurrenciesWithBalance = false,
 }: CurrencySearchModalProps) {
   const handleCurrencySelect = useCallback(
-    (currency: Currency) => {
-      onCurrencySelect(currency)
+    (currency: Currency, hasWarning?: boolean) => {
+      onCurrencySelect(currency, hasWarning)
       onDismiss()
     },
     [onDismiss, onCurrencySelect]
