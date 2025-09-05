@@ -13,6 +13,7 @@ describe('swap reducer', () => {
       typedValue: '',
       independentField: Field.INPUT,
       recipient: null,
+      currenciesSwapped: false,
     })
   })
 
@@ -31,6 +32,7 @@ describe('swap reducer', () => {
         typedValue: '',
         independentField: Field.INPUT,
         recipient: null,
+        currenciesSwapped: false,
       })
     })
   })

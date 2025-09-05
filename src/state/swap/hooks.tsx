@@ -283,6 +283,7 @@ export function queryParametersToSwapState(parsedQs: ParsedQs, chainId?: number)
     typedValue,
     independentField,
     recipient,
+    currenciesSwapped: false,
   }
 }
 
