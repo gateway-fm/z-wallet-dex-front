@@ -58,7 +58,7 @@ const HeaderWrapper = styled.div<{ transparent?: boolean; scrollY: number }>`
   background-color: ${({ theme, transparent }) => !transparent && theme.surface1};
   border-bottom: ${({ theme, transparent }) => !transparent && `1px solid ${theme.surface3}`};
   width: 100%;
-  max-width: 1400px;
+  max-width: 1600px;
   justify-content: space-between;
   position: fixed;
   top: 0;
