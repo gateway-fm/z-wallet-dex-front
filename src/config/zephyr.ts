@@ -118,6 +118,7 @@ export const EXTERNAL_SERVICES_CONFIG = {
   WALLET_CONNECT_PROJECT_ID: process.env.REACT_APP_WALLET_CONNECT_PROJECT_ID || '',
   Z_WALLET_CLIENT_URL: process.env.REACT_APP_Z_WALLET_CLIENT_URL || 'https://z-wallet-dev.zero.tech',
   Z_WALLET_PERSISTENCE_TTL: Number(process.env.REACT_APP_Z_WALLET_PERSISTENCE_TTL) || 24 * 60 * 60 * 1000, // 24 hours
+  Z_WALLET_TIMEOUT: Number(process.env.REACT_APP_Z_WALLET_TIMEOUT) || 60000, // 60 seconds
 } as const
 
 export const TOKEN_FILTER_CONFIG = {

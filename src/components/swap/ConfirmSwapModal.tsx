@@ -117,6 +117,7 @@ function useConfirmModalState({
   const wrapConfirmed = useIsTransactionConfirmed(wrapTxHash)
   const prevWrapConfirmed = usePrevious(wrapConfirmed)
   const catchUserReject = async (e: any, errorType: PendingModalError) => {
+    console.warn('Transaction cancelled', e, errorType)
     setConfirmModalState(ConfirmModalState.REVIEWING)
     if (e instanceof ZWalletUserRejectedError) {
       setApprovalError(PendingModalError.ZWALLET_USER_REJECTED)
