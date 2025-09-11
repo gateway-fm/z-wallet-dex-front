@@ -1,73 +1,113 @@
 /* eslint-disable import/no-unused-modules */
 
+import { runtimeConfig } from '../utils/runtime-config'
+
 export const NETWORK_CONFIG = {
-  CHAIN_ID: Number(process.env.REACT_APP_CUSTOM_NETWORK_CHAIN_ID) || 1417429182,
-  NAME: 'Zephyr',
+  get CHAIN_ID() {
+    return runtimeConfig.getChainId()
+  },
+  get NAME() {
+    return runtimeConfig.getNetworkName()
+  },
   RPC: {
-    PRIMARY: process.env.REACT_APP_CUSTOM_NETWORK_RPC_URL || 'https://zephyr-rpc.eu-north-2.gateway.fm',
-    FALLBACK: process.env.REACT_APP_ZEPHYR_RPC_FALLBACK || '',
-    TIMEOUT: Number(process.env.REACT_APP_RPC_TIMEOUT) || 10000,
+    get PRIMARY() {
+      return runtimeConfig.getRpcUrl()
+    },
+    get FALLBACK() {
+      return runtimeConfig.getRpcFallback()
+    },
+    get TIMEOUT() {
+      return runtimeConfig.getRpcTimeout()
+    },
   },
   EXPLORER: {
-    URL: process.env.REACT_APP_CUSTOM_NETWORK_EXPLORER_URL || 'https://zephyr-blockscout.eu-north-2.gateway.fm/',
-    API: process.env.REACT_APP_ZEPHYR_EXPLORER_API || 'https://zephyr-blockscout.eu-north-2.gateway.fm/api',
+    get URL() {
+      return runtimeConfig.getExplorerUrl()
+    },
+    get API() {
+      return runtimeConfig.getExplorerApi()
+    },
   },
-  BRIDGE_URL: process.env.REACT_APP_CUSTOM_NETWORK_BRIDGE_URL || 'https://zephyr-bridge.eu-north-2.gateway.fm',
-  FAUCET_URL: process.env.REACT_APP_CUSTOM_NETWORK_FAUCET_URL || 'https://zephyr-faucet.eu-north-2.gateway.fm',
+  get BRIDGE_URL() {
+    return runtimeConfig.getBridgeUrl()
+  },
+  get FAUCET_URL() {
+    return runtimeConfig.getFaucetUrl()
+  },
   BASE_TOKEN: {
-    ADDRESS: process.env.REACT_APP_ZEPHYR_BASE_TOKEN_ADDRESS || '0xdf4bdac4ba259127d1c53c07cdd005ad54ccafb0',
-    SYMBOL: process.env.REACT_APP_ZEPHYR_BASE_TOKEN_SYMBOL || 'USDC',
-    NAME: process.env.REACT_APP_ZEPHYR_BASE_TOKEN_NAME || 'USD Coin',
+    get ADDRESS() {
+      return runtimeConfig.getBaseTokenAddress()
+    },
+    get SYMBOL() {
+      return runtimeConfig.getBaseTokenSymbol()
+    },
+    get NAME() {
+      return runtimeConfig.getBaseTokenName()
+    },
   },
 } as const
 
 export const ZEPHYR_CHAIN_ID = NETWORK_CONFIG.CHAIN_ID
 export const ENABLE_ZEPHYR_ORDER_PROTOCOL = false
 
-const hasZephyrContracts = !!(
-  process.env.REACT_APP_ZEPHYR_LIQUIDITY_MANAGER_ADDRESS &&
-  process.env.REACT_APP_ZEPHYR_EXCHANGER_ADDRESS &&
-  process.env.REACT_APP_ZEPHYR_PAIR_FACTORY_ADDRESS
-)
+const hasZephyrContracts = () =>
+  !!(
+    runtimeConfig.getLiquidityManagerAddress() &&
+    runtimeConfig.getExchangerAddress() &&
+    runtimeConfig.getPairFactoryAddress()
+  )
 
-export const USE_ZEPHYR_ORDER_PROTOCOL = ENABLE_ZEPHYR_ORDER_PROTOCOL && hasZephyrContracts
+export const USE_ZEPHYR_ORDER_PROTOCOL = ENABLE_ZEPHYR_ORDER_PROTOCOL && hasZephyrContracts()
 
 export const CONTRACTS_CONFIG = {
-  V3_CORE_FACTORY:
-    process.env.REACT_APP_CUSTOM_NETWORK_V3_FACTORY_ADDRESS || '0xEB4F50E1879e9912Ff8FD73B20bCAd7F195c5EBD',
-  POSITION_MANAGER:
-    process.env.REACT_APP_CUSTOM_NETWORK_POSITION_MANAGER_ADDRESS || '0x684fB3F611fd294f305b3F58ba3be72cFa65b0b2',
-  SWAP_ROUTER_02:
-    process.env.REACT_APP_CUSTOM_NETWORK_SWAP_ROUTER_ADDRESS || '0x881f1D82139635c9190976F390305764bdBdEF3D',
-  QUOTER_V2: process.env.REACT_APP_CUSTOM_NETWORK_QUOTER_ADDRESS || '0x49FC0204705C6E1F1A9458b78C3c9DB2c5Fe2717',
-  MULTICALL2: process.env.REACT_APP_CUSTOM_NETWORK_MULTICALL_ADDRESS || '0xcA11bde05977b3631167028862bE2a173976CA11',
-  TICK_LENS: process.env.REACT_APP_CUSTOM_NETWORK_TICK_LENS_ADDRESS || '0x9FdcfF6c3c58eFD2a3EA23E01EE02c51d31f13Db',
-  V3_MIGRATOR: process.env.REACT_APP_CUSTOM_NETWORK_V3_MIGRATOR_ADDRESS || '0xdACEF64026d35EB778A2da9406aE9BE59737FEFb',
-  DELEGATION: process.env.REACT_APP_CUSTOM_NETWORK_DELEGATION_ADDRESS || '0x227380efd3392EC33cf148Ade5e0a89D33121814',
-  LIQUIDITY_MANAGER:
-    process.env.REACT_APP_ZEPHYR_LIQUIDITY_MANAGER_ADDRESS ||
-    process.env.REACT_APP_CUSTOM_NETWORK_POSITION_MANAGER_ADDRESS ||
-    '0x684fB3F611fd294f305b3F58ba3be72cFa65b0b2',
-  EXCHANGER:
-    process.env.REACT_APP_ZEPHYR_EXCHANGER_ADDRESS ||
-    process.env.REACT_APP_CUSTOM_NETWORK_SWAP_ROUTER_ADDRESS ||
-    '0x881f1D82139635c9190976F390305764bdBdEF3D',
-  PAIR_FACTORY:
-    process.env.REACT_APP_ZEPHYR_PAIR_FACTORY_ADDRESS ||
-    process.env.REACT_APP_CUSTOM_NETWORK_V3_FACTORY_ADDRESS ||
-    '0xEB4F50E1879e9912Ff8FD73B20bCAd7F195c5EBD',
+  get V3_CORE_FACTORY() {
+    return runtimeConfig.getV3FactoryAddress()
+  },
+  get POSITION_MANAGER() {
+    return runtimeConfig.getPositionManagerAddress()
+  },
+  get SWAP_ROUTER_02() {
+    return runtimeConfig.getSwapRouterAddress()
+  },
+  get QUOTER_V2() {
+    return runtimeConfig.getQuoterAddress()
+  },
+  get MULTICALL2() {
+    return runtimeConfig.getMulticallAddress()
+  },
+  get TICK_LENS() {
+    return runtimeConfig.getTickLensAddress()
+  },
+  get V3_MIGRATOR() {
+    return runtimeConfig.getV3MigratorAddress()
+  },
+  get DELEGATION() {
+    return runtimeConfig.getDelegationAddress()
+  },
+  get LIQUIDITY_MANAGER() {
+    return runtimeConfig.getLiquidityManagerAddress() || runtimeConfig.getPositionManagerAddress()
+  },
+  get EXCHANGER() {
+    return runtimeConfig.getExchangerAddress() || runtimeConfig.getSwapRouterAddress()
+  },
+  get PAIR_FACTORY() {
+    return runtimeConfig.getPairFactoryAddress() || runtimeConfig.getV3FactoryAddress()
+  },
 } as const
 
 export const TOKENS_CONFIG = {
   WRAPPED_NATIVE: {
-    ADDRESS:
-      process.env.REACT_APP_CUSTOM_NETWORK_WRAPPED_NATIVE_ADDRESS || '0x08a19Ce4b93E957aDD175F61e022b81894e66720',
+    get ADDRESS() {
+      return runtimeConfig.getWrappedNativeAddress()
+    },
     SYMBOL: 'WZERO',
     NAME: 'Wrapped Zero',
     DECIMALS: 18,
   },
   USDC: {
-    ADDRESS: process.env.REACT_APP_CUSTOM_NETWORK_USDC_ADDRESS || '0xDF4BDAC4Ba259127D1c53C07cdd005AD54CCAfb0',
+    get ADDRESS() {
+      return runtimeConfig.getUsdcAddress()
+    },
     SYMBOL: 'USDC',
     NAME: 'USD Coin',
     DECIMALS: 6,
@@ -75,28 +115,57 @@ export const TOKENS_CONFIG = {
 } as const
 
 export const FEATURES_CONFIG = {
-  ANALYTICS_ENABLED: process.env.REACT_APP_ANALYTICS_ENABLED === 'true',
-  GRAPHQL_ENABLED: process.env.REACT_APP_ENABLE_GRAPHQL !== 'false', // Default enabled
-  PRIVACY_MODE: process.env.REACT_APP_PRIVACY_MODE === 'true',
-  DEBUG_MODE: process.env.REACT_APP_DEBUG_MODE === 'true',
-  CACHE_ENABLED: process.env.REACT_APP_CACHE_ENABLED !== 'false',
-  IS_STAGING: process.env.REACT_APP_STAGING === 'true',
-  IS_UNISWAP_INTERFACE: process.env.REACT_APP_IS_UNISWAP_INTERFACE === 'true',
-  SKIP_CSP: process.env.REACT_APP_SKIP_CSP === 'true',
+  get ANALYTICS_ENABLED() {
+    return runtimeConfig.isAnalyticsEnabled()
+  },
+  get GRAPHQL_ENABLED() {
+    return runtimeConfig.isGraphqlEnabled()
+  },
+  get PRIVACY_MODE() {
+    return runtimeConfig.isPrivacyMode()
+  },
+  get DEBUG_MODE() {
+    return runtimeConfig.isDebugMode()
+  },
+  get CACHE_ENABLED() {
+    return runtimeConfig.isCacheEnabled()
+  },
+  get IS_STAGING() {
+    return runtimeConfig.isStaging()
+  },
+  get IS_UNISWAP_INTERFACE() {
+    return runtimeConfig.isUniswapInterface()
+  },
+  get SKIP_CSP() {
+    return runtimeConfig.shouldSkipCsp()
+  },
 } as const
 
 export const EXTERNAL_SERVICES_CONFIG = {
-  INFURA_KEY: process.env.REACT_APP_INFURA_KEY || '',
-  ALCHEMY_API_KEY: process.env.REACT_APP_ALCHEMY_API_KEY || '',
-  WALLET_CONNECT_PROJECT_ID: process.env.REACT_APP_WALLET_CONNECT_PROJECT_ID || '',
-  Z_WALLET_CLIENT_URL: process.env.REACT_APP_Z_WALLET_CLIENT_URL || 'https://z-wallet-dev.zero.tech',
-  Z_WALLET_PERSISTENCE_TTL: Number(process.env.REACT_APP_Z_WALLET_PERSISTENCE_TTL) || 24 * 60 * 60 * 1000, // 24 hours
-  Z_WALLET_TIMEOUT: Number(process.env.REACT_APP_Z_WALLET_TIMEOUT) || 60000, // 60 seconds
+  get INFURA_KEY() {
+    return runtimeConfig.getInfuraKey()
+  },
+  get ALCHEMY_API_KEY() {
+    return runtimeConfig.getAlchemyApiKey()
+  },
+  get WALLET_CONNECT_PROJECT_ID() {
+    return runtimeConfig.getWalletConnectProjectId()
+  },
+  get Z_WALLET_CLIENT_URL() {
+    return runtimeConfig.getZWalletClientUrl()
+  },
+  get Z_WALLET_PERSISTENCE_TTL() {
+    return runtimeConfig.getZWalletPersistenceTtl()
+  },
+  get Z_WALLET_TIMEOUT() {
+    return runtimeConfig.getZWalletTimeout()
+  },
 } as const
 
 export const TOKEN_FILTER_CONFIG = {
-  // Quick access tokens (comma-separated symbols, default: empty - use top pools logic)
-  QUICK_ACCESS_TOKENS: process.env.REACT_APP_QUICK_ACCESS_TOKENS?.split(',').map((s) => s.trim()) || ['USDC', 'TEST'],
+  get QUICK_ACCESS_TOKENS() {
+    return runtimeConfig.getQuickAccessTokens()
+  },
 } as const
 
 export type TokenFilterConfig = typeof TOKEN_FILTER_CONFIG
@@ -105,13 +174,15 @@ export type TokenFilterConfig = typeof TOKEN_FILTER_CONFIG
  * Utility function to check if a token should be included in quick access
  */
 export function shouldIncludeInQuickAccess(token: { address: string; symbol?: string }): boolean {
+  const quickAccessTokens = TOKEN_FILTER_CONFIG.QUICK_ACCESS_TOKENS
+
   // If no quick access tokens configured, include all (fallback to top pools logic)
-  if (TOKEN_FILTER_CONFIG.QUICK_ACCESS_TOKENS.length === 0) {
+  if (quickAccessTokens.length === 0) {
     return true
   }
 
   const tokenSymbol = token.symbol?.toUpperCase() || ''
 
   // Check if token symbol is in quick access list
-  return TOKEN_FILTER_CONFIG.QUICK_ACCESS_TOKENS.some((symbol) => tokenSymbol === symbol.toUpperCase())
+  return quickAccessTokens.some((symbol) => tokenSymbol === symbol.toUpperCase())
 }
