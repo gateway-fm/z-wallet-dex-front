@@ -85,33 +85,6 @@ export const FEATURES_CONFIG = {
   SKIP_CSP: process.env.REACT_APP_SKIP_CSP === 'true',
 } as const
 
-export const API_CONFIG = {
-  GRAPHQL: {
-    URL:
-      process.env.GRAPHQL_URL_OVERRIDE ||
-      process.env.REACT_APP_AWS_API_ENDPOINT ||
-      'https://api-zephyr-dex.platform-dev.gateway.fm/subgraphs/name/v3-tokens-mainnet',
-    TIMEOUT: Number(process.env.REACT_APP_GRAPHQL_TIMEOUT) || 30000,
-    RETRY_COUNT: Number(process.env.REACT_APP_GRAPHQL_RETRY_COUNT) || 3,
-  },
-  V2_SUBGRAPH: {
-    URL:
-      process.env.API_BASE_URL_V2_OVERRIDE ||
-      process.env.REACT_APP_API_BASE_URL_V2_OVERRIDE ||
-      'https://api-zephyr-dex.platform-dev.gateway.fm/subgraphs/name/v2',
-  },
-  GATEWAY: {
-    URL:
-      process.env.REACT_APP_UNISWAP_GATEWAY_DNS ||
-      process.env.API_BASE_URL_OVERRIDE ||
-      'https://api-zephyr-dex.platform-dev.gateway.fm',
-  },
-  CACHE: {
-    TTL: Number(process.env.REACT_APP_CACHE_TTL) || 5 * 60 * 1000, // 5 minutes
-    MAX_SIZE: Number(process.env.REACT_APP_CACHE_MAX_SIZE) || 100,
-  },
-} as const
-
 export const EXTERNAL_SERVICES_CONFIG = {
   INFURA_KEY: process.env.REACT_APP_INFURA_KEY || '',
   ALCHEMY_API_KEY: process.env.REACT_APP_ALCHEMY_API_KEY || '',
