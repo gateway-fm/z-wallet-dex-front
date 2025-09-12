@@ -248,8 +248,8 @@ export const runtimeConfig = {
   getWalletConnectProjectId: () =>
     getRuntimeConfig('WALLET_CONNECT_PROJECT_ID', 'REACT_APP_WALLET_CONNECT_PROJECT_ID', ''),
   getZWalletClientUrl: () =>
-    getRuntimeConfig('Z_WALLET_CLIENT_URL', 'REACT_APP_Z_WALLET_CLIENT_URL', 'https://zos.zero.tech/'),
-  getZWalletChainId: () => getRuntimeConfig('Z_WALLET_CHAIN_ID', 'REACT_APP_Z_WALLET_CHAIN_ID', 9369),
+    getRuntimeConfig('Z_WALLET_CLIENT_URL', 'REACT_APP_Z_WALLET_CLIENT_URL', 'https://z-wallet-dev.zero.tech'),
+  getZWalletChainId: () => getRuntimeConfig('Z_WALLET_CHAIN_ID', 'REACT_APP_Z_WALLET_CHAIN_ID', 1417429182),
   getZWalletRpcUrl: () => getRuntimeConfig('Z_WALLET_RPC_URL', 'REACT_APP_Z_WALLET_RPC_URL', 'https://rpc.zchain.org/'),
   getZWalletExplorerUrl: () =>
     getRuntimeConfig('Z_WALLET_EXPLORER_URL', 'REACT_APP_Z_WALLET_EXPLORER_URL', 'https://zscan.live/'),
