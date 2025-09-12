@@ -63,6 +63,9 @@ interface RuntimeConfig {
   ALCHEMY_API_KEY: string
   WALLET_CONNECT_PROJECT_ID: string
   Z_WALLET_CLIENT_URL: string
+  Z_WALLET_CHAIN_ID: number
+  Z_WALLET_RPC_URL: string
+  Z_WALLET_EXPLORER_URL: string
   Z_WALLET_PERSISTENCE_TTL: number
   Z_WALLET_TIMEOUT: number
 
@@ -245,7 +248,11 @@ export const runtimeConfig = {
   getWalletConnectProjectId: () =>
     getRuntimeConfig('WALLET_CONNECT_PROJECT_ID', 'REACT_APP_WALLET_CONNECT_PROJECT_ID', ''),
   getZWalletClientUrl: () =>
-    getRuntimeConfig('Z_WALLET_CLIENT_URL', 'REACT_APP_Z_WALLET_CLIENT_URL', 'https://z-wallet-dev.zero.tech'),
+    getRuntimeConfig('Z_WALLET_CLIENT_URL', 'REACT_APP_Z_WALLET_CLIENT_URL', 'https://zos.zero.tech/'),
+  getZWalletChainId: () => getRuntimeConfig('Z_WALLET_CHAIN_ID', 'REACT_APP_Z_WALLET_CHAIN_ID', 9369),
+  getZWalletRpcUrl: () => getRuntimeConfig('Z_WALLET_RPC_URL', 'REACT_APP_Z_WALLET_RPC_URL', 'https://rpc.zchain.org/'),
+  getZWalletExplorerUrl: () =>
+    getRuntimeConfig('Z_WALLET_EXPLORER_URL', 'REACT_APP_Z_WALLET_EXPLORER_URL', 'https://zscan.live/'),
   getZWalletPersistenceTtl: () =>
     getRuntimeConfig('Z_WALLET_PERSISTENCE_TTL', 'REACT_APP_Z_WALLET_PERSISTENCE_TTL', 24 * 60 * 60 * 1000),
   getZWalletTimeout: () => getRuntimeConfig('Z_WALLET_TIMEOUT', 'REACT_APP_Z_WALLET_TIMEOUT', 60000),
