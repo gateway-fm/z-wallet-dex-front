@@ -241,8 +241,7 @@ export const runtimeConfig = {
   getAlchemyApiKey: () => getRuntimeConfig('ALCHEMY_API_KEY', 'REACT_APP_ALCHEMY_API_KEY', ''),
   getWalletConnectProjectId: () =>
     getRuntimeConfig('WALLET_CONNECT_PROJECT_ID', 'REACT_APP_WALLET_CONNECT_PROJECT_ID', ''),
-  getZWalletClientUrl: () =>
-    getRuntimeConfig('Z_WALLET_CLIENT_URL', 'REACT_APP_Z_WALLET_CLIENT_URL', 'https://z-wallet-dev.zero.tech'),
+  getZWalletClientUrl: () => getRuntimeConfig('Z_WALLET_CLIENT_URL', 'REACT_APP_Z_WALLET_CLIENT_URL'),
   getZWalletRpcUrl: () => getRuntimeConfig('Z_WALLET_RPC_URL', 'REACT_APP_Z_WALLET_RPC_URL', 'https://rpc.zchain.org/'),
   getZWalletExplorerUrl: () =>
     getRuntimeConfig('Z_WALLET_EXPLORER_URL', 'REACT_APP_Z_WALLET_EXPLORER_URL', 'https://zscan.live/'),
