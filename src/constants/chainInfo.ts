@@ -62,9 +62,7 @@ export interface L2ChainInfo extends BaseChainInfo {
 
 type ChainInfoMap = {
   readonly [chainId: number]: L1ChainInfo | L2ChainInfo
-} & {
-  readonly [chainId in SupportedL2ChainId]: L2ChainInfo
-} & { readonly [chainId in SupportedL1ChainId]: L1ChainInfo }
+}
 
 const CHAIN_INFO: ChainInfoMap = {
   [ChainId.MAINNET]: {

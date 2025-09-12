@@ -36,17 +36,17 @@ export const TESTNET_CHAIN_IDS = [] as const
 /**
  * All the chain IDs that are running the Ethereum protocol.
  */
-export const L1_CHAIN_IDS = [ZEPHYR_CHAIN_ID] as const
+export const L1_CHAIN_IDS = [ZEPHYR_CHAIN_ID]
 
-export type SupportedL1ChainId = (typeof L1_CHAIN_IDS)[number]
+export type SupportedL1ChainId = number
 
 /**
  * Controls some L2 specific behavior, e.g. slippage tolerance, special UI behavior.
  * The expectation is that all of these networks have immediate transaction confirmation.
  */
-export const L2_CHAIN_IDS = [] as const
+export const L2_CHAIN_IDS: number[] = []
 
-export type SupportedL2ChainId = (typeof L2_CHAIN_IDS)[number]
+export type SupportedL2ChainId = never
 
 /**
  * Get the priority of a chainId based on its relevance to the user.
