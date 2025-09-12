@@ -3,6 +3,7 @@ import { Connector } from '@web3-react/types'
 import { zWalletClient } from 'z-wallet-sdk'
 
 import { EXTERNAL_SERVICES_CONFIG } from '../config/zephyr'
+import { runtimeConfig } from '../utils/runtime-config'
 
 interface ZWalletConnectorOptions {
   clientUrl: string
@@ -63,7 +64,7 @@ export class ZWalletConnector extends Connector {
     super(actions)
 
     this.clientUrl = options.clientUrl
-    this.chainId = options.chainId || 1417429182
+    this.chainId = options.chainId || runtimeConfig.getChainId()
 
     if (connectEagerly) {
       void this.connectEagerly()

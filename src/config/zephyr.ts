@@ -155,7 +155,7 @@ export const EXTERNAL_SERVICES_CONFIG = {
     return runtimeConfig.getZWalletClientUrl()
   },
   get Z_WALLET_CHAIN_ID() {
-    return runtimeConfig.getZWalletChainId()
+    return NETWORK_CONFIG.CHAIN_ID
   },
   get Z_WALLET_RPC_URL() {
     return runtimeConfig.getZWalletRpcUrl()

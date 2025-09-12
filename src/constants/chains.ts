@@ -3,15 +3,17 @@
 
 import { ChainId } from '@uniswap/sdk-core'
 
-// Custom Chain ID for Zephyr network
-export const ZEPHYR_CHAIN_ID = 1417429182
+import { runtimeConfig } from '../utils/runtime-config'
+
+// Custom Chain ID for Zephyr network - get from runtime config
+export const ZEPHYR_CHAIN_ID = runtimeConfig.getChainId()
 
 export const CHAIN_IDS_TO_NAMES = {
   [ZEPHYR_CHAIN_ID]: 'zephyr',
 } as const
 
 // Only Zephyr network is supported
-export type SupportedInterfaceChain = typeof ZEPHYR_CHAIN_ID
+export type SupportedInterfaceChain = number
 
 export function isSupportedChain(chainId: number | null | undefined | ChainId): chainId is SupportedInterfaceChain {
   return !!chainId && chainId === ZEPHYR_CHAIN_ID
