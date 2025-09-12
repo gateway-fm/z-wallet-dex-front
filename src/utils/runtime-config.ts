@@ -46,7 +46,6 @@ interface RuntimeConfig {
 
   // Token Addresses
   WRAPPED_NATIVE_ADDRESS: string
-  USDC_ADDRESS: string
 
   // Feature Flags
   ANALYTICS_ENABLED: boolean
@@ -156,7 +155,7 @@ export const runtimeConfig = {
   getBaseTokenAddress: () =>
     getRuntimeConfig(
       'BASE_TOKEN_ADDRESS',
-      'REACT_APP_ZEPHYR_BASE_TOKEN_ADDRESS',
+      'REACT_APP_CUSTOM_NETWORK_USDC_ADDRESS',
       '0xdf4bdac4ba259127d1c53c07cdd005ad54ccafb0'
     ),
   getBaseTokenSymbol: () => getRuntimeConfig('BASE_TOKEN_SYMBOL', 'REACT_APP_ZEPHYR_BASE_TOKEN_SYMBOL', 'USDC'),
@@ -205,6 +204,7 @@ export const runtimeConfig = {
       'REACT_APP_CUSTOM_NETWORK_V3_MIGRATOR_ADDRESS',
       '0xdACEF64026d35EB778A2da9406aE9BE59737FEFb'
     ),
+  // NOTE: REACT_APP_CUSTOM_NETWORK_DELEGATION_ADDRESS is not used in current solution but kept for compatibility
   getDelegationAddress: () =>
     getRuntimeConfig(
       'DELEGATION_ADDRESS',
@@ -224,12 +224,6 @@ export const runtimeConfig = {
       'WRAPPED_NATIVE_ADDRESS',
       'REACT_APP_CUSTOM_NETWORK_WRAPPED_NATIVE_ADDRESS',
       '0x08a19Ce4b93E957aDD175F61e022b81894e66720'
-    ),
-  getUsdcAddress: () =>
-    getRuntimeConfig(
-      'USDC_ADDRESS',
-      'REACT_APP_CUSTOM_NETWORK_USDC_ADDRESS',
-      '0xDF4BDAC4Ba259127D1c53C07cdd005AD54CCAfb0'
     ),
 
   // Feature Flags

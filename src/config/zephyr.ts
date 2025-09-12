@@ -106,7 +106,7 @@ export const TOKENS_CONFIG = {
   },
   USDC: {
     get ADDRESS() {
-      return runtimeConfig.getUsdcAddress()
+      return runtimeConfig.getBaseTokenAddress()
     },
     SYMBOL: 'USDC',
     NAME: 'USD Coin',
