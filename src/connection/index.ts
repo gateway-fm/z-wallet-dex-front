@@ -6,13 +6,21 @@ import { EXTERNAL_SERVICES_CONFIG } from '../config/zephyr'
 import { Connection, ConnectionType } from './types'
 import { ZWalletConnector } from './zWalletConnector'
 
-const [web3ZWallet, web3ZWalletHooks] = initializeConnector<ZWalletConnector>(
-  (actions) =>
-    new ZWalletConnector(actions, {
-      clientUrl: EXTERNAL_SERVICES_CONFIG.Z_WALLET_CLIENT_URL,
-      chainId: EXTERNAL_SERVICES_CONFIG.Z_WALLET_CHAIN_ID,
-    })
-)
+interface ZWalletConnectorOptions {
+  clientUrl?: string
+  chainId: number
+}
+
+const [web3ZWallet, web3ZWalletHooks] = initializeConnector<ZWalletConnector>((actions) => {
+  const clientUrl = EXTERNAL_SERVICES_CONFIG.Z_WALLET_CLIENT_URL
+  const config: ZWalletConnectorOptions = {
+    chainId: EXTERNAL_SERVICES_CONFIG.Z_WALLET_CHAIN_ID,
+  }
+  if (clientUrl) {
+    config.clientUrl = clientUrl
+  }
+  return new ZWalletConnector(actions, config)
+})
 
 // eslint-disable-next-line import/no-unused-modules
 export const injectedConnection: Connection = {

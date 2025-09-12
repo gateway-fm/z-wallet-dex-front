@@ -6,7 +6,7 @@ import { EXTERNAL_SERVICES_CONFIG } from '../config/zephyr'
 import { runtimeConfig } from '../utils/runtime-config'
 
 interface ZWalletConnectorOptions {
-  clientUrl: string
+  clientUrl?: string
   chainId?: number
 }
 
@@ -57,7 +57,7 @@ function clearPersistedZWalletState() {
 }
 
 export class ZWalletConnector extends Connector {
-  private readonly clientUrl: string
+  private readonly clientUrl?: string
   private readonly chainId: number
 
   constructor(actions: Actions, options: ZWalletConnectorOptions, connectEagerly = false) {
@@ -75,16 +75,14 @@ export class ZWalletConnector extends Connector {
     const cancelActivation = this.actions.startActivation()
 
     try {
-      // Set client URL for this instance
-      zWalletClient.clientUrl = this.clientUrl
+      if (this.clientUrl) {
+        zWalletClient.clientUrl = this.clientUrl
+      }
 
       // Try to restore persisted state
       const persistedState = getPersistedZWalletState()
 
       if (persistedState && persistedState.isConnected && persistedState.walletInfo) {
-        console.debug('Restoring Z Wallet connection from persisted state')
-
-        // Restore the client state
         zWalletClient.walletInfo = persistedState.walletInfo
         zWalletClient.isConnected = true
 
@@ -107,7 +105,9 @@ export class ZWalletConnector extends Connector {
     const cancelActivation = this.actions.startActivation()
 
     try {
-      zWalletClient.clientUrl = this.clientUrl
+      if (this.clientUrl) {
+        zWalletClient.clientUrl = this.clientUrl
+      }
 
       await zWalletClient.connect()
 
