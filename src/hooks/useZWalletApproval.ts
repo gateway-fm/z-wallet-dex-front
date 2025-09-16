@@ -11,7 +11,17 @@ export async function approveWithZWallet(
   account: string,
   addTransaction: ReturnType<typeof useTransactionAdder>
 ): Promise<void> {
+  console.log('approveWithZWallet called:', {
+    tokenSymbol: token.symbol,
+    tokenAddress: token.address,
+    spender,
+    chainId,
+    account,
+    isConnected: zWalletClient.isConnected,
+  })
+
   if (!zWalletClient.isConnected) {
+    console.error('Z Wallet is not connected - cannot proceed with approval')
     throw new Error('Z Wallet is not connected')
   }
 
@@ -22,11 +32,40 @@ export async function approveWithZWallet(
     params: [spender, MaxUint256.toString()],
   }
 
-  const response = await zWalletClient.callContract(approvalTx)
+  console.log('Sending approval transaction to Z-Wallet:', approvalTx)
+
+  let response: any
+  try {
+    response = await zWalletClient.callContract(approvalTx)
+    console.log('Z-Wallet approval response received:', {
+      response,
+      hasData: !!response?.data,
+      hasError: !!response?.error,
+      data: response?.data,
+      error: response?.error,
+    })
+  } catch (error) {
+    console.error('Z-Wallet approval call failed with exception:', error)
+    throw error
+  }
 
   if (!response || !response.data) {
-    throw new Error((response && response.error) || 'Z Wallet approval failed')
+    const errorMessage = (response && response.error) || 'Z Wallet approval failed'
+    console.error('Z-Wallet approval failed - no valid response:', {
+      response,
+      errorMessage,
+      tokenSymbol: token.symbol,
+      tokenAddress: token.address,
+    })
+    throw new Error(errorMessage)
   }
+
+  console.log('Z-Wallet approval successful, creating transaction result:', {
+    transactionHash: response.data?.transactionHash,
+    tokenSymbol: token.symbol,
+    tokenAddress: token.address,
+    spender,
+  })
 
   const approvalResult = {
     hash: response.data?.transactionHash || '',
@@ -48,12 +87,22 @@ export async function approveWithZWallet(
     to: token.address,
   } as any
 
+  console.log('Adding approval transaction to store:', {
+    hash: approvalResult.hash,
+    type: TransactionType.APPROVAL,
+    tokenAddress: token.address,
+    spender,
+    amount: MaxUint256.toString(),
+  })
+
   addTransaction(approvalResult, {
     type: TransactionType.APPROVAL,
     tokenAddress: token.address,
     spender,
     amount: MaxUint256.toString(),
   })
+
+  console.log('approveWithZWallet completed successfully')
 }
 
 // eslint-disable-next-line import/no-unused-modules

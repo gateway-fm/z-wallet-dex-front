@@ -97,11 +97,29 @@ export function useZephyrSwapV2(
 
       if (isZWallet && approvalState !== ApprovalState.APPROVED) {
         needApproval = true
+        console.log('Z-Wallet approval required:', {
+          tokenIn: tokenIn.symbol,
+          tokenAddress: tokenIn.address,
+          spender: CONTRACTS_CONFIG.SWAP_ROUTER_02,
+          approvalState,
+          inputAmount: inputAmount.quotient.toString(),
+        })
+
         try {
+          console.log('Starting Z-Wallet approval process...')
           await approve()
+          console.log('Z-Wallet approval completed successfully')
         } catch (approvalError) {
+          console.error('Z-Wallet approval failed:', {
+            error: approvalError,
+            errorMessage: approvalError instanceof Error ? approvalError.message : 'Unknown error',
+            tokenSymbol: tokenIn.symbol,
+            tokenAddress: tokenIn.address,
+          })
+
           if (approvalError && typeof approvalError === 'object' && 'message' in approvalError) {
             const errorMessage = (approvalError as any).message || ''
+            console.debug('Checking approval error for user cancellation:', errorMessage)
             if (isUserCancellation(errorMessage)) {
               throw new ZWalletUserRejectedError('User cancelled approval in Z-Wallet')
             }

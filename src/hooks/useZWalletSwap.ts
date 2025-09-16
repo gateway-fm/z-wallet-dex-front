@@ -115,13 +115,23 @@ export async function swapWithZWallet(
     params,
   }
 
-  console.debug('Z-Wallet contract call:', contractCall)
+  console.log('Z-Wallet swap contract call:', {
+    contractCall,
+    chainId,
+    account,
+    transactionTo: transaction.to,
+    transactionValue: transaction.value,
+    gasLimit: transaction.gasLimit,
+    isConnected: zWalletClient.isConnected,
+  })
 
   let response: any
   try {
     // Create a timeout promise that rejects after configured timeout
     let timeoutId: NodeJS.Timeout
     const timeoutMs = EXTERNAL_SERVICES_CONFIG.Z_WALLET_TIMEOUT
+    console.log(`Starting Z-Wallet call with timeout: ${timeoutMs}ms`)
+
     const timeoutPromise = new Promise((_, reject) => {
       timeoutId = setTimeout(() => {
         console.error(`Z-Wallet timeout reached - ${timeoutMs}ms elapsed`)
@@ -129,22 +139,42 @@ export async function swapWithZWallet(
       }, timeoutMs)
     })
 
+    const startTime = Date.now()
     response = await Promise.race([zWalletClient.callContract(contractCall), timeoutPromise])
+    const elapsed = Date.now() - startTime
 
     // Clear timeout if we got a response
     clearTimeout(timeoutId!) // eslint-disable-line @typescript-eslint/no-non-null-assertion
-    console.debug('Z-Wallet response received successfully:', response)
+    console.log('Z-Wallet response received successfully:', {
+      response,
+      elapsed: `${elapsed}ms`,
+      hasData: !!response?.data,
+      hasError: !!response?.error,
+      data: response?.data,
+      error: response?.error,
+    })
 
     // If response is null/undefined, it might be user cancellation
     if (response === null || response === undefined) {
       throw new ZWalletUserRejectedError('User cancelled transaction - SDK returned empty response')
     }
   } catch (error) {
+    console.error('Z-Wallet call failed with error:', {
+      error,
+      errorType: typeof error,
+      errorName: error instanceof Error ? error.name : 'Unknown',
+      errorMessage: error instanceof Error ? error.message : String(error),
+      contractCall,
+      chainId,
+      account,
+    })
+
     // Check if user cancelled the transaction
     if (error && typeof error === 'object' && 'message' in error) {
       const errorMessage = (error as any).message || ''
       console.debug('Checking error message for user cancellation:', errorMessage)
       if (isUserCancellation(errorMessage)) {
+        console.log('Detected user cancellation in Z-Wallet')
         throw new ZWalletUserRejectedError()
       }
     }
@@ -155,10 +185,22 @@ export async function swapWithZWallet(
 
   if (!response || !response.data) {
     const errorMsg = (response && response.error) || 'Z Wallet swap failed'
+    console.error('Z-Wallet swap failed - invalid response:', {
+      response,
+      hasResponse: !!response,
+      hasData: !!response?.data,
+      hasError: !!response?.error,
+      errorMsg,
+      contractCall,
+      chainId,
+      account,
+    })
+
     // Check if this is a user cancellation
     if (typeof errorMsg === 'string') {
       console.debug('Checking response error message for user cancellation:', errorMsg)
       if (isUserCancellation(errorMsg)) {
+        console.log('Detected user cancellation from response error message')
         throw new ZWalletUserRejectedError(errorMsg)
       }
     }
