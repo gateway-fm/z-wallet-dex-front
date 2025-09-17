@@ -10,7 +10,6 @@ export const selectCurrency = createAction<{
   currencyId: string
 }>('swap/selectCurrency')
 export const switchCurrencies = createAction<{
-  previouslyEstimatedOutput: string
   currentInputValue: string
 }>('swap/switchCurrencies')
 export const forceExactInput = createAction<void>('swap/forceExactInput')

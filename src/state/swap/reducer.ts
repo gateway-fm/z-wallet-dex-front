@@ -66,30 +66,13 @@ export default createReducer<SwapState>(initialState, (builder) =>
         }
       }
     })
-    .addCase(switchCurrencies, (state, { payload: { previouslyEstimatedOutput, currentInputValue } }) => {
-      // Toggle between normal and swapped state
-      if (state.currenciesSwapped) {
-        // Reverse back to original: INPUT becomes independent, OUTPUT gets calculated
-        return {
-          ...state,
-          independentField: Field.INPUT,
-          [Field.INPUT]: { currencyId: state[Field.OUTPUT].currencyId },
-          [Field.OUTPUT]: { currencyId: state[Field.INPUT].currencyId },
-          // Use previously estimated output or keep current value
-          typedValue: previouslyEstimatedOutput || currentInputValue || state.typedValue,
-          currenciesSwapped: false,
-        }
-      } else {
-        // First swap: OUTPUT becomes independent with current input value, INPUT gets calculated
-        return {
-          ...state,
-          independentField: Field.OUTPUT,
-          [Field.INPUT]: { currencyId: state[Field.OUTPUT].currencyId },
-          [Field.OUTPUT]: { currencyId: state[Field.INPUT].currencyId },
-          // Use current input value instead of hardcoded "1"
-          typedValue: currentInputValue || state.typedValue || '1',
-          currenciesSwapped: true,
-        }
+    .addCase(switchCurrencies, (state, { payload: { currentInputValue } }) => {
+      return {
+        ...state,
+        [Field.INPUT]: { currencyId: state[Field.OUTPUT].currencyId },
+        [Field.OUTPUT]: { currencyId: state[Field.INPUT].currencyId },
+        independentField: state.independentField === Field.INPUT ? Field.OUTPUT : Field.INPUT,
+        typedValue: state.typedValue || currentInputValue || '1',
       }
     })
     .addCase(forceExactInput, (state) => {
