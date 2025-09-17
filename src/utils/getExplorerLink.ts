@@ -1,7 +1,8 @@
 import { ZEPHYR_CHAIN_ID } from '../constants/chains'
+import { runtimeConfig } from './runtime-config'
 
 const BLOCK_EXPLORER_PREFIXES: { [chainId: number]: string } = {
-  [ZEPHYR_CHAIN_ID]: 'https://zephyr-blockscout.eu-north-2.gateway.fm',
+  [ZEPHYR_CHAIN_ID]: runtimeConfig.getExplorerUrl(),
 }
 
 export enum ExplorerDataType {
@@ -18,7 +19,7 @@ export enum ExplorerDataType {
  * @param type the type of the data
  */
 export function getExplorerLink(chainId: number, data: string, type: ExplorerDataType): string {
-  const prefix = BLOCK_EXPLORER_PREFIXES[chainId] ?? 'https://zephyr-blockscout.eu-north-2.gateway.fm'
+  const prefix = BLOCK_EXPLORER_PREFIXES[chainId] ?? runtimeConfig.getExplorerUrl()
 
   switch (type) {
     case ExplorerDataType.TRANSACTION:
