@@ -66,7 +66,7 @@ export default createReducer<SwapState>(initialState, (builder) =>
         }
       }
     })
-    .addCase(switchCurrencies, (state, { payload: { newOutputHasTax, previouslyEstimatedOutput } }) => {
+    .addCase(switchCurrencies, (state, { payload: { previouslyEstimatedOutput, currentInputValue } }) => {
       // Toggle between normal and swapped state
       if (state.currenciesSwapped) {
         // Reverse back to original: INPUT becomes independent, OUTPUT gets calculated
@@ -75,19 +75,19 @@ export default createReducer<SwapState>(initialState, (builder) =>
           independentField: Field.INPUT,
           [Field.INPUT]: { currencyId: state[Field.OUTPUT].currencyId },
           [Field.OUTPUT]: { currencyId: state[Field.INPUT].currencyId },
-          // Set input amount to "1" so the output will be calculated
-          typedValue: '1',
+          // Use previously estimated output or keep current value
+          typedValue: previouslyEstimatedOutput || currentInputValue || state.typedValue,
           currenciesSwapped: false,
         }
       } else {
-        // First swap: OUTPUT becomes independent with "1", INPUT gets calculated
+        // First swap: OUTPUT becomes independent with current input value, INPUT gets calculated
         return {
           ...state,
           independentField: Field.OUTPUT,
           [Field.INPUT]: { currencyId: state[Field.OUTPUT].currencyId },
           [Field.OUTPUT]: { currencyId: state[Field.INPUT].currencyId },
-          // Always set output amount to "1" so the input will be calculated
-          typedValue: '1',
+          // Use current input value instead of hardcoded "1"
+          typedValue: currentInputValue || state.typedValue || '1',
           currenciesSwapped: true,
         }
       }
