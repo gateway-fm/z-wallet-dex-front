@@ -139,15 +139,12 @@ export async function swapWithZWallet(
       }, timeoutMs)
     })
 
-    const startTime = Date.now()
     response = await Promise.race([zWalletClient.callContract(contractCall), timeoutPromise])
-    const elapsed = Date.now() - startTime
 
     // Clear timeout if we got a response
     clearTimeout(timeoutId!) // eslint-disable-line @typescript-eslint/no-non-null-assertion
     console.log('Z-Wallet response received successfully:', {
       response,
-      elapsed: `${elapsed}ms`,
       hasData: !!response?.data,
       hasError: !!response?.error,
       data: response?.data,
