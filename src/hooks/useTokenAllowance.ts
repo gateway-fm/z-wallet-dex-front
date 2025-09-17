@@ -19,6 +19,7 @@ export function useTokenAllowance(
 ): {
   tokenAllowance?: CurrencyAmount<Token>
   isSyncing: boolean
+  refetchAllowance: () => void
 } {
   const { chainId } = useWeb3React()
   const contract = useTokenContract(token?.address, false)
@@ -26,6 +27,7 @@ export function useTokenAllowance(
 
   const [zephyrAllowance, setZephyrAllowance] = useState<bigint | undefined>(undefined)
   const [isZephyrLoading, setIsZephyrLoading] = useState(false)
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
 
   const blocksPerFetch = chainId === ZEPHYR_CHAIN_ID ? 1 : undefined
 
@@ -35,6 +37,12 @@ export function useTokenAllowance(
     result?: [bigint]
     syncing: boolean
   }
+
+  const refetchAllowance = useCallback(() => {
+    if (chainId === ZEPHYR_CHAIN_ID) {
+      setRefreshTrigger((prev) => prev + 1)
+    }
+  }, [chainId])
 
   useEffect(() => {
     if (chainId === ZEPHYR_CHAIN_ID && contract && owner && spender && token) {
@@ -50,7 +58,7 @@ export function useTokenAllowance(
           setIsZephyrLoading(false)
         })
     }
-  }, [chainId, contract, owner, spender, token])
+  }, [chainId, contract, owner, spender, token, refreshTrigger])
 
   const tokenAllowance = useMemo(() => {
     if (!token) {
@@ -73,8 +81,9 @@ export function useTokenAllowance(
     () => ({
       tokenAllowance,
       isSyncing: chainId === ZEPHYR_CHAIN_ID ? isZephyrLoading : isSyncing, // Для Zephyr показываем состояние прямого вызова
+      refetchAllowance,
     }),
-    [tokenAllowance, isSyncing, chainId, isZephyrLoading]
+    [tokenAllowance, isSyncing, chainId, isZephyrLoading, refetchAllowance]
   )
 }
 

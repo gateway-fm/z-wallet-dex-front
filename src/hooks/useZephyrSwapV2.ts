@@ -95,38 +95,43 @@ export function useZephyrSwapV2(
       const isZWallet = currentConnection.type === ConnectionType.Z_WALLET
       let needApproval = false
 
-      if (isZWallet && approvalState !== ApprovalState.APPROVED) {
+      if (approvalState !== ApprovalState.APPROVED) {
         needApproval = true
-        console.log('Z-Wallet approval required:', {
+        console.log('Token approval required:', {
           tokenIn: tokenIn.symbol,
           tokenAddress: tokenIn.address,
           spender: CONTRACTS_CONFIG.SWAP_ROUTER_02,
           approvalState,
           inputAmount: inputAmount.quotient.toString(),
+          walletType: isZWallet ? 'Z-Wallet' : 'Standard',
         })
 
         try {
-          console.log('Starting Z-Wallet approval process...')
+          console.log('Starting approval process...')
           await approve()
-          console.log('Z-Wallet approval completed successfully')
+          console.log('Approval completed successfully')
         } catch (approvalError) {
-          console.error('Z-Wallet approval failed:', {
+          console.error('Approval failed:', {
             error: approvalError,
             errorMessage: approvalError instanceof Error ? approvalError.message : 'Unknown error',
             tokenSymbol: tokenIn.symbol,
             tokenAddress: tokenIn.address,
           })
 
-          if (approvalError && typeof approvalError === 'object' && 'message' in approvalError) {
+          if (isZWallet && approvalError && typeof approvalError === 'object' && 'message' in approvalError) {
             const errorMessage = (approvalError as any).message || ''
             console.debug('Checking approval error for user cancellation:', errorMessage)
             if (isUserCancellation(errorMessage)) {
               throw new ZWalletUserRejectedError('User cancelled approval in Z-Wallet')
             }
           }
-          throw new ZWalletTransactionError(
-            `Approval failed: ${approvalError instanceof Error ? approvalError.message : 'Unknown error'}`
-          )
+
+          const errorMessage = approvalError instanceof Error ? approvalError.message : 'Unknown error'
+          if (isZWallet) {
+            throw new ZWalletTransactionError(`Approval failed: ${errorMessage}`)
+          } else {
+            throw new Error(`Approval failed: ${errorMessage}`)
+          }
         }
       }
 
