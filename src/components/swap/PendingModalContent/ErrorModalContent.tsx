@@ -17,6 +17,7 @@ export enum PendingModalError {
   ZWALLET_USER_REJECTED,
   ZWALLET_CONNECTION_ERROR,
   ZWALLET_TRANSACTION_ERROR,
+  INSUFFICIENT_BALANCE,
 }
 
 interface ErrorModalContentProps {
@@ -26,6 +27,11 @@ interface ErrorModalContentProps {
 
 function getErrorContent(errorType: PendingModalError) {
   switch (errorType) {
+    case PendingModalError.INSUFFICIENT_BALANCE:
+      return {
+        title: <Trans>Insufficient balance</Trans>,
+        label: <Trans>Your wallet balance is not enough to complete this swap.</Trans>,
+      }
     case PendingModalError.TOKEN_APPROVAL_ERROR:
       return {
         title: <Trans>Token approval failed</Trans>,
