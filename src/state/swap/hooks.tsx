@@ -198,9 +198,30 @@ export function useDerivedSwapInfo(state: SwapState, chainId: ChainId | undefine
     const inputAmount = trade?.trade?.inputAmount
     const maxAmountIn = trade?.trade?.maximumAmountIn(allowedSlippage)
 
+    // Debug: log computed amounts and balances
+    if (process.env.NODE_ENV !== 'production') {
+      // eslint-disable-next-line no-console
+      console.log('Swap balance check', {
+        account,
+        inputCurrency: currencies[Field.INPUT]?.symbol,
+        balanceIn: balanceIn?.toExact(),
+        inputAmount: inputAmount?.toExact(),
+        maxAmountIn: maxAmountIn?.toExact(),
+        allowedSlippage: allowedSlippage.toSignificant(4),
+      })
+    }
+
     if (balanceIn && inputAmount && balanceIn.lessThan(inputAmount)) {
+      if (process.env.NODE_ENV !== 'production') {
+        // eslint-disable-next-line no-console
+        console.log('Swap balance check: insufficient by inputAmount')
+      }
       inputError = <Trans>Insufficient {balanceIn.currency.symbol} balance</Trans>
     } else if (balanceIn && maxAmountIn && balanceIn.lessThan(maxAmountIn)) {
+      if (process.env.NODE_ENV !== 'production') {
+        // eslint-disable-next-line no-console
+        console.log('Swap balance check: insufficient by maxAmountIn')
+      }
       inputError = <Trans>Insufficient {balanceIn.currency.symbol} balance</Trans>
     }
 
