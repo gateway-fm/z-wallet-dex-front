@@ -77,18 +77,6 @@ export function useTokenBalancesWithLoadingIndicator(
 
   const anyLoading: boolean = useMemo(() => balances.some((callState) => callState.loading), [balances])
 
-  // Diagnostics: log token balance query context and raw results
-  // eslint-disable-next-line no-console
-  console.log('TokenBalances debug', {
-    chainId,
-    address,
-    isZephyrNetwork,
-    tokenCount: validatedTokens.length,
-    tokenAddresses: validatedTokenAddresses,
-    anyLoading,
-    results: balances?.map((r) => ({ loading: r.loading, valid: r.valid, error: r.error, hasResult: !!r.result })),
-  })
-
   return useMemo(
     () => [
       address && validatedTokens.length > 0
@@ -137,22 +125,6 @@ export function useCurrencyBalances(
   const tokenBalances = useTokenBalances(account, tokens)
   const containsETH: boolean = useMemo(() => currencies?.some((currency) => currency?.isNative) ?? false, [currencies])
   const ethBalance = useNativeCurrencyBalances(useMemo(() => (containsETH ? [account] : []), [containsETH, account]))
-
-  // eslint-disable-next-line no-console
-  console.log('CurrencyBalances debug', {
-    chainId,
-    account,
-    containsETH,
-    currencies: currencies?.map((c) => ({
-      symbol: c?.symbol,
-      isToken: c?.isToken,
-      isNative: c?.isNative,
-      address: (c as Token | undefined)?.address,
-      tokenChainId: (c as Token | undefined)?.chainId,
-    })),
-    tokenBalanceKeys: Object.keys(tokenBalances || {}),
-    ethBalancePresent: !!(account && ethBalance[account]),
-  })
 
   return useMemo(
     () =>
