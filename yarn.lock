@@ -20287,10 +20287,10 @@ youch@3.3.4:
     mustache "^4.2.0"
     stacktracey "^2.1.8"
 
-z-wallet-sdk@^0.1.10:
-  version "0.1.10"
-  resolved "https://registry.yarnpkg.com/z-wallet-sdk/-/z-wallet-sdk-0.1.10.tgz#c374f2a638a17d1e72b6677f4efa9a60a127b9e4"
-  integrity sha512-/8/jnhlCpHwb3tKHWa/Ch26LQ8BRnAJn3ZeyJiJlcC/MR8dove91R5i0nbbPQMi1RgVpNmxQUrE7a8XSy7/88w==
+z-wallet-sdk@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/z-wallet-sdk/-/z-wallet-sdk-0.2.1.tgz#9c98dcb0f378b7d290d9af23673ad8c36e04f87d"
+  integrity sha512-71V+7LWmFm1mKjZmSjaAIBMzJa1U1GnZbEEwChOmuCBFp7d4szFnlpKR5crUMafDdDnySDcP3sjLeyiB0bnZ8Q==
   dependencies:
     comlink "^4.4.2"
     zustand "^5.0.7"

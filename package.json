@@ -279,7 +279,7 @@
     "workbox-precaching": "^6.1.0",
     "workbox-routing": "^6.1.0",
     "xml2js": "^0.6.2",
-    "z-wallet-sdk": "^0.1.10",
+    "z-wallet-sdk": "^0.2.1",
     "zustand": "^4.3.6"
   },
   "engines": {
