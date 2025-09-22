@@ -28,7 +28,7 @@ export function useZephyrTokenApproval(
 
   const approvalState = useMemo((): ApprovalState => {
     if (!amountToApprove || !spender || !token || chainId !== ZEPHYR_CHAIN_ID) {
-      console.log('Approval state UNKNOWN - missing required params:', {
+      console.debug('Approval state UNKNOWN - missing required params:', {
         hasAmountToApprove: !!amountToApprove,
         hasSpender: !!spender,
         hasToken: !!token,
@@ -38,7 +38,7 @@ export function useZephyrTokenApproval(
       return ApprovalState.UNKNOWN
     }
     if (!tokenAllowance) {
-      console.log('Approval state UNKNOWN - no token allowance data:', {
+      console.debug('Approval state UNKNOWN - no token allowance data:', {
         tokenSymbol: token.symbol,
         tokenAddress: token.address,
         spender,
@@ -51,7 +51,7 @@ export function useZephyrTokenApproval(
     const currentAllowanceBN = BigInt(tokenAllowance.quotient.toString())
 
     const isApproved = currentAllowanceBN >= amountToApproveBN
-    console.log('Approval state check:', {
+    console.debug('Approval state check:', {
       tokenSymbol: token.symbol,
       tokenAddress: token.address,
       spender,
@@ -69,7 +69,7 @@ export function useZephyrTokenApproval(
   }, [amountToApprove, spender, token, chainId, tokenAllowance, account])
 
   const approve = useCallback(async (): Promise<void> => {
-    console.log('Zephyr token approval called:', {
+    console.debug('Zephyr token approval called:', {
       tokenSymbol: token?.symbol,
       tokenAddress: token?.address,
       spender,
@@ -84,15 +84,15 @@ export function useZephyrTokenApproval(
     }
 
     const connection = getConnection(connector)
-    console.log('Using connection type:', connection.type)
+    console.debug('Using connection type:', connection.type)
 
     if (connection.type === ConnectionType.Z_WALLET) {
-      console.log('Using Z-Wallet for approval')
+      console.debug('Using Z-Wallet for approval')
       await approveWithZWallet(token, spender, chainId, account || '', addTransaction)
-      console.log('Refreshing allowance after Z-Wallet approval')
+      console.debug('Refreshing allowance after Z-Wallet approval')
       refetchAllowance()
     } else {
-      console.log('Using standard wallet for approval')
+      console.debug('Using standard wallet for approval')
       if (!tokenContract) {
         console.error('No token contract available for standard wallet approval')
         return
@@ -100,7 +100,7 @@ export function useZephyrTokenApproval(
 
       try {
         const approvalResult = await tokenContract.approve(spender, MaxUint256.toString())
-        console.log('Standard wallet approval successful:', {
+        console.debug('Standard wallet approval successful:', {
           hash: approvalResult.hash,
           tokenSymbol: token.symbol,
         })
@@ -111,7 +111,7 @@ export function useZephyrTokenApproval(
           spender,
           amount: MaxUint256.toString(),
         })
-        console.log('Refreshing allowance after standard wallet approval')
+        console.debug('Refreshing allowance after standard wallet approval')
         refetchAllowance()
       } catch (error) {
         console.error('Standard wallet approval failed:', {
