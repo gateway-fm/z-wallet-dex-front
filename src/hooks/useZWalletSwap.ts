@@ -129,7 +129,7 @@ export async function swapWithZWallet(
   try {
     // Create a timeout promise that rejects after configured timeout
     let timeoutId: NodeJS.Timeout
-    const timeoutMs = EXTERNAL_SERVICES_CONFIG.Z_WALLET_TIMEOUT
+    const timeoutMs = EXTERNAL_SERVICES_CONFIG.Z_WALLET_TIMEOUT || 60000
     console.log(`Starting Z-Wallet call with timeout: ${timeoutMs}ms`)
 
     const timeoutPromise = new Promise((_, reject) => {

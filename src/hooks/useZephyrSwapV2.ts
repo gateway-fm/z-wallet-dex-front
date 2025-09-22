@@ -26,8 +26,6 @@ import {
   ZWalletUserRejectedError,
 } from './useZWalletSwap'
 
-const Z_WALLET_APPROVAL_WAIT_TIME = 5000
-
 interface SimpleTrade {
   inputAmount: CurrencyAmount<Currency>
   outputAmount: CurrencyAmount<Currency>
@@ -80,9 +78,6 @@ export function useZephyrSwapV2(
       type: TradeFillType.Classic
       response: any
     }> => {
-      // NOTE: workaround to ensure everything is properly initialized
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
       const { inputAmount, outputAmount } = trade
       const tokenIn = inputAmount.currency
       const tokenOut = outputAmount.currency
@@ -93,10 +88,8 @@ export function useZephyrSwapV2(
 
       const currentConnection = getConnection(connector)
       const isZWallet = currentConnection.type === ConnectionType.Z_WALLET
-      let needApproval = false
 
       if (approvalState !== ApprovalState.APPROVED) {
-        needApproval = true
         console.log('Token approval required:', {
           tokenIn: tokenIn.symbol,
           tokenAddress: tokenIn.address,
@@ -149,11 +142,6 @@ export function useZephyrSwapV2(
 
       let swapResult
       if (isZWallet) {
-        if (needApproval) {
-          // Wait after approval for Z-Wallet to ensure it's processed
-          await new Promise((resolve) => setTimeout(resolve, Z_WALLET_APPROVAL_WAIT_TIME))
-        }
-
         // Create swap info for Z-Wallet transaction
         const swapInfo: ExactInputSwapTransactionInfo | ExactOutputSwapTransactionInfo = {
           type: TransactionType.SWAP,
