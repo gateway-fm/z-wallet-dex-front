@@ -13,7 +13,7 @@ import { useTokenContract } from './useContract'
 const MAX_ALLOWANCE = MaxUint256.toString()
 
 export function useTokenAllowance(
-  token: Token | undefined,
+  token?: Token,
   owner?: string,
   spender?: string
 ): {
@@ -22,6 +22,7 @@ export function useTokenAllowance(
   refetchAllowance: () => void
 } {
   const { chainId } = useWeb3React()
+  const isZephyr = chainId === ZEPHYR_CHAIN_ID
   const contract = useTokenContract(token?.address, false)
   const inputs = useMemo(() => [owner, spender], [owner, spender])
 
@@ -29,63 +30,79 @@ export function useTokenAllowance(
   const [isZephyrLoading, setIsZephyrLoading] = useState(false)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
 
-  const blocksPerFetch = chainId === ZEPHYR_CHAIN_ID ? 1 : undefined
-
-  const { result, syncing: isSyncing } = useSingleCallResult(contract, 'allowance', inputs, {
-    blocksPerFetch,
-  }) as {
+  const singleCallResult = useSingleCallResult(isZephyr ? (null as any) : contract, 'allowance', inputs) as {
+    valid?: boolean
     result?: [bigint]
     syncing: boolean
   }
 
+  const { result, syncing: isSyncing } = singleCallResult
+
   const refetchAllowance = useCallback(() => {
-    if (chainId === ZEPHYR_CHAIN_ID) {
-      setRefreshTrigger((prev) => prev + 1)
-    }
-  }, [chainId])
+    setRefreshTrigger((prev) => prev + 1)
+  }, [])
 
   useEffect(() => {
-    if (chainId === ZEPHYR_CHAIN_ID && contract && owner && spender && token) {
+    const needDirectCall = isZephyr || singleCallResult?.valid === false
+    if (!contract) {
+      console.debug('Direct allowance skipped: no contract')
+      return
+    }
+    if (!owner || !spender) {
+      console.debug('Direct allowance skipped: missing owner or spender', { owner, spender })
+      return
+    }
+
+    console.debug('Allowance decision', {
+      isZephyr,
+      singleCallValid: singleCallResult?.valid,
+      needDirectCall,
+      owner,
+      spender,
+      token: token?.address,
+    })
+
+    if (needDirectCall) {
       setIsZephyrLoading(true)
       contract
         .allowance(owner, spender)
         .then((allowanceResult: any) => {
-          console.debug('Check token allowance', allowanceResult)
+          console.debug('Check token allowance (direct)', allowanceResult)
           setZephyrAllowance(BigInt(allowanceResult.toString()))
           setIsZephyrLoading(false)
         })
         .catch((err) => {
-          console.debug('Token allowance check error', err)
-          setZephyrAllowance(BigInt(0)) // Default to 0 if call fails
+          console.debug('Token allowance check error (direct)', err)
+          setZephyrAllowance(BigInt(0))
           setIsZephyrLoading(false)
         })
     }
-  }, [chainId, contract, owner, spender, token, refreshTrigger])
+  }, [isZephyr, singleCallResult?.valid, contract, owner, spender, token?.address, refreshTrigger])
 
   const tokenAllowance = useMemo(() => {
-    if (!token) {
-      return undefined
+    if (!token) return undefined
+
+    // Prefer direct result if available (Zephyr or fallback)
+    if (zephyrAllowance !== undefined && !isZephyrLoading) {
+      return CurrencyAmount.fromRawAmount(token, zephyrAllowance.toString())
     }
 
-    if (chainId === ZEPHYR_CHAIN_ID) {
-      if (zephyrAllowance !== undefined && !isZephyrLoading) {
-        const allowanceAmount = CurrencyAmount.fromRawAmount(token, zephyrAllowance.toString())
-        return allowanceAmount
-      }
-      return CurrencyAmount.fromRawAmount(token, 0)
-    } else {
-      if (!result || isSyncing) return undefined
+    // Multicall path (non-Zephyr)
+    if (!isZephyr && result && !isSyncing) {
       return CurrencyAmount.fromRawAmount(token, result[0].toString())
     }
-  }, [token, result, isSyncing, chainId, zephyrAllowance, isZephyrLoading])
+
+    // Unknown yet
+    return undefined
+  }, [token, result, isSyncing, zephyrAllowance, isZephyrLoading, isZephyr])
 
   return useMemo(
     () => ({
       tokenAllowance,
-      isSyncing: chainId === ZEPHYR_CHAIN_ID ? isZephyrLoading : isSyncing, // Для Zephyr показываем состояние прямого вызова
+      isSyncing: isZephyrLoading || isSyncing,
       refetchAllowance,
     }),
-    [tokenAllowance, isSyncing, chainId, isZephyrLoading, refetchAllowance]
+    [tokenAllowance, isZephyrLoading, isSyncing, refetchAllowance]
   )
 }
 
