@@ -24,7 +24,7 @@ export function useZephyrTokenApproval(
   const tokenContract = useTokenContract(token?.address, true)
   const addTransaction = useTransactionAdder()
 
-  const { tokenAllowance, refetchAllowance } = useTokenAllowance(token, account ?? undefined, spender)
+  const { tokenAllowance, isSyncing, refetchAllowance } = useTokenAllowance(token, account ?? undefined, spender)
 
   const approvalState = useMemo((): ApprovalState => {
     if (!amountToApprove || !spender || !token || chainId !== ZEPHYR_CHAIN_ID) {
@@ -37,7 +37,7 @@ export function useZephyrTokenApproval(
       })
       return ApprovalState.UNKNOWN
     }
-    if (!tokenAllowance) {
+    if (isSyncing || !tokenAllowance) {
       console.debug('Approval state UNKNOWN - no token allowance data:', {
         tokenSymbol: token.symbol,
         tokenAddress: token.address,
@@ -66,7 +66,7 @@ export function useZephyrTokenApproval(
     }
 
     return ApprovalState.NOT_APPROVED
-  }, [amountToApprove, spender, token, chainId, tokenAllowance, account])
+  }, [amountToApprove, spender, token, chainId, tokenAllowance, account, isSyncing])
 
   const approve = useCallback(async (): Promise<void> => {
     console.debug('Zephyr token approval called:', {

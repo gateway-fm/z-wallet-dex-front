@@ -50,10 +50,12 @@ export function useTokenAllowance(
       contract
         .allowance(owner, spender)
         .then((allowanceResult: any) => {
+          console.debug('Check token allowance', allowanceResult)
           setZephyrAllowance(BigInt(allowanceResult.toString()))
           setIsZephyrLoading(false)
         })
-        .catch(() => {
+        .catch((err) => {
+          console.debug('Token allowance check error', err)
           setZephyrAllowance(BigInt(0)) // Default to 0 if call fails
           setIsZephyrLoading(false)
         })
