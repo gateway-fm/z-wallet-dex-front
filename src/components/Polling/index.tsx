@@ -1,6 +1,7 @@
 import { Trans } from '@lingui/macro'
 import { useWeb3React } from '@web3-react/core'
 import { RowFixed } from 'components/Row'
+import { ZEPHYR_CHAIN_ID } from 'constants/chains'
 import { getChainInfo } from 'constants/chainInfo'
 import useCurrentBlockTimestamp from 'hooks/useCurrentBlockTimestamp'
 import { useIsLandingPage } from 'hooks/useIsLandingPage'
@@ -104,7 +105,10 @@ export default function Polling() {
   const blockNumber = useBlockNumber()
   const [isMounting, setIsMounting] = useState(false)
   const [isHover, setIsHover] = useState(false)
-  const machineTime = useMachineTimeMs(NETWORK_HEALTH_CHECK_MS)
+  
+  // For Zephyr network, reduce unnecessary polling and health checks
+  const isZephyr = chainId === ZEPHYR_CHAIN_ID
+  const machineTime = useMachineTimeMs(isZephyr ? ms('5m') : NETWORK_HEALTH_CHECK_MS) // Reduce frequency for Zephyr
   const blockTime = useCurrentBlockTimestamp()
   const isLandingPage = useIsLandingPage()
 

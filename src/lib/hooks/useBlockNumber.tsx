@@ -63,6 +63,8 @@ export function BlockNumberProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let stale = false
 
+    // For Zephyr network, reduce polling frequency to minimize RPC calls
+    // Only poll when window is visible and not too frequently
     if (provider && activeChainId && windowVisible) {
       setChainBlock((chainBlock) => {
         // If chainId hasn't changed, don't clear the block. This prevents re-fetching still valid data.
@@ -72,20 +74,41 @@ export function BlockNumberProvider({ children }: { children: ReactNode }) {
         return chainBlock
       })
 
-      provider
-        .getBlockNumber()
-        .then((block) => {
-          if (!stale) onChainBlock(activeChainId, block)
-        })
-        .catch((error) => {
-          console.error(`Failed to get block number for chainId ${activeChainId}`, error)
-        })
+      // For Zephyr network, use less frequent polling to reduce RPC load
+      const isZephyr = activeChainId === ZEPHYR_CHAIN_ID
+      
+      const fetchBlockNumber = () => {
+        if (!stale) {
+          provider
+            .getBlockNumber()
+            .then((block) => {
+              if (!stale) onChainBlock(activeChainId, block)
+            })
+            .catch((error) => {
+              console.debug(`Failed to get block number for chainId ${activeChainId}`, error)
+            })
+        }
+      }
 
-      const onBlock = (block: number) => onChainBlock(activeChainId, block)
-      provider.on('block', onBlock)
-      return () => {
-        stale = true
-        provider.removeListener('block', onBlock)
+      // Initial fetch
+      fetchBlockNumber()
+
+      if (isZephyr) {
+        // For Zephyr: Use interval-based polling instead of event listeners to reduce RPC calls
+        const pollInterval = setInterval(fetchBlockNumber, 30000) // Poll every 30 seconds instead of every block
+        
+        return () => {
+          stale = true
+          clearInterval(pollInterval)
+        }
+      } else {
+        // For other networks: Use standard block event listeners
+        const onBlock = (block: number) => onChainBlock(activeChainId, block)
+        provider.on('block', onBlock)
+        return () => {
+          stale = true
+          provider.removeListener('block', onBlock)
+        }
       }
     }
 

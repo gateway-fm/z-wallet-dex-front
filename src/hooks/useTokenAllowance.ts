@@ -30,17 +30,27 @@ export function useTokenAllowance(
   const [isZephyrLoading, setIsZephyrLoading] = useState(false)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
 
+  // Cache allowance results to avoid repeated requests
+  const allowanceCache = useRef<Map<string, { allowance: bigint; timestamp: number }>>(new Map())
   const chainIdRef = useRef(chainId)
   const prevParamsRef = useRef({ token: token?.address, owner, spender })
+
+  // Create cache key for memoization
+  const cacheKey = useMemo(() => {
+    if (!token?.address || !owner || !spender || !chainId) return null
+    return `${chainId}-${token.address}-${owner}-${spender}`
+  }, [chainId, token?.address, owner, spender])
 
   useEffect(() => {
     if (chainId !== chainIdRef.current) {
       chainIdRef.current = chainId
+      // Clear cache when chain changes
+      allowanceCache.current.clear()
       setZephyrAllowance(undefined)
       setIsZephyrLoading(false)
     }
 
-    // Reset state when key parameters change
+    // Reset state when key parameters change, but check cache first
     const currentParams = { token: token?.address, owner, spender }
     const prevParams = prevParamsRef.current
 
@@ -49,11 +59,27 @@ export function useTokenAllowance(
       currentParams.owner !== prevParams.owner ||
       currentParams.spender !== prevParams.spender
     ) {
-      setZephyrAllowance(undefined)
-      setIsZephyrLoading(false)
+      // Check if we have cached result for new parameters
+      if (cacheKey) {
+        const cached = allowanceCache.current.get(cacheKey)
+        const isRecent = cached && Date.now() - cached.timestamp < 30000 // 30 seconds cache
+
+        if (cached && isRecent) {
+          console.debug('Using cached allowance result', { cacheKey, allowance: cached.allowance })
+          setZephyrAllowance(cached.allowance)
+          setIsZephyrLoading(false)
+        } else {
+          setZephyrAllowance(undefined)
+          setIsZephyrLoading(false)
+        }
+      } else {
+        setZephyrAllowance(undefined)
+        setIsZephyrLoading(false)
+      }
+
       prevParamsRef.current = currentParams
     }
-  }, [chainId, token?.address, owner, spender])
+  }, [chainId, token?.address, owner, spender, cacheKey])
 
   const singleCallResult = useSingleCallResult(isZephyr ? (null as any) : contract, 'allowance', inputs) as {
     valid?: boolean
@@ -64,8 +90,12 @@ export function useTokenAllowance(
   const { result, syncing: isSyncing } = singleCallResult
 
   const refetchAllowance = useCallback(() => {
+    // Clear cache when explicitly refetching
+    if (cacheKey) {
+      allowanceCache.current.delete(cacheKey)
+    }
     setRefreshTrigger((prev) => prev + 1)
-  }, [])
+  }, [cacheKey])
 
   useEffect(() => {
     const needDirectCall = isZephyr || singleCallResult?.valid === false
@@ -92,21 +122,54 @@ export function useTokenAllowance(
     })
 
     if (needDirectCall) {
+      // Check cache first to avoid duplicate requests
+      if (cacheKey) {
+        const cached = allowanceCache.current.get(cacheKey)
+        const isRecent = cached && Date.now() - cached.timestamp < 30000 // 30 seconds cache
+
+        if (cached && isRecent) {
+          console.debug('Using cached allowance result (direct call)', { cacheKey, allowance: cached.allowance })
+          setZephyrAllowance(cached.allowance)
+          setIsZephyrLoading(false)
+          return
+        }
+      }
+
       setIsZephyrLoading(true)
       contract
         .allowance(owner, spender)
         .then((allowanceResult: any) => {
+          const allowanceBigInt = BigInt(allowanceResult.toString())
           console.debug('Check token allowance (direct)', allowanceResult)
-          setZephyrAllowance(BigInt(allowanceResult.toString()))
+
+          // Cache the result
+          if (cacheKey) {
+            allowanceCache.current.set(cacheKey, {
+              allowance: allowanceBigInt,
+              timestamp: Date.now(),
+            })
+          }
+
+          setZephyrAllowance(allowanceBigInt)
           setIsZephyrLoading(false)
         })
         .catch((err) => {
           console.debug('Token allowance check error (direct)', err)
-          setZephyrAllowance(BigInt(0))
+          const zeroAllowance = BigInt(0)
+
+          // Cache zero result for failed requests too
+          if (cacheKey) {
+            allowanceCache.current.set(cacheKey, {
+              allowance: zeroAllowance,
+              timestamp: Date.now(),
+            })
+          }
+
+          setZephyrAllowance(zeroAllowance)
           setIsZephyrLoading(false)
         })
     }
-  }, [isZephyr, singleCallResult?.valid, contract, owner, spender, token?.address, refreshTrigger])
+  }, [isZephyr, singleCallResult?.valid, contract, owner, spender, token?.address, refreshTrigger, cacheKey])
 
   const tokenAllowance = useMemo(() => {
     if (!token) return undefined
