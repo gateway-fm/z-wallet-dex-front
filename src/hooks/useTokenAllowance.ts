@@ -1,6 +1,7 @@
 import { ContractTransaction } from '@ethersproject/contracts'
 import { CurrencyAmount, MaxUint256, Token } from '@uniswap/sdk-core'
 import { useWeb3React } from '@web3-react/core'
+import { ALLOWANCE_CACHE_DURATION, CacheUtils } from 'config/cache'
 import { useSingleCallResult } from 'lib/hooks/multicall'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ApproveTransactionInfo, TransactionType } from 'state/transactions/types'
@@ -38,7 +39,7 @@ export function useTokenAllowance(
   // Create cache key for memoization
   const cacheKey = useMemo(() => {
     if (!token?.address || !owner || !spender || !chainId) return null
-    return `${chainId}-${token.address}-${owner}-${spender}`
+    return CacheUtils.createKey(chainId, token.address, owner, spender)
   }, [chainId, token?.address, owner, spender])
 
   useEffect(() => {
@@ -62,7 +63,7 @@ export function useTokenAllowance(
       // Check if we have cached result for new parameters
       if (cacheKey) {
         const cached = allowanceCache.current.get(cacheKey)
-        const isRecent = cached && Date.now() - cached.timestamp < 30000 // 30 seconds cache
+        const isRecent = cached && CacheUtils.isValid(cached.timestamp, ALLOWANCE_CACHE_DURATION)
 
         if (cached && isRecent) {
           console.debug('Using cached allowance result', { cacheKey, allowance: cached.allowance })
@@ -125,7 +126,7 @@ export function useTokenAllowance(
       // Check cache first to avoid duplicate requests
       if (cacheKey) {
         const cached = allowanceCache.current.get(cacheKey)
-        const isRecent = cached && Date.now() - cached.timestamp < 30000 // 30 seconds cache
+        const isRecent = cached && CacheUtils.isValid(cached.timestamp, ALLOWANCE_CACHE_DURATION)
 
         if (cached && isRecent) {
           console.debug('Using cached allowance result (direct call)', { cacheKey, allowance: cached.allowance })

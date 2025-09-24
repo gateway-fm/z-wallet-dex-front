@@ -1,5 +1,6 @@
 import { Network } from '@ethersproject/networks'
 import { JsonRpcProvider, Provider } from '@ethersproject/providers'
+import { CacheUtils, PROVIDER_EVALUATION_CACHE_DURATION } from 'config/cache'
 import { SupportedInterfaceChain } from 'constants/chains'
 
 import AppStaticJsonRpcProvider from './StaticJsonRpcProvider'
@@ -124,9 +125,20 @@ export default class AppRpcProvider extends AppStaticJsonRpcProvider {
 
   /**
    * Evaluates the performance of a provider. Updates latency and failure count metrics.
+   * Optimized to reduce RPC calls by using cached evaluation results.
    */
   async evaluateProvider(config: FallbackProviderEvaluation): Promise<void> {
-    const startTime = Date.now()
+    const now = Date.now()
+
+    // Skip evaluation if recently evaluated to reduce RPC load
+    if (
+      config.performance.lastEvaluated &&
+      CacheUtils.isValid(config.performance.lastEvaluated, PROVIDER_EVALUATION_CACHE_DURATION)
+    ) {
+      return
+    }
+
+    const startTime = now
     config.performance.callCount++
     try {
       await config.provider.getBlockNumber()
@@ -136,7 +148,7 @@ export default class AppRpcProvider extends AppStaticJsonRpcProvider {
     const latency = Date.now() - startTime
     config.performance.latency += latency
 
-    config.performance.lastEvaluated = Date.now()
+    config.performance.lastEvaluated = now
   }
 
   static sortProviders(providerEvaluations: FallbackProviderEvaluation[]) {

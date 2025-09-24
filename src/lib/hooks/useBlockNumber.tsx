@@ -1,4 +1,5 @@
 import { useWeb3React } from '@web3-react/core'
+import { CacheUtils } from 'config/cache'
 import { ZEPHYR_CHAIN_ID } from 'constants/chains'
 import { RPC_PROVIDERS } from 'constants/providers'
 import useIsWindowVisible from 'hooks/useIsWindowVisible'
@@ -76,7 +77,7 @@ export function BlockNumberProvider({ children }: { children: ReactNode }) {
 
       // For Zephyr network, use less frequent polling to reduce RPC load
       const isZephyr = activeChainId === ZEPHYR_CHAIN_ID
-      
+
       const fetchBlockNumber = () => {
         if (!stale) {
           provider
@@ -95,8 +96,9 @@ export function BlockNumberProvider({ children }: { children: ReactNode }) {
 
       if (isZephyr) {
         // For Zephyr: Use interval-based polling instead of event listeners to reduce RPC calls
-        const pollInterval = setInterval(fetchBlockNumber, 30000) // Poll every 30 seconds instead of every block
-        
+        const interval = CacheUtils.getBlockPollingInterval(activeChainId)
+        const pollInterval = setInterval(fetchBlockNumber, interval)
+
         return () => {
           stale = true
           clearInterval(pollInterval)

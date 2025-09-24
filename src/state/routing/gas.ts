@@ -3,13 +3,13 @@ import { PERMIT2_ADDRESS } from '@uniswap/permit2-sdk'
 import { Currency } from '@uniswap/sdk-core'
 import ERC20_ABI from 'abis/erc20.json'
 import { Erc20 } from 'abis/types'
+import { ALLOWANCE_CACHE_DURATION, CacheUtils } from 'config/cache'
 import { getContract } from 'utils'
 
 import { ApproveInfo } from './types'
 
 // Cache for allowance results to avoid repeated RPC calls
 const allowanceCache = new Map<string, { allowance: string; timestamp: number }>()
-const CACHE_DURATION = 30000 // 30 seconds
 
 export async function getApproveInfo(
   account: string | undefined,
@@ -24,9 +24,9 @@ export async function getApproveInfo(
   if (!account) return { needsApprove: false }
 
   // Check cache first to avoid repeated RPC calls
-  const cacheKey = `${currency.address}-${account}-${PERMIT2_ADDRESS}`
+  const cacheKey = CacheUtils.createKey(currency.address, account, PERMIT2_ADDRESS)
   const cached = allowanceCache.get(cacheKey)
-  const isRecent = cached && Date.now() - cached.timestamp < CACHE_DURATION
+  const isRecent = cached && CacheUtils.isValid(cached.timestamp, ALLOWANCE_CACHE_DURATION)
 
   if (cached && isRecent) {
     console.debug('Using cached allowance result for approve info', { cacheKey })

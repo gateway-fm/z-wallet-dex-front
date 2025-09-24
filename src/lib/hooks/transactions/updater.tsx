@@ -1,6 +1,7 @@
 import { TransactionReceipt } from '@ethersproject/abstract-provider'
 import { ChainId } from '@uniswap/sdk-core'
 import { useWeb3React } from '@web3-react/core'
+import { CacheUtils } from 'config/cache'
 import useCurrentBlockTimestamp from 'hooks/useCurrentBlockTimestamp'
 import useBlockNumber, { useFastForwardBlockNumber } from 'lib/hooks/useBlockNumber'
 import ms from 'ms'
@@ -16,22 +17,18 @@ interface Transaction {
   lastCheckedBlockNumber?: number
 }
 
-export function shouldCheck(lastBlockNumber: number, tx: Transaction): boolean {
+export function shouldCheck(lastBlockNumber: number, tx: Transaction, chainId?: number): boolean {
   if (tx.receipt) return false
   if (!tx.lastCheckedBlockNumber) return true
   const blocksSinceCheck = lastBlockNumber - tx.lastCheckedBlockNumber
   if (blocksSinceCheck < 1) return false
+
   const minutesPending = (new Date().getTime() - tx.addedTime) / ms(`1m`)
-  if (minutesPending > 60) {
-    // every 10 blocks if pending longer than an hour
-    return blocksSinceCheck > 9
-  } else if (minutesPending > 5) {
-    // every 3 blocks if pending longer than 5 minutes
-    return blocksSinceCheck > 2
-  } else {
-    // otherwise every block
-    return true
-  }
+
+  // Use centralized cache configuration for transaction check intervals
+  const requiredBlockInterval = chainId ? CacheUtils.getTransactionCheckInterval(chainId, minutesPending) : 1
+
+  return blocksSinceCheck >= requiredBlockInterval
 }
 
 const RETRY_OPTIONS_BY_CHAIN_ID: { [chainId: number]: RetryOptions } = {
@@ -90,7 +87,7 @@ export default function Updater({ pendingTransactions, onCheck, onReceipt }: Upd
     if (!chainId || !provider || !lastBlockNumber) return
 
     const cancels = Object.keys(pendingTransactions)
-      .filter((hash) => shouldCheck(lastBlockNumber, pendingTransactions[hash]))
+      .filter((hash) => shouldCheck(lastBlockNumber, pendingTransactions[hash], chainId))
       .map((hash) => {
         const { promise, cancel } = getReceipt(hash)
         promise
