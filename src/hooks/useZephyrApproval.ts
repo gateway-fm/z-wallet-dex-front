@@ -3,7 +3,7 @@ import { useWeb3React } from '@web3-react/core'
 import { getConnection } from 'connection'
 import { ConnectionType } from 'connection/types'
 import { ApprovalState } from 'lib/hooks/useApproval'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
 import { useTransactionAdder } from 'state/transactions/hooks'
 import { TransactionType } from 'state/transactions/types'
 
@@ -24,19 +24,34 @@ export function useZephyrTokenApproval(
   const tokenContract = useTokenContract(token?.address, true)
   const addTransaction = useTransactionAdder()
 
-  const { tokenAllowance, isSyncing, refetchAllowance } = useTokenAllowance(token, account ?? undefined, spender)
+  const chainIdRef = useRef(chainId)
+  if (chainId !== chainIdRef.current) {
+    chainIdRef.current = chainId
+  }
+
+  const shouldFetchAllowance = chainIdRef.current === ZEPHYR_CHAIN_ID && token && account && spender
+  const { tokenAllowance, isSyncing, refetchAllowance } = useTokenAllowance(
+    shouldFetchAllowance ? token : undefined,
+    shouldFetchAllowance ? account : undefined,
+    shouldFetchAllowance ? spender : undefined
+  )
 
   const approvalState = useMemo((): ApprovalState => {
-    if (!amountToApprove || !spender || !token || chainId !== ZEPHYR_CHAIN_ID) {
+    if (!amountToApprove || !spender || !token || chainIdRef.current !== ZEPHYR_CHAIN_ID) {
       console.debug('Approval state UNKNOWN - missing required params:', {
         hasAmountToApprove: !!amountToApprove,
         hasSpender: !!spender,
         hasToken: !!token,
-        chainId,
-        isZephyrChain: chainId === ZEPHYR_CHAIN_ID,
+        chainId: chainIdRef.current,
+        isZephyrChain: chainIdRef.current === ZEPHYR_CHAIN_ID,
       })
       return ApprovalState.UNKNOWN
     }
+
+    if (!shouldFetchAllowance) {
+      return ApprovalState.UNKNOWN
+    }
+
     if (isSyncing || !tokenAllowance) {
       console.debug('Approval state UNKNOWN - no token allowance data:', {
         tokenSymbol: token.symbol,
@@ -66,19 +81,19 @@ export function useZephyrTokenApproval(
     }
 
     return ApprovalState.NOT_APPROVED
-  }, [amountToApprove, spender, token, chainId, tokenAllowance, account, isSyncing])
+  }, [amountToApprove, spender, token, tokenAllowance, account, isSyncing, shouldFetchAllowance])
 
   const approve = useCallback(async (): Promise<void> => {
     console.debug('Zephyr token approval called:', {
       tokenSymbol: token?.symbol,
       tokenAddress: token?.address,
       spender,
-      chainId,
+      chainId: chainIdRef.current,
       account,
-      isZephyrChain: chainId === ZEPHYR_CHAIN_ID,
+      isZephyrChain: chainIdRef.current === ZEPHYR_CHAIN_ID,
     })
 
-    if (!spender || !token || chainId !== ZEPHYR_CHAIN_ID) {
+    if (!spender || !token || chainIdRef.current !== ZEPHYR_CHAIN_ID) {
       console.warn('Approval cancelled - missing required params')
       return
     }
@@ -88,7 +103,7 @@ export function useZephyrTokenApproval(
 
     if (connection.type === ConnectionType.Z_WALLET) {
       console.debug('Using Z-Wallet for approval')
-      await approveWithZWallet(token, spender, chainId, account || '', addTransaction)
+      await approveWithZWallet(token, spender, chainIdRef.current, account || '', addTransaction)
       console.debug('Refreshing allowance after Z-Wallet approval')
       refetchAllowance()
     } else {
@@ -122,7 +137,7 @@ export function useZephyrTokenApproval(
         throw error
       }
     }
-  }, [tokenContract, spender, token, chainId, addTransaction, connector, account, refetchAllowance])
+  }, [tokenContract, spender, token, addTransaction, connector, account, refetchAllowance])
 
   return {
     approvalState,

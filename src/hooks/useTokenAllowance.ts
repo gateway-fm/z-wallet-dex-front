@@ -2,7 +2,7 @@ import { ContractTransaction } from '@ethersproject/contracts'
 import { CurrencyAmount, MaxUint256, Token } from '@uniswap/sdk-core'
 import { useWeb3React } from '@web3-react/core'
 import { useSingleCallResult } from 'lib/hooks/multicall'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ApproveTransactionInfo, TransactionType } from 'state/transactions/types'
 import { UserRejectedRequestError } from 'utils/errors'
 import { didUserReject } from 'utils/swapErrorToUserReadableMessage'
@@ -30,6 +30,31 @@ export function useTokenAllowance(
   const [isZephyrLoading, setIsZephyrLoading] = useState(false)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
 
+  const chainIdRef = useRef(chainId)
+  const prevParamsRef = useRef({ token: token?.address, owner, spender })
+
+  useEffect(() => {
+    if (chainId !== chainIdRef.current) {
+      chainIdRef.current = chainId
+      setZephyrAllowance(undefined)
+      setIsZephyrLoading(false)
+    }
+
+    // Reset state when key parameters change
+    const currentParams = { token: token?.address, owner, spender }
+    const prevParams = prevParamsRef.current
+
+    if (
+      currentParams.token !== prevParams.token ||
+      currentParams.owner !== prevParams.owner ||
+      currentParams.spender !== prevParams.spender
+    ) {
+      setZephyrAllowance(undefined)
+      setIsZephyrLoading(false)
+      prevParamsRef.current = currentParams
+    }
+  }, [chainId, token?.address, owner, spender])
+
   const singleCallResult = useSingleCallResult(isZephyr ? (null as any) : contract, 'allowance', inputs) as {
     valid?: boolean
     result?: [bigint]
@@ -50,6 +75,10 @@ export function useTokenAllowance(
     }
     if (!owner || !spender) {
       console.debug('Direct allowance skipped: missing owner or spender', { owner, spender })
+      return
+    }
+    if (!token?.address) {
+      console.debug('Direct allowance skipped: no token address')
       return
     }
 
