@@ -121,4 +121,5 @@ export const CacheUtils = {
 }
 
 export const ALLOWANCE_CACHE_DURATION = CACHE_CONFIG.ALLOWANCE.DURATION
+// eslint-disable-next-line import/no-unused-modules
 export const PROVIDER_EVALUATION_CACHE_DURATION = CACHE_CONFIG.PROVIDER_EVALUATION.DURATION
