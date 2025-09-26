@@ -5,6 +5,8 @@ import { CallStateResult, useSingleCallResult, useSingleContractMultipleData } f
 import { useEffect, useMemo, useState } from 'react'
 import { PositionDetails } from 'types/position'
 
+import { usePositionFromApiByTokenId, usePositionsFromApi } from '../api/positions-hooks'
+import { POSITIONS_API_CONFIG } from '../config/positions-api'
 import { useV3NFTPositionManagerContract } from './useContract'
 
 interface UseV3PositionsResults {
@@ -194,39 +196,62 @@ function useZephyrV3PositionFromTokenId(tokenId: BigNumber | undefined): UseV3Po
 export function useV3PositionFromTokenId(tokenId: BigNumber | undefined): UseV3PositionResults {
   const { chainId } = useWeb3React()
   const isZephyrNetwork = chainId === ZEPHYR_CHAIN_ID
-  const zephyrPosition = useZephyrV3PositionFromTokenId(isZephyrNetwork ? tokenId : undefined)
-  const position = useV3PositionsFromTokenIds(isZephyrNetwork ? undefined : tokenId ? [tokenId] : undefined)
+
+  // Try API first if enabled
+  const apiPosition = usePositionFromApiByTokenId(tokenId, POSITIONS_API_CONFIG.ENABLED)
+
+  // Fallback to blockchain data
+  const zephyrPosition = useZephyrV3PositionFromTokenId(
+    isZephyrNetwork && !POSITIONS_API_CONFIG.ENABLED ? tokenId : undefined
+  )
+  const position = useV3PositionsFromTokenIds(
+    !POSITIONS_API_CONFIG.ENABLED && !isZephyrNetwork && tokenId ? [tokenId] : undefined
+  )
 
   return useMemo(() => {
-    if (isZephyrNetwork) {
+    // Return API data if enabled and available
+    if (POSITIONS_API_CONFIG.ENABLED && !apiPosition.isLoading) {
+      return {
+        loading: apiPosition.isLoading,
+        position: apiPosition.data?.position,
+      }
+    }
+
+    // Return Zephyr blockchain data
+    if (isZephyrNetwork && !POSITIONS_API_CONFIG.ENABLED) {
       return zephyrPosition
     }
 
+    // Return standard blockchain data
     return {
       loading: position.loading,
       position: position.positions?.[0],
     }
-  }, [isZephyrNetwork, zephyrPosition, position])
+  }, [isZephyrNetwork, zephyrPosition, position, apiPosition])
 }
 
 export function useV3Positions(account: string | null | undefined): UseV3PositionsResults {
   const { chainId } = useWeb3React()
   const isZephyrNetwork = chainId === ZEPHYR_CHAIN_ID
 
+  // Try API first if enabled
+  const apiPositions = usePositionsFromApi(account, POSITIONS_API_CONFIG.ENABLED)
+
+  // Fallback to blockchain data
   // Use direct RPC calls for Zephyr
-  const zephyrPositions = useZephyrV3Positions(isZephyrNetwork ? account : null)
+  const zephyrPositions = useZephyrV3Positions(isZephyrNetwork && !POSITIONS_API_CONFIG.ENABLED ? account : null)
   // And multicall for other networks
   const positionManager = useV3NFTPositionManagerContract()
 
   const { loading: balanceLoading, result: balanceResult } = useSingleCallResult(
-    isZephyrNetwork ? null : positionManager,
+    !isZephyrNetwork && !POSITIONS_API_CONFIG.ENABLED ? positionManager : null,
     'balanceOf',
     [account ?? undefined]
   )
   const accountBalance: number | undefined = balanceResult?.[0]?.toNumber()
 
   const tokenIdsArgs = useMemo(() => {
-    if (accountBalance && account && !isZephyrNetwork) {
+    if (accountBalance && account && !isZephyrNetwork && !POSITIONS_API_CONFIG.ENABLED) {
       const tokenRequests = []
       for (let i = 0; i < accountBalance; i++) {
         tokenRequests.push([account, i])
@@ -237,14 +262,14 @@ export function useV3Positions(account: string | null | undefined): UseV3Positio
   }, [account, accountBalance, isZephyrNetwork])
 
   const tokenIdResults = useSingleContractMultipleData(
-    isZephyrNetwork ? null : positionManager,
+    !isZephyrNetwork && !POSITIONS_API_CONFIG.ENABLED ? positionManager : null,
     'tokenOfOwnerByIndex',
     tokenIdsArgs
   )
   const someTokenIdsLoading = useMemo(() => tokenIdResults.some(({ loading }) => loading), [tokenIdResults])
 
   const tokenIds = useMemo(() => {
-    if (account && !isZephyrNetwork) {
+    if (account && !isZephyrNetwork && !POSITIONS_API_CONFIG.ENABLED) {
       return tokenIdResults
         .map(({ result }) => result)
         .filter((result): result is CallStateResult => !!result)
@@ -253,12 +278,24 @@ export function useV3Positions(account: string | null | undefined): UseV3Positio
     return []
   }, [account, tokenIdResults, isZephyrNetwork])
 
-  const { positions, loading: positionsLoading } = useV3PositionsFromTokenIds(isZephyrNetwork ? undefined : tokenIds)
+  const { positions, loading: positionsLoading } = useV3PositionsFromTokenIds(
+    !POSITIONS_API_CONFIG.ENABLED && !isZephyrNetwork ? tokenIds : undefined
+  )
 
-  if (isZephyrNetwork) {
+  // Return API data if enabled and available
+  if (POSITIONS_API_CONFIG.ENABLED && !apiPositions.isLoading) {
+    return {
+      loading: apiPositions.isLoading,
+      positions: apiPositions.data?.positions || [],
+    }
+  }
+
+  // Return Zephyr blockchain data
+  if (isZephyrNetwork && !POSITIONS_API_CONFIG.ENABLED) {
     return zephyrPositions
   }
 
+  // Return standard blockchain data
   return {
     loading: someTokenIdsLoading || balanceLoading || positionsLoading,
     positions,
