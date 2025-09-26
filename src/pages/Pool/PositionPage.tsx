@@ -15,6 +15,7 @@ import { RowBetween, RowFixed } from 'components/Row'
 import { Dots } from 'components/swap/styled'
 import Toggle from 'components/Toggle'
 import TransactionConfirmationModal, { ConfirmationModalContent } from 'components/TransactionConfirmationModal'
+import { POSITIONS_API_CONFIG } from 'config/positions-api'
 import { CHAIN_IDS_TO_NAMES, isSupportedChain } from 'constants/chains'
 import { ZEPHYR_CHAIN_ID } from 'constants/chains'
 import { useToken } from 'hooks/Tokens'
@@ -383,7 +384,8 @@ export function PositionPageUnsupportedContent() {
 
 export default function PositionPage() {
   const { chainId } = useWeb3React()
-  if (isSupportedChain(chainId)) {
+  // If positions API is enabled, we can view positions without blockchain connection
+  if (isSupportedChain(chainId) || POSITIONS_API_CONFIG.ENABLED) {
     return <PositionPageContent />
   } else {
     return <PositionPageUnsupportedContent />

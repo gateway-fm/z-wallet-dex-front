@@ -7,6 +7,7 @@ import { FlyoutAlignment, Menu } from 'components/Menu'
 import PositionList from 'components/PositionList'
 import { RowBetween, RowFixed } from 'components/Row'
 import { SwitchLocaleLink } from 'components/SwitchLocaleLink'
+import { POSITIONS_API_CONFIG } from 'config/positions-api'
 import { isSupportedChain } from 'constants/chains'
 import { useFilterPossiblyMaliciousPositions } from 'hooks/useFilterPossiblyMaliciousPositions'
 import { useNetworkSupportsV2 } from 'hooks/useNetworkSupportsV2'
@@ -154,6 +155,7 @@ function PositionsLoadingPlaceholder() {
 
 function WrongNetworkCard() {
   const theme = useTheme()
+  const { chainId } = useWeb3React()
 
   return (
     <>
@@ -173,6 +175,18 @@ function WrongNetworkCard() {
                   <div data-testid="pools-unsupported-err">
                     <Trans>Your connected network is unsupported.</Trans>
                   </div>
+                  {chainId && (
+                    <ThemedText.BodySecondary style={{ marginTop: '8px' }}>
+                      <Trans>
+                        Connected to chain {chainId}. Please switch to the correct network to view positions.
+                      </Trans>
+                    </ThemedText.BodySecondary>
+                  )}
+                  {!chainId && (
+                    <ThemedText.BodySecondary style={{ marginTop: '8px' }}>
+                      <Trans>Please connect your wallet to view positions.</Trans>
+                    </ThemedText.BodySecondary>
+                  )}
                 </ThemedText.BodyPrimary>
               </ErrorContainer>
             </MainContentWrapper>
@@ -209,8 +223,12 @@ export default function Pool() {
 
   const filteredPositions = useFilterPossiblyMaliciousPositions(userSelectedPositionSet)
 
-  if (!isSupportedChain(chainId)) {
-    return <WrongNetworkCard />
+  if (!isSupportedChain(chainId) && !POSITIONS_API_CONFIG.ENABLED) {
+    return (
+      <>
+        <WrongNetworkCard />
+      </>
+    )
   }
 
   const showConnectAWallet = Boolean(!account)
