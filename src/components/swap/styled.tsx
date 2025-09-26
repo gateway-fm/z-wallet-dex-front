@@ -27,18 +27,6 @@ const SwapWrapperOuter = styled.main<{ isDark?: boolean }>`
   border: 1px solid ${({ theme }) => theme.surface3};
   transition: transform 250ms ease;
   border-radius: 24px;
-
-  &:before {
-    content: ' ';
-    display: flex;
-    position: absolute;
-    inset: 0;
-    transform: scale(1.1);
-    filter: blur(50px);
-    background-color: ${({ theme }) => theme.accent2};
-    z-index: -2;
-  }
-
   &:hover {
     border: 1px solid ${({ theme }) => theme.surface3};
   }
