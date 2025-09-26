@@ -43,6 +43,7 @@ export const SwapWrapper = (props: React.ComponentProps<typeof SwapWrapperOuter>
 const SwapWrapperInner = styled.div`
   border-radius: 24px;
   background: ${({ theme }) => theme.surface1};
+
   z-index: -1;
   padding: 8px;
   padding-top: 12px;
