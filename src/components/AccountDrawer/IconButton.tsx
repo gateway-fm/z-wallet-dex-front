@@ -51,12 +51,11 @@ const IconStyles = css<{ hideHorizontal?: boolean }>`
   }
 `
 
-const IconBlockLink = styled.a`
-  ${IconStyles};
-`
-
 const IconBlockButton = styled.button`
   ${IconStyles};
+  padding: 0px 0 0 4px !important;
+  min-width: 38px !important;
+  height: 38px !important;
   border: none;
   outline: none;
 `
@@ -81,9 +80,6 @@ interface IconButtonProps extends React.ComponentPropsWithoutRef<'button'>, Base
 type IconBlockProps = React.ComponentPropsWithoutRef<'a' | 'button'>
 
 const IconBlock = forwardRef<HTMLAnchorElement | HTMLDivElement, IconBlockProps>(function IconBlock(props, ref) {
-  if ('href' in props) {
-    return <IconBlockLink ref={ref as React.ForwardedRef<HTMLAnchorElement>} {...props} />
-  }
   // ignoring 'button' 'type' conflict between React and styled-components
   // @ts-ignore
   return <IconBlockButton ref={ref} {...props} />
@@ -240,6 +236,7 @@ export const IconWithConfirmTextButton = ({
             // this negative transform offsets for the shift it does due to being 0 width
             transform: showText ? undefined : `translateX(-8px)`,
             minWidth: showText ? dimensions.innerText : 0,
+            marginRight: showText ? '10px' : 0,
           }}
         >
           <TextWrapper ref={hiddenObserver.ref}>{text}</TextWrapper>
