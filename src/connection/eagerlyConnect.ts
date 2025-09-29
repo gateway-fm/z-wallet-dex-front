@@ -1,7 +1,7 @@
 import { Connector } from '@web3-react/types'
 import { useSyncExternalStore } from 'react'
 
-import { getConnection, networkConnection } from './index'
+import { getConnection } from './index'
 import { deletePersistedConnectionMeta, getPersistedConnectionMeta } from './meta'
 import { ConnectionType } from './types'
 
@@ -37,8 +37,6 @@ async function connect(connector: Connector, type: ConnectionType) {
     performance.measure(`web3:connect:${type}`, `web3:connect:${type}:start`)
   }
 }
-
-connect(networkConnection.connector, ConnectionType.NETWORK)
 
 // Get the persisted wallet type from the last session.
 const meta = getPersistedConnectionMeta()

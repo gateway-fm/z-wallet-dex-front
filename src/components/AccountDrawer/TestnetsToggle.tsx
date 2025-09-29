@@ -1,6 +1,6 @@
 import { t } from '@lingui/macro'
-import { useSetAtom } from 'jotai'
-import { atomWithStorage, useAtomValue } from 'jotai/utils'
+import { useAtomValue, useSetAtom } from 'jotai'
+import { atomWithStorage } from 'jotai/utils'
 
 import { SettingsToggle } from './SettingsToggle'
 

@@ -7,7 +7,6 @@ export const onRequest: PagesFunction = async ({ request, next }) => {
     title: 'Horswap',
     image: imageUri,
     url: request.url,
-    description: 'Swap or provide liquidity on the Uniswap Protocol',
   }
   const res = next()
   try {

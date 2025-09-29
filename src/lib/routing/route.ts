@@ -1,6 +1,6 @@
 import apiInstance from '../../api'
 import { extractRecipientFromCalldata, replaceRecipientInCalldata } from './calldata-utils'
-import { SwapParams, SwapType } from './types'
+import { SwapParams } from './types'
 
 export async function getSwapData(params: SwapParams): Promise<{ callData: string; amountQuoted: bigint }> {
   if (!params.tokenIn || !params.tokenOut) {
@@ -16,7 +16,8 @@ export async function getSwapData(params: SwapParams): Promise<{ callData: strin
   }
 
   try {
-    const routeType = params.swapType === SwapType.EXACT_INPUT ? 'input' : 'output'
+    // Always use 'input' route type as API works better with it
+    const routeType = 'input'
 
     const bestRouteResponse = await apiInstance.routing.bestRoute({
       tknIn: params.tokenIn,

@@ -100,8 +100,8 @@ export default function AssetLogo({
         </LogoImageWrapper>
       ) : (
         <MissingImageLogo size={size}>
-          {/* use only first 3 characters of Symbol for design reasons */}
-          {symbol?.toUpperCase().replace('$', '').replace(/\s+/g, '').slice(0, 3)}
+          {/* use only first 4 characters of Symbol for design reasons */}
+          {symbol?.toUpperCase().replace('$', '').replace(/\s+/g, '').slice(0, 4)}
         </MissingImageLogo>
       )}
       {!hideL2Icon && <L2NetworkLogo networkUrl={L2Icon} parentSize={size} />}

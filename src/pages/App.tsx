@@ -1,7 +1,7 @@
 import ErrorBoundary from 'components/ErrorBoundary'
 import Loader from 'components/Icons/LoadingSpinner'
 import { IpfsSubpathRedirect } from 'components/IpfsSubpathRedirect'
-import NavBar, { PageTabs } from 'components/NavBar'
+import NavBar from 'components/NavBar'
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
@@ -31,6 +31,7 @@ const BodyWrapper = styled.div`
   }
 `
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const MobileBottomBar = styled.div`
   z-index: ${Z_INDEX.sticky};
   position: fixed;
@@ -57,6 +58,7 @@ const HeaderWrapper = styled.div<{ transparent?: boolean; scrollY: number }>`
   background-color: ${({ theme, transparent }) => !transparent && theme.surface1};
   border-bottom: ${({ theme, transparent }) => !transparent && `1px solid ${theme.surface3}`};
   width: 100%;
+  max-width: 1600px;
   justify-content: space-between;
   position: fixed;
   top: 0;
@@ -128,9 +130,6 @@ export default function App() {
           </Routes>
         </Suspense>
       </BodyWrapper>
-      <MobileBottomBar>
-        <PageTabs />
-      </MobileBottomBar>
     </ErrorBoundary>
   )
 }

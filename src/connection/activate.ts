@@ -1,7 +1,6 @@
 import { ChainId } from '@uniswap/sdk-core'
 import { Connection } from 'connection/types'
-import { atom, useSetAtom } from 'jotai'
-import { useAtomValue } from 'jotai/utils'
+import { atom, useAtomValue, useSetAtom } from 'jotai'
 import { useCallback } from 'react'
 import { useAppDispatch } from 'state/hooks'
 import { updateSelectedWallet } from 'state/user/reducer'
@@ -34,11 +33,9 @@ function useTryActivation() {
       try {
         setActivationState({ status: ActivationStatus.PENDING, connection })
 
-        console.debug(`Connection activating: ${connection.getName()}`)
         dispatch(updateSelectedWallet({ wallet: undefined }))
         await connection.connector.activate()
 
-        console.debug(`Connection activated: ${connection.getName()}`)
         dispatch(updateSelectedWallet({ wallet: connection.type }))
 
         // Clears pending connection state

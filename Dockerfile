@@ -39,6 +39,7 @@ COPY --chown=appuser:nodejs package.json ./
 COPY --from=builder --chown=appuser:nodejs /app/build ./build
 COPY --from=builder --chown=appuser:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=appuser:nodejs /app/public ./public
+COPY --from=builder --chown=appuser:nodejs /app/scripts/generate-runtime-config.sh ./scripts/
 
 # Create simple health check endpoint script
 RUN echo 'const http = require("http"); \
@@ -46,6 +47,9 @@ http.get("http://localhost:3000/", (res) => { \
   process.exit(res.statusCode === 200 ? 0 : 1); \
 }).on("error", () => process.exit(1));' > health-check.js && \
   chown appuser:nodejs health-check.js
+
+# Make runtime config script executable
+RUN chmod +x ./scripts/generate-runtime-config.sh
 
 # Switch to non-root user
 USER appuser
@@ -55,5 +59,6 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD node health-check.js
 
-CMD ["yarn", "serve"]
+# Generate runtime configuration and start the application
+CMD ["sh", "-c", "./scripts/generate-runtime-config.sh && yarn serve"]
 

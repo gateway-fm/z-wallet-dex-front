@@ -1,5 +1,6 @@
 import { t } from '@lingui/macro'
 
+import { ZWalletUserRejectedError } from '../hooks/useZWalletSwap'
 import { UserRejectedRequestError } from './errors'
 
 function getReason(error: any): string | undefined {
@@ -20,7 +21,7 @@ export function didUserReject(error: any): boolean {
     // For Rainbow :
     (reason?.match(/request/i) && reason?.match(/reject/i)) ||
     // For Frame:
-    reason?.match(/declined/i) ||
+    reason?.match(/declined?/i) ||
     // For SafePal:
     reason?.match(/cancell?ed by user/i) ||
     // For Trust:
@@ -29,7 +30,12 @@ export function didUserReject(error: any): boolean {
     reason?.match(/user denied/i) ||
     // For Fireblocks
     reason?.match(/user rejected/i) ||
-    error instanceof UserRejectedRequestError
+    // For Z-Wallet specific cancellation:
+    reason?.match(/request_cancelled/i) ||
+    reason?.match(/request was cancelled by the user/i) ||
+    error instanceof UserRejectedRequestError ||
+    // For Z-Wallet:
+    error instanceof ZWalletUserRejectedError
   ) {
     return true
   }
@@ -44,6 +50,10 @@ export function didUserReject(error: any): boolean {
 export function swapErrorToUserReadableMessage(error: any): string {
   if (didUserReject(error)) {
     return t`Transaction rejected`
+  }
+
+  if (error?.message && error.message.includes('Insufficient') && error.message.includes('balance')) {
+    return error.message
   }
 
   let reason = getReason(error)
@@ -68,11 +78,8 @@ export function swapErrorToUserReadableMessage(error: any): string {
     case 'TF':
       return t`The output token cannot be transferred. There may be an issue with the output token. Note: fee on transfer and rebase tokens are incompatible with Uniswap V3.`
     default:
-      if (reason?.indexOf('undefined is not an object') !== -1) {
-        console.error(error, reason)
+      if (reason?.indexOf('undefined is not an object') !== -1)
         return t`An error occurred when trying to execute this swap. You may need to increase your slippage tolerance. If that does not work, there may be an incompatibility with the token you are trading. Note: fee on transfer and rebase tokens are incompatible with Uniswap V3.`
-      }
-      return t`${reason ? reason : 'Unknown error.'} Try increasing your slippage tolerance.
-Note: fee-on-transfer and rebase tokens are incompatible with Uniswap V3.`
+      return t`Unknown error${reason ? `: "${reason}"` : ''}. Try increasing your slippage tolerance.`
   }
 }

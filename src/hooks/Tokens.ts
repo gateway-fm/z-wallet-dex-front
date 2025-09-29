@@ -14,7 +14,9 @@ import { useAllLists, useCombinedActiveList, useCombinedTokenMapFromUrls } from 
 import { WrappedTokenInfo } from '../state/lists/wrappedTokenInfo'
 import { deserializeToken, useUserAddedTokens } from '../state/user/hooks'
 import { useUnsupportedTokenList } from './../state/lists/hooks'
-import { useZephyrTokens } from './useZephyrTokensV2'
+import { getTokenMetadata, useZephyrTokens } from './useZephyrTokensV2'
+
+const createdTokensCache: { [address: string]: Token } = {}
 
 type Maybe<T> = T | null | undefined
 
@@ -233,7 +235,6 @@ export function useCurrency(currencyId: string | null | undefined, chainId?: Cha
   if (currentChainId === ZEPHYR_CHAIN_ID) {
     if (!currencyId) return undefined
 
-    // Look up token in GraphQL tokens by address or symbol
     const tokenByAddress = Object.values(zephyrTokens).find(
       (token) => token.address.toLowerCase() === currencyId.toLowerCase()
     )
@@ -246,6 +247,35 @@ export function useCurrency(currencyId: string | null | undefined, chainId?: Cha
     )
 
     if (tokenBySymbol) return tokenBySymbol
+
+    // If we have a valid address, create the token anyway
+    if (currencyId.startsWith('0x') && currencyId.length === 42) {
+      const lowerAddress = currencyId.toLowerCase()
+
+      // Return cached token if exists
+      if (createdTokensCache[lowerAddress]) {
+        return createdTokensCache[lowerAddress]
+      }
+
+      const metadata = getTokenMetadata(currencyId)
+
+      try {
+        const token = new Token(
+          currentChainId,
+          currencyId,
+          metadata?.decimals || 18,
+          metadata?.symbol || 'TOKEN',
+          metadata?.name || 'Token'
+        )
+
+        // Cache the created token
+        createdTokensCache[lowerAddress] = token
+        return token
+      } catch (error) {
+        return undefined
+      }
+    }
+
     return undefined
   }
 

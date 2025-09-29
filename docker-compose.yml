@@ -2,11 +2,77 @@ version: '3.8'
 
 services:
   frontend:
-    image: gatewayfm/zephyr-dex:latest
+    image: gatewayfm/zephyr-dex:v1.1.4
     ports:
-      - "3000:80"
+      - "8000:3000"
     env_file:
       - .env
+    environment:
+      # Network Configuration
+      - REACT_APP_CUSTOM_NETWORK_CHAIN_ID
+      - REACT_APP_CUSTOM_NETWORK_NAME
+      - REACT_APP_CUSTOM_NETWORK_RPC_URL
+      - REACT_APP_ZEPHYR_RPC_FALLBACK
+      - REACT_APP_RPC_TIMEOUT
+
+      # Explorer Configuration
+      - REACT_APP_CUSTOM_NETWORK_EXPLORER_URL
+      - REACT_APP_ZEPHYR_EXPLORER_API
+
+      # Service URLs
+      - REACT_APP_CUSTOM_NETWORK_BRIDGE_URL
+      - REACT_APP_CUSTOM_NETWORK_FAUCET_URL
+
+      # API Configuration
+      - REACT_APP_API_URL
+      - REACT_APP_API_CACHE_STALE_TIME
+      - REACT_APP_API_CACHE_GC_TIME
+
+      # Token Configuration
+      - REACT_APP_CUSTOM_NETWORK_USDC_ADDRESS
+      - REACT_APP_ZEPHYR_BASE_TOKEN_SYMBOL
+      - REACT_APP_ZEPHYR_BASE_TOKEN_NAME
+
+      # Contract Addresses
+      - REACT_APP_CUSTOM_NETWORK_V3_FACTORY_ADDRESS
+      - REACT_APP_CUSTOM_NETWORK_POSITION_MANAGER_ADDRESS
+      - REACT_APP_CUSTOM_NETWORK_SWAP_ROUTER_ADDRESS
+      - REACT_APP_CUSTOM_NETWORK_QUOTER_ADDRESS
+      - REACT_APP_CUSTOM_NETWORK_MULTICALL_ADDRESS
+      - REACT_APP_CUSTOM_NETWORK_TICK_LENS_ADDRESS
+      - REACT_APP_CUSTOM_NETWORK_V3_MIGRATOR_ADDRESS
+
+      # Zephyr Protocol Addresses (optional)
+      - REACT_APP_ZEPHYR_LIQUIDITY_MANAGER_ADDRESS
+      - REACT_APP_ZEPHYR_EXCHANGER_ADDRESS
+      - REACT_APP_ZEPHYR_PAIR_FACTORY_ADDRESS
+
+      # Token Addresses
+      - REACT_APP_CUSTOM_NETWORK_WRAPPED_NATIVE_ADDRESS
+
+      # Feature Flags
+      - REACT_APP_ANALYTICS_ENABLED
+      - REACT_APP_ENABLE_GRAPHQL
+      - REACT_APP_PRIVACY_MODE
+      - REACT_APP_DEBUG_MODE
+      - REACT_APP_CACHE_ENABLED
+      - REACT_APP_STAGING
+      - REACT_APP_IS_UNISWAP_INTERFACE
+      - REACT_APP_SKIP_CSP
+
+      # External Services
+      - REACT_APP_INFURA_KEY
+      - REACT_APP_ALCHEMY_API_KEY
+      - REACT_APP_WALLET_CONNECT_PROJECT_ID
+      - REACT_APP_Z_WALLET_CLIENT_URL
+      - REACT_APP_Z_WALLET_RPC_URL
+      - REACT_APP_Z_WALLET_EXPLORER_URL
+      - REACT_APP_Z_WALLET_PERSISTENCE_TTL
+      - REACT_APP_Z_WALLET_TIMEOUT
+
+      # Token Filter
+      - REACT_APP_QUICK_ACCESS_TOKENS
+
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "node", "health-check.js"]

@@ -26,7 +26,7 @@ import { SwapState } from './reducer'
 
 export function useSwapActionHandlers(dispatch: React.Dispatch<AnyAction>): {
   onCurrencySelection: (field: Field, currency: Currency) => void
-  onSwitchTokens: (newOutputHasTax: boolean, previouslyEstimatedOutput: string) => void
+  onSwitchTokens: (newOutputHasTax: boolean, previouslyEstimatedOutput: string, currentInputValue: string) => void
   onUserInput: (field: Field, typedValue: string) => void
   onChangeRecipient: (recipient: string | null) => void
 } {
@@ -43,8 +43,14 @@ export function useSwapActionHandlers(dispatch: React.Dispatch<AnyAction>): {
   )
 
   const onSwitchTokens = useCallback(
-    (newOutputHasTax: boolean, previouslyEstimatedOutput: string) => {
-      dispatch(switchCurrencies({ newOutputHasTax, previouslyEstimatedOutput }))
+    (newOutputHasTax: boolean, previouslyEstimatedOutput: string, currentInputValue: string) => {
+      dispatch(
+        switchCurrencies({
+          newOutputHasTax,
+          previouslyEstimatedOutput,
+          currentInputValue,
+        })
+      )
     },
     [dispatch]
   )
@@ -189,10 +195,14 @@ export function useDerivedSwapInfo(state: SwapState, chainId: ChainId | undefine
       }
     }
 
-    // compare input balance to max input based on version
-    const [balanceIn, maxAmountIn] = [currencyBalances[Field.INPUT], trade?.trade?.maximumAmountIn(allowedSlippage)]
+    // compare input balance to required input amount based on trade
+    const balanceIn = currencyBalances[Field.INPUT]
+    const inputAmount = trade?.trade?.inputAmount
+    const maxAmountIn = trade?.trade?.maximumAmountIn(allowedSlippage)
 
-    if (balanceIn && maxAmountIn && balanceIn.lessThan(maxAmountIn)) {
+    if (balanceIn && inputAmount && balanceIn.lessThan(inputAmount)) {
+      inputError = <Trans>Insufficient {balanceIn.currency.symbol} balance</Trans>
+    } else if (balanceIn && maxAmountIn && balanceIn.lessThan(maxAmountIn)) {
       inputError = <Trans>Insufficient {balanceIn.currency.symbol} balance</Trans>
     }
 
@@ -273,6 +283,7 @@ export function queryParametersToSwapState(parsedQs: ParsedQs, chainId?: number)
     typedValue,
     independentField,
     recipient,
+    currenciesSwapped: false,
   }
 }
 

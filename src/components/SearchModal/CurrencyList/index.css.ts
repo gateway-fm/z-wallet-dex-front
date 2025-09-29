@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css'
 import { themeVars } from 'nft/css/sprinkles.css'
 
+// eslint-disable-next-line import/no-unused-modules
 export const scrollbarStyle = style([
   {
     scrollbarWidth: 'thin',

@@ -124,7 +124,7 @@ function DoubleCurrencyLogo({ chainId, currencies, backupImages, size }: DoubleC
   }
   return (
     <MissingImageLogo size={size}>
-      {currencies[0]?.symbol?.toUpperCase().replace('$', '').replace(/\s+/g, '').slice(0, 3)}
+      {currencies[0]?.symbol?.toUpperCase().replace('$', '').replace(/\s+/g, '').slice(0, 4)}
     </MissingImageLogo>
   )
 }

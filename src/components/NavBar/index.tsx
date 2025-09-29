@@ -42,6 +42,7 @@ const MenuItem = ({ href, dataTestId, id, isActive, children }: MenuItemProps) =
   )
 }
 
+// eslint-disable-next-line import/no-unused-modules
 export const PageTabs = () => {
   const { pathname } = useLocation()
   return (

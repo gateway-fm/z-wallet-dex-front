@@ -20,6 +20,7 @@ describe('hooks', () => {
         typedValue: '20.5',
         independentField: Field.OUTPUT,
         recipient: null,
+        currenciesSwapped: false,
       })
     })
 
@@ -32,6 +33,7 @@ describe('hooks', () => {
         typedValue: '',
         independentField: Field.INPUT,
         recipient: null,
+        currenciesSwapped: false,
       })
     })
 
@@ -46,6 +48,7 @@ describe('hooks', () => {
         typedValue: '20.5',
         independentField: Field.INPUT,
         recipient: null,
+        currenciesSwapped: false,
       })
     })
 
@@ -60,6 +63,7 @@ describe('hooks', () => {
         typedValue: '20.5',
         independentField: Field.INPUT,
         recipient: null,
+        currenciesSwapped: false,
       })
     })
 
@@ -77,6 +81,7 @@ describe('hooks', () => {
         typedValue: '20.5',
         independentField: Field.INPUT,
         recipient: TEST_RECIPIENT_ADDRESS,
+        currenciesSwapped: false,
       })
     })
     test('accepts any recipient', () => {
@@ -93,6 +98,7 @@ describe('hooks', () => {
         typedValue: '20.5',
         independentField: Field.INPUT,
         recipient: 'bob.argent.xyz',
+        currenciesSwapped: false,
       })
     })
   })

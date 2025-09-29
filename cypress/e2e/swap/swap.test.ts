@@ -33,7 +33,6 @@ describe('Swap', () => {
       cy.visit('/swap')
       cy.get('#swap-currency-input .token-amount-input').should('have.value', '')
       cy.get('#swap-currency-input .token-amount-input').type('0.01')
-cy.get(.type('0.01').should( 1>.type('0.01').should(-).should('have.value', '0.01')
       cy.visit('/pool').visit('/swap')
       cy.get('#swap-currency-input .token-amount-input').should('have.value', '')
     })
@@ -44,7 +43,6 @@ cy.get(.type('0.01').should( 1>.type('0.01').should(-).should('have.value', '0.0
       cy.get(`#swap-currency-output .token-amount-input`).should('have.value', '')
 
       cy.get('#swap-currency-input .token-amount-input').type('0.01')
-cy.get(.type('0.01').should( 1>.type('0.01').should(-).should('have.value', '0.01')
       cy.get(`#swap-currency-output .token-amount-input`).should('not.have.value', '')
       cy.get('#swap-currency-input .token-amount-input').clear()
       cy.get(`#swap-currency-output .token-amount-input`).should('not.have.value')
@@ -64,7 +62,6 @@ cy.get(.type('0.01').should( 1>.type('0.01').should(-).should('have.value', '0.0
 
         // Enter amount to swap
         cy.get('#swap-currency-output .token-amount-input').type('1')
-cy.get(.type('1').should( 1>.type('1').should(-).should('have.value', '1')
         cy.get('#swap-currency-input .token-amount-input').should('not.have.value', '')
 
         // Submit transaction

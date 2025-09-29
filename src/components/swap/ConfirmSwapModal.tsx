@@ -9,6 +9,7 @@ import { Allowance, AllowanceState } from 'hooks/usePermit2Allowance'
 import usePrevious from 'hooks/usePrevious'
 import { SwapResult } from 'hooks/useSwapCallback'
 import useWrapCallback from 'hooks/useWrapCallback'
+import { ZWalletConnectionError, ZWalletTransactionError, ZWalletUserRejectedError } from 'hooks/useZWalletSwap'
 import useNativeCurrency from 'lib/hooks/useNativeCurrency'
 import { useCallback, useEffect, useState } from 'react'
 import { InterfaceTrade } from 'state/routing/types'
@@ -116,7 +117,12 @@ function useConfirmModalState({
   const wrapConfirmed = useIsTransactionConfirmed(wrapTxHash)
   const prevWrapConfirmed = usePrevious(wrapConfirmed)
   const catchUserReject = async (e: any, errorType: PendingModalError) => {
+    console.warn('Transaction cancelled', e, errorType)
     setConfirmModalState(ConfirmModalState.REVIEWING)
+    if (e instanceof ZWalletUserRejectedError) {
+      setApprovalError(PendingModalError.ZWALLET_USER_REJECTED)
+      return
+    }
     if (didUserReject(e)) return
     console.error(e)
     setApprovalError(errorType)
@@ -224,7 +230,14 @@ function useConfirmModalState({
     setApprovalError(undefined)
   }
 
-  return { startSwapFlow, onCancel, confirmModalState, approvalError, pendingModalSteps, wrapTxHash }
+  return {
+    startSwapFlow,
+    onCancel,
+    confirmModalState,
+    approvalError,
+    pendingModalSteps,
+    wrapTxHash,
+  }
 }
 
 export default function ConfirmSwapModal({
@@ -381,6 +394,10 @@ export default function ConfirmSwapModal({
     if (approvalError) return approvalError
     // SignatureExpiredError is a special case. The UI is shown in the PendingModalContent component.
     if (swapError instanceof SignatureExpiredError) return
+    // Handle Z-Wallet specific errors
+    if (swapError instanceof ZWalletUserRejectedError) return PendingModalError.ZWALLET_USER_REJECTED
+    if (swapError instanceof ZWalletConnectionError) return PendingModalError.ZWALLET_CONNECTION_ERROR
+    if (swapError instanceof ZWalletTransactionError) return PendingModalError.ZWALLET_TRANSACTION_ERROR
     if (swapError && !didUserReject(swapError)) return PendingModalError.CONFIRMATION_ERROR
     return
   }

@@ -41,6 +41,9 @@
 
     <link rel="preload" href="./fonts/Basel-Book.woff" as="font" type="font/woff" crossorigin />
     <link rel="preload" href="./fonts/Basel-Medium.woff" as="font" type="font/woff" crossorigin />
+    
+    <!-- Runtime Environment Configuration -->
+    <script src="./env-config.js"></script>
 
    
     <style>
@@ -118,6 +121,13 @@
       #root {
         min-height: 100%;
       }
+
+      #root {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }      
 
       @media (prefers-color-scheme: dark) {
         html {

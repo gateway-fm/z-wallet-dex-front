@@ -30,7 +30,7 @@ export const MORE_CARDS = [
   {
     to: '/whatishorswap',
     title: 'Horswap?',
-    description: 'Read more about this censorship resistant and privacy protecting Uniswap Interface.',
+    description: 'Read more about this censorship resistant and privacy protecting',
     lightIcon: <StyledCardLogo src={hors} alt="What is Horswap?" />,
     darkIcon: <StyledCardLogo src={hors} alt="What is Horswap?" />,
     cta: 'Read more',
@@ -38,7 +38,7 @@ export const MORE_CARDS = [
   {
     to: '/pools',
     title: 'Earn',
-    description: 'Provide liquidity to pools on Uniswap and earn fees on swaps.',
+    description: 'Provide liquidity to pools and earn fees on swaps.',
     lightIcon: <StyledCardLogo src={lightArrowImgSrc} alt="Analytics" />,
     darkIcon: <StyledCardLogo src={darkArrowImgSrc} alt="Analytics" />,
     cta: 'Provide liquidity',

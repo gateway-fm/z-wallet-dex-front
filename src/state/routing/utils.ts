@@ -17,7 +17,6 @@ import {
   PreviewTrade,
   QuoteMethod,
   QuoteState,
-  SubmittableTrade,
   SwapRouterNativeAssets,
   TradeFillType,
   TradeResult,
@@ -149,16 +148,11 @@ export async function transformRoutesToTrade(
   const { tradeType, account, amount, inputTax, outputTax } = args
 
   const [currencyIn, currencyOut] = getTradeCurrencies(args)
-  const { gasUseEstimateUSD, blockNumber, routes, gasUseEstimate } = getClassicTradeDetails(
-    currencyIn,
-    currencyOut,
-    data
-  )
+  const { gasUseEstimateUSD, blockNumber, routes } = getClassicTradeDetails(currencyIn, currencyOut, data)
 
   // Some sus javascript float math but it's ok because its just an estimate for display purposes
-  const usdCostPerGas = gasUseEstimateUSD && gasUseEstimate ? gasUseEstimateUSD / gasUseEstimate : undefined
-
-  const approveInfo = await getApproveInfo(account, currencyIn, amount, provider, usdCostPerGas)
+  // NOTE: No gas fees in this DEX solution
+  const approveInfo = await getApproveInfo(account, currencyIn, amount, provider)
 
   const classicTrade = new ClassicTrade({
     v2Routes:
@@ -238,8 +232,4 @@ export function isClassicTrade(trade?: InterfaceTrade): trade is ClassicTrade {
 
 export function isPreviewTrade(trade?: InterfaceTrade): trade is PreviewTrade {
   return trade?.fillType === TradeFillType.None
-}
-
-export function isSubmittableTrade(trade?: InterfaceTrade): trade is SubmittableTrade {
-  return trade?.fillType === TradeFillType.Classic
 }

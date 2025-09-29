@@ -6,6 +6,7 @@ import { useUniversalRouterSwapCallback } from 'hooks/useUniversalRouter'
 import { useZephyrRoutingV2 } from 'hooks/useZephyrRoutingV2'
 import { useZephyrSwapV2 } from 'hooks/useZephyrSwapV2'
 import { useCallback } from 'react'
+import { useCurrencyBalance } from 'state/connection/hooks'
 import { InterfaceTrade } from 'state/routing/types'
 import { isClassicTrade } from 'state/routing/utils'
 import { useTransactionAdder } from 'state/transactions/hooks'
@@ -29,9 +30,9 @@ export function useSwapCallback(
   allowedSlippage: Percent, // in bips
   permitSignature: PermitSignature | undefined
 ) {
+  const { account, chainId } = useWeb3React()
   const deadline = useTransactionDeadline()
   const addTransaction = useTransactionAdder()
-  const { account, chainId } = useWeb3React()
 
   const universalRouterSwapCallback = useUniversalRouterSwapCallback(isClassicTrade(trade) ? trade : undefined, {
     slippageTolerance: allowedSlippage,
@@ -60,8 +61,9 @@ export function useSwapCallback(
     routingResult.callData // Use callData from routing system
   )
 
-  // Use Universal Router for other networks, but SwapRouter02 for Zephyr
   const swapCallback = chainId === ZEPHYR_CHAIN_ID ? zephyrSwapCallback : universalRouterSwapCallback
+
+  const inputBalance = useCurrencyBalance(account, trade?.inputAmount.currency)
 
   return useCallback(async () => {
     if (!trade) throw new Error('missing trade')
@@ -82,28 +84,37 @@ export function useSwapCallback(
 
     if (!swapCallback) throw new Error('swap callback not available')
 
+    // Check if user has sufficient balance before attempting the swap
+    if (inputBalance && trade.inputAmount && inputBalance.lessThan(trade.inputAmount)) {
+      throw new Error(`Insufficient ${trade.inputAmount.currency.symbol} balance`)
+    }
+
     const result = await swapCallback()
 
-    const swapInfo: ExactInputSwapTransactionInfo | ExactOutputSwapTransactionInfo = {
-      type: TransactionType.SWAP,
-      inputCurrencyId: currencyId(trade.inputAmount.currency),
-      outputCurrencyId: currencyId(trade.outputAmount.currency),
-      ...(trade.tradeType === TradeType.EXACT_INPUT
-        ? {
-            tradeType: TradeType.EXACT_INPUT,
-            inputCurrencyAmountRaw: trade.inputAmount.quotient.toString(),
-            expectedOutputCurrencyAmountRaw: trade.postTaxOutputAmount.quotient.toString(),
-            minimumOutputCurrencyAmountRaw: trade.minimumAmountOut(allowedSlippage).quotient.toString(),
-          }
-        : {
-            tradeType: TradeType.EXACT_OUTPUT,
-            maximumInputCurrencyAmountRaw: trade.maximumAmountIn(allowedSlippage).quotient.toString(),
-            outputCurrencyAmountRaw: trade.postTaxOutputAmount.quotient.toString(),
-            expectedInputCurrencyAmountRaw: trade.inputAmount.quotient.toString(),
-          }),
+    // For Zephyr network, transaction is already added to store in useZWalletSwap
+    // For other networks, add transaction to store
+    if (chainId !== ZEPHYR_CHAIN_ID) {
+      const swapInfo: ExactInputSwapTransactionInfo | ExactOutputSwapTransactionInfo = {
+        type: TransactionType.SWAP,
+        inputCurrencyId: currencyId(trade.inputAmount.currency),
+        outputCurrencyId: currencyId(trade.outputAmount.currency),
+        ...(trade.tradeType === TradeType.EXACT_INPUT
+          ? {
+              tradeType: TradeType.EXACT_INPUT,
+              inputCurrencyAmountRaw: trade.inputAmount.quotient.toString(),
+              expectedOutputCurrencyAmountRaw: trade.postTaxOutputAmount.quotient.toString(),
+              minimumOutputCurrencyAmountRaw: trade.minimumAmountOut(allowedSlippage).quotient.toString(),
+            }
+          : {
+              tradeType: TradeType.EXACT_OUTPUT,
+              maximumInputCurrencyAmountRaw: trade.maximumAmountIn(allowedSlippage).quotient.toString(),
+              outputCurrencyAmountRaw: trade.postTaxOutputAmount.quotient.toString(),
+              expectedInputCurrencyAmountRaw: trade.inputAmount.quotient.toString(),
+            }),
+      }
+      addTransaction(result.response, swapInfo, deadline?.toNumber())
     }
-    addTransaction(result.response, swapInfo, deadline?.toNumber())
 
     return result
-  }, [trade, account, chainId, swapCallback, allowedSlippage, addTransaction, deadline, routingResult])
+  }, [trade, account, chainId, swapCallback, allowedSlippage, addTransaction, deadline, routingResult, inputBalance])
 }

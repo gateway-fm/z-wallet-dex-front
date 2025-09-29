@@ -3,15 +3,17 @@
 
 import { ChainId } from '@uniswap/sdk-core'
 
-// Custom Chain ID for Zephyr network
-export const ZEPHYR_CHAIN_ID = 1417429182
+import { runtimeConfig } from '../utils/runtime-config'
+
+// Custom Chain ID for Zephyr network - get from runtime config
+export const ZEPHYR_CHAIN_ID = runtimeConfig.getChainId()
 
 export const CHAIN_IDS_TO_NAMES = {
   [ZEPHYR_CHAIN_ID]: 'zephyr',
 } as const
 
 // Only Zephyr network is supported
-export type SupportedInterfaceChain = typeof ZEPHYR_CHAIN_ID
+export type SupportedInterfaceChain = number
 
 export function isSupportedChain(chainId: number | null | undefined | ChainId): chainId is SupportedInterfaceChain {
   return !!chainId && chainId === ZEPHYR_CHAIN_ID
@@ -34,17 +36,17 @@ export const TESTNET_CHAIN_IDS = [] as const
 /**
  * All the chain IDs that are running the Ethereum protocol.
  */
-export const L1_CHAIN_IDS = [ZEPHYR_CHAIN_ID] as const
+export const L1_CHAIN_IDS = [ZEPHYR_CHAIN_ID]
 
-export type SupportedL1ChainId = (typeof L1_CHAIN_IDS)[number]
+export type SupportedL1ChainId = number
 
 /**
  * Controls some L2 specific behavior, e.g. slippage tolerance, special UI behavior.
  * The expectation is that all of these networks have immediate transaction confirmation.
  */
-export const L2_CHAIN_IDS = [] as const
+export const L2_CHAIN_IDS: number[] = []
 
-export type SupportedL2ChainId = (typeof L2_CHAIN_IDS)[number]
+export type SupportedL2ChainId = never
 
 /**
  * Get the priority of a chainId based on its relevance to the user.
