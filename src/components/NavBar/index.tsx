@@ -1,6 +1,7 @@
 import { Trans } from '@lingui/macro'
 import { useAccountDrawer } from 'components/AccountDrawer'
 import Web3Status from 'components/Web3Status'
+import { useIsPoolsPage } from 'hooks/useIsPoolsPage'
 import { Box } from 'nft/components/Box'
 import { Row } from 'nft/components/Flex'
 // import { GatewayIcon } from 'nft/components/icons'
@@ -45,10 +46,15 @@ const MenuItem = ({ href, dataTestId, id, isActive, children }: MenuItemProps) =
 // eslint-disable-next-line import/no-unused-modules
 export const PageTabs = () => {
   const { pathname } = useLocation()
+  const isPoolActive = useIsPoolsPage()
+
   return (
     <>
       <MenuItem href="/swap" isActive={pathname.startsWith('/swap')}>
         <Trans>Swap</Trans>
+      </MenuItem>
+      <MenuItem href="/pools" dataTestId="pool-nav-link" isActive={isPoolActive}>
+        <Trans>Positions</Trans>
       </MenuItem>
     </>
   )

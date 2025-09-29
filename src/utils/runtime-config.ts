@@ -24,6 +24,10 @@ interface RuntimeConfig {
   API_CACHE_STALE_TIME: number
   API_CACHE_GC_TIME: number
 
+  // Positions API Configuration
+  POSITIONS_API_URL: string
+  POSITIONS_API_ENABLED: boolean
+
   // Token Configuration
   BASE_TOKEN_ADDRESS: string
   BASE_TOKEN_SYMBOL: string
@@ -150,6 +154,15 @@ export const runtimeConfig = {
     getRuntimeConfig('API_URL', 'REACT_APP_API_URL', 'https://api-swap-zephyr.platform-dev.gateway.fm/api/v1'),
   getApiCacheStaleTime: () => getRuntimeConfig('API_CACHE_STALE_TIME', 'REACT_APP_API_CACHE_STALE_TIME', 5 * 60 * 1000),
   getApiCacheGcTime: () => getRuntimeConfig('API_CACHE_GC_TIME', 'REACT_APP_API_CACHE_GC_TIME', 10 * 60 * 1000),
+
+  // Positions API Configuration
+  getPositionsApiUrl: () =>
+    getRuntimeConfig(
+      'POSITIONS_API_URL',
+      'REACT_APP_POSITIONS_API_URL',
+      'https://swap-positions.platform-dev.gateway.fm/api/v1'
+    ),
+  isPositionsApiEnabled: () => getRuntimeConfig('POSITIONS_API_ENABLED', 'REACT_APP_POSITIONS_API_ENABLED', true),
 
   // Token Configuration
   getBaseTokenAddress: () =>
