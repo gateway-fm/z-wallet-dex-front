@@ -66,6 +66,18 @@ export function useSwapCallback(
   const inputBalance = useCurrencyBalance(account, trade?.inputAmount.currency)
 
   return useCallback(async () => {
+    if (process.env.NODE_ENV !== 'production') {
+      // eslint-disable-next-line no-console
+      console.log('Swap pre-check', {
+        account,
+        chainId,
+        tradeExists: Boolean(trade),
+        inputCurrency: trade?.inputAmount.currency.symbol,
+        inputAmount: trade?.inputAmount.toExact(),
+        inputBalance: inputBalance?.toExact(),
+        usingZephyr: chainId === ZEPHYR_CHAIN_ID,
+      })
+    }
     if (!trade) throw new Error('missing trade')
     if (!account || !chainId) throw new Error('wallet must be connected to swap')
 
@@ -86,10 +98,26 @@ export function useSwapCallback(
 
     // Check if user has sufficient balance before attempting the swap
     if (inputBalance && trade.inputAmount && inputBalance.lessThan(trade.inputAmount)) {
+      if (process.env.NODE_ENV !== 'production') {
+        // eslint-disable-next-line no-console
+        console.log('Swap pre-check: insufficient balance', {
+          inputCurrency: trade.inputAmount.currency.symbol,
+          inputAmount: trade.inputAmount.toExact(),
+          inputBalance: inputBalance.toExact(),
+        })
+      }
       throw new Error(`Insufficient ${trade.inputAmount.currency.symbol} balance`)
     }
 
     const result = await swapCallback()
+
+    if (process.env.NODE_ENV !== 'production') {
+      // eslint-disable-next-line no-console
+      console.log('Swap submitted', {
+        hash: result?.response?.hash,
+        chainId,
+      })
+    }
 
     // For Zephyr network, transaction is already added to store in useZWalletSwap
     // For other networks, add transaction to store

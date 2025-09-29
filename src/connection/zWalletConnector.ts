@@ -1,4 +1,5 @@
-import type { Actions } from '@web3-react/types'
+import { JsonRpcProvider, Network } from '@ethersproject/providers'
+import type { Actions, Provider } from '@web3-react/types'
 import { Connector } from '@web3-react/types'
 import { zWalletClient } from 'z-wallet-sdk'
 
@@ -57,6 +58,8 @@ function clearPersistedZWalletState() {
 }
 
 export class ZWalletConnector extends Connector {
+  private readonly rpcProvider: JsonRpcProvider
+  private readonly eip1193Provider: Provider
   private readonly clientUrl?: string
   private readonly chainId: number
 
@@ -65,6 +68,21 @@ export class ZWalletConnector extends Connector {
 
     this.clientUrl = options.clientUrl
     this.chainId = options.chainId || runtimeConfig.getChainId()
+
+    // Initialize read-only provider for Zephyr network
+    const rpcUrl = EXTERNAL_SERVICES_CONFIG.Z_WALLET_RPC_URL
+    const network: Network = { name: runtimeConfig.getNetworkName(), chainId: this.chainId }
+    this.rpcProvider = new JsonRpcProvider(rpcUrl, network)
+
+    // Minimal EIP-1193 compatible wrapper
+    this.eip1193Provider = {
+      request: async ({ method, params }) => this.rpcProvider.send(method, (params as any[]) ?? []),
+      on: () => this.eip1193Provider,
+      removeListener: () => this.eip1193Provider,
+    }
+
+    // Expose provider on the instance for web3-react hooks
+    this.provider = this.eip1193Provider
 
     if (connectEagerly) {
       void this.connectEagerly()

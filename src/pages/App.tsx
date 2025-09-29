@@ -55,11 +55,10 @@ const MobileBottomBar = styled.div`
 
 const HeaderWrapper = styled.div<{ transparent?: boolean; scrollY: number }>`
   ${flexRowNoWrap};
-  background-color: ${({ theme, transparent }) => !transparent && theme.surface1};
-  border-bottom: ${({ theme, transparent }) => !transparent && `1px solid ${theme.surface3}`};
   width: 100%;
   max-width: 1600px;
   justify-content: space-between;
+  background: transparent;
   position: fixed;
   top: 0;
   z-index: ${Z_INDEX.dropdown};

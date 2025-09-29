@@ -26,8 +26,6 @@ import {
   ZWalletUserRejectedError,
 } from './useZWalletSwap'
 
-const Z_WALLET_APPROVAL_WAIT_TIME = 5000
-
 interface SimpleTrade {
   inputAmount: CurrencyAmount<Currency>
   outputAmount: CurrencyAmount<Currency>
@@ -80,9 +78,6 @@ export function useZephyrSwapV2(
       type: TradeFillType.Classic
       response: any
     }> => {
-      // NOTE: workaround to ensure everything is properly initialized
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
       const { inputAmount, outputAmount } = trade
       const tokenIn = inputAmount.currency
       const tokenOut = outputAmount.currency
@@ -93,22 +88,43 @@ export function useZephyrSwapV2(
 
       const currentConnection = getConnection(connector)
       const isZWallet = currentConnection.type === ConnectionType.Z_WALLET
-      let needApproval = false
 
-      if (isZWallet && approvalState !== ApprovalState.APPROVED) {
-        needApproval = true
+      if (approvalState !== ApprovalState.APPROVED) {
+        console.log('Token approval required:', {
+          tokenIn: tokenIn.symbol,
+          tokenAddress: tokenIn.address,
+          spender: CONTRACTS_CONFIG.SWAP_ROUTER_02,
+          approvalState,
+          inputAmount: inputAmount.quotient.toString(),
+          walletType: isZWallet ? 'Z-Wallet' : 'Standard',
+        })
+
         try {
+          console.log('Starting approval process...')
           await approve()
+          console.log('Approval completed successfully')
         } catch (approvalError) {
-          if (approvalError && typeof approvalError === 'object' && 'message' in approvalError) {
+          console.error('Approval failed:', {
+            error: approvalError,
+            errorMessage: approvalError instanceof Error ? approvalError.message : 'Unknown error',
+            tokenSymbol: tokenIn.symbol,
+            tokenAddress: tokenIn.address,
+          })
+
+          if (isZWallet && approvalError && typeof approvalError === 'object' && 'message' in approvalError) {
             const errorMessage = (approvalError as any).message || ''
+            console.debug('Checking approval error for user cancellation:', errorMessage)
             if (isUserCancellation(errorMessage)) {
               throw new ZWalletUserRejectedError('User cancelled approval in Z-Wallet')
             }
           }
-          throw new ZWalletTransactionError(
-            `Approval failed: ${approvalError instanceof Error ? approvalError.message : 'Unknown error'}`
-          )
+
+          const errorMessage = approvalError instanceof Error ? approvalError.message : 'Unknown error'
+          if (isZWallet) {
+            throw new ZWalletTransactionError(`Approval failed: ${errorMessage}`)
+          } else {
+            throw new Error(`Approval failed: ${errorMessage}`)
+          }
         }
       }
 
@@ -126,11 +142,6 @@ export function useZephyrSwapV2(
 
       let swapResult
       if (isZWallet) {
-        if (needApproval) {
-          // Wait after approval for Z-Wallet to ensure it's processed
-          await new Promise((resolve) => setTimeout(resolve, Z_WALLET_APPROVAL_WAIT_TIME))
-        }
-
         // Create swap info for Z-Wallet transaction
         const swapInfo: ExactInputSwapTransactionInfo | ExactOutputSwapTransactionInfo = {
           type: TransactionType.SWAP,

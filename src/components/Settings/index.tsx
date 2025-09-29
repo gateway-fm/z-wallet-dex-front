@@ -15,7 +15,7 @@ import { X } from 'react-feather'
 import { useCloseModal, useModalIsOpen, useToggleSettingsMenu } from 'state/application/hooks'
 import { ApplicationModal } from 'state/application/reducer'
 import styled from 'styled-components'
-import { Divider, ThemedText } from 'theme/components'
+import { DividerMargin, ThemedText } from 'theme/components'
 import { Z_INDEX } from 'theme/zIndex'
 
 import MaxSlippageSettings from './MaxSlippageSettings'
@@ -114,7 +114,7 @@ export default function SettingsTab({ autoSlippage, chainId }: { autoSlippage: P
           <MaxSlippageSettings autoSlippage={autoSlippage} />
           {showDeadlineSettings && (
             <>
-              <Divider />
+              <DividerMargin />
               <TransactionDeadlineSettings />
             </>
           )}

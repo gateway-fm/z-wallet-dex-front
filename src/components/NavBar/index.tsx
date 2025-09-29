@@ -3,7 +3,7 @@ import { useAccountDrawer } from 'components/AccountDrawer'
 import Web3Status from 'components/Web3Status'
 import { Box } from 'nft/components/Box'
 import { Row } from 'nft/components/Flex'
-import { GatewayIcon } from 'nft/components/icons'
+// import { GatewayIcon } from 'nft/components/icons'
 import { ReactNode, useCallback } from 'react'
 import { NavLink, NavLinkProps, useLocation, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
@@ -73,7 +73,7 @@ const Navbar = ({ blur }: { blur: boolean }) => {
       <Nav>
         <Box display="flex" height="full" flexWrap="nowrap">
           <Box className={styles.leftSideContainer}>
-            <Box className={styles.logoContainer}>
+            {/* <Box className={styles.logoContainer}>
               <GatewayIcon
                 width="36"
                 height="36"
@@ -87,7 +87,7 @@ const Navbar = ({ blur }: { blur: boolean }) => {
             </Box>
             <Row>
               <PageTabs />
-            </Row>
+            </Row> */}
           </Box>
           <Box className={styles.rightSideContainer}>
             <Row gap="12">

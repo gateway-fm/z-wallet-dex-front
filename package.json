@@ -13,7 +13,7 @@
     "i18n:compile": "lingui compile",
     "i18n": "yarn i18n:extract --clean && yarn i18n:compile",
     "prepare": "concurrently \"npm:ajv\" \"npm:contracts\" \"npm:i18n\"",
-    "start": "craco start",
+    "start": "PORT=3103 craco start",
     "start:cloud": "NODE_OPTIONS=--dns-result-order=ipv4first PORT=3001 npx wrangler pages dev --compatibility-flags=nodejs_compat --compatibility-date=2023-08-01 --proxy=3001 --port=3000 -- yarn start",
     "build": "craco build",
     "build:production": "yarn prepare && yarn build",
@@ -279,7 +279,7 @@
     "workbox-precaching": "^6.1.0",
     "workbox-routing": "^6.1.0",
     "xml2js": "^0.6.2",
-    "z-wallet-sdk": "^0.1.10",
+    "z-wallet-sdk": "^0.2.1",
     "zustand": "^4.3.6"
   },
   "engines": {

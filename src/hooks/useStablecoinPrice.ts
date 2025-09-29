@@ -1,6 +1,4 @@
 import { Currency, CurrencyAmount, Price, Token } from '@uniswap/sdk-core'
-import { useWeb3React } from '@web3-react/core'
-import tryParseCurrencyAmount from 'lib/utils/tryParseCurrencyAmount'
 import { useMemo } from 'react'
 
 import { ZEPHYR_CHAIN_ID } from '../constants/chains'
@@ -54,27 +52,4 @@ export function useStablecoinValue(currencyAmount: CurrencyAmount<Currency> | un
       return null
     }
   }, [currencyAmount, price])
-}
-
-/**
- *
- * @param fiatValue string representation of a USD amount
- * @returns CurrencyAmount where currency is stablecoin on active chain
- */
-export function useStablecoinAmountFromFiatValue(fiatValue: number | null | undefined) {
-  const { chainId } = useWeb3React()
-  const stablecoin = chainId ? STABLECOIN_AMOUNT_OUT[chainId]?.currency : undefined
-
-  return useMemo(() => {
-    if (fiatValue === null || fiatValue === undefined || !chainId || !stablecoin) {
-      return undefined
-    }
-    const parsedForDecimals = fiatValue.toFixed(stablecoin.decimals).toString()
-    try {
-      // Parse USD string into CurrencyAmount based on stablecoin decimals
-      return tryParseCurrencyAmount(parsedForDecimals, stablecoin)
-    } catch (error) {
-      return undefined
-    }
-  }, [chainId, fiatValue, stablecoin])
 }

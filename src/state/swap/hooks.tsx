@@ -1,32 +1,34 @@
+/* eslint-disable import/order */
 import { Trans } from '@lingui/macro'
 import { ChainId, Currency, CurrencyAmount, Percent, TradeType } from '@uniswap/sdk-core'
 import { useWeb3React } from '@web3-react/core'
 import { useConnectionReady } from 'connection/eagerlyConnect'
+import { ZEPHYR_CHAIN_ID } from 'constants/chains'
+import { TOKEN_SHORTHANDS } from 'constants/tokens'
+import { useCurrency } from 'hooks/Tokens'
 import useAutoSlippageTolerance from 'hooks/useAutoSlippageTolerance'
 import { useDebouncedTrade } from 'hooks/useDebouncedTrade'
+import { useZephyrEffectiveInputBalance } from 'hooks/useDirectBalance'
+import useENS from 'hooks/useENS'
+import useParsedQueryString from 'hooks/useParsedQueryString'
 import { useSwapTaxes } from 'hooks/useSwapTaxes'
 import tryParseCurrencyAmount from 'lib/utils/tryParseCurrencyAmount'
 import { ParsedQs } from 'qs'
 import { ReactNode, useCallback, useEffect, useMemo } from 'react'
 import { AnyAction } from 'redux'
+import { useCurrencyBalances } from 'state/connection/hooks'
 import { useAppDispatch } from 'state/hooks'
 import { InterfaceTrade, TradeState } from 'state/routing/types'
 import { isClassicTrade } from 'state/routing/utils'
 import { useUserSlippageToleranceWithDefault } from 'state/user/hooks'
+import { isAddress } from 'utils'
 
-import { ZEPHYR_CHAIN_ID } from '../../constants/chains'
-import { TOKEN_SHORTHANDS } from '../../constants/tokens'
-import { useCurrency } from '../../hooks/Tokens'
-import useENS from '../../hooks/useENS'
-import useParsedQueryString from '../../hooks/useParsedQueryString'
-import { isAddress } from '../../utils'
-import { useCurrencyBalances } from '../connection/hooks'
 import { Field, replaceSwapState, selectCurrency, setRecipient, switchCurrencies, typeInput } from './actions'
 import { SwapState } from './reducer'
 
 export function useSwapActionHandlers(dispatch: React.Dispatch<AnyAction>): {
   onCurrencySelection: (field: Field, currency: Currency) => void
-  onSwitchTokens: (newOutputHasTax: boolean, previouslyEstimatedOutput: string, currentInputValue: string) => void
+  onSwitchTokens: (currentInputValue: string) => void
   onUserInput: (field: Field, typedValue: string) => void
   onChangeRecipient: (recipient: string | null) => void
 } {
@@ -43,11 +45,9 @@ export function useSwapActionHandlers(dispatch: React.Dispatch<AnyAction>): {
   )
 
   const onSwitchTokens = useCallback(
-    (newOutputHasTax: boolean, previouslyEstimatedOutput: string, currentInputValue: string) => {
+    (currentInputValue: string) => {
       dispatch(
         switchCurrencies({
-          newOutputHasTax,
-          previouslyEstimatedOutput,
           currentInputValue,
         })
       )
@@ -144,12 +144,18 @@ export function useDerivedSwapInfo(state: SwapState, chainId: ChainId | undefine
     outputTax
   )
 
+  const zephyrInputBalance = useZephyrEffectiveInputBalance(
+    account,
+    inputCurrency ?? undefined,
+    relevantTokenBalances[0]
+  )
+
   const currencyBalances = useMemo(
     () => ({
-      [Field.INPUT]: relevantTokenBalances[0],
+      [Field.INPUT]: zephyrInputBalance ?? relevantTokenBalances[0],
       [Field.OUTPUT]: relevantTokenBalances[1],
     }),
-    [relevantTokenBalances]
+    [relevantTokenBalances, zephyrInputBalance]
   )
 
   const currencies: { [field in Field]?: Currency } = useMemo(
@@ -195,10 +201,36 @@ export function useDerivedSwapInfo(state: SwapState, chainId: ChainId | undefine
       }
     }
 
-    // compare input balance to required input amount based on trade
     const balanceIn = currencyBalances[Field.INPUT]
     const inputAmount = trade?.trade?.inputAmount
     const maxAmountIn = trade?.trade?.maximumAmountIn(allowedSlippage)
+
+    console.debug('Swap balance check', {
+      account,
+      inputCurrency: currencies[Field.INPUT]?.symbol,
+      typedValue,
+      independentField,
+      parsedAmount: parsedAmount?.toExact(),
+      balanceIn: balanceIn?.toExact(),
+      inputAmount: inputAmount?.toExact(),
+      maxAmountIn: maxAmountIn?.toExact(),
+      allowedSlippage: allowedSlippage.toSignificant(4),
+    })
+
+    if (independentField === Field.INPUT && balanceIn && parsedAmount) {
+      // Immediate check based on typed input amount before trade
+      const bal = Number(balanceIn.toExact())
+      const need = Number(parsedAmount.toExact())
+      // eslint-disable-next-line no-console
+      console.debug('Immediate balance compare', { bal, need })
+      if (!Number.isNaN(bal) && !Number.isNaN(need) && bal + 1e-12 < need) {
+        inputError = inputError ?? <Trans>Insufficient {balanceIn.currency.symbol} balance</Trans>
+      } else if (balanceIn.lessThan && parsedAmount && balanceIn.currency?.equals?.(parsedAmount.currency)) {
+        if (balanceIn.lessThan(parsedAmount)) {
+          inputError = inputError ?? <Trans>Insufficient {balanceIn.currency.symbol} balance</Trans>
+        }
+      }
+    }
 
     if (balanceIn && inputAmount && balanceIn.lessThan(inputAmount)) {
       inputError = <Trans>Insufficient {balanceIn.currency.symbol} balance</Trans>
@@ -207,7 +239,18 @@ export function useDerivedSwapInfo(state: SwapState, chainId: ChainId | undefine
     }
 
     return inputError
-  }, [account, currencies, parsedAmount, to, currencyBalances, trade?.trade, allowedSlippage, connectionReady])
+  }, [
+    account,
+    currencies,
+    parsedAmount,
+    to,
+    currencyBalances,
+    trade?.trade,
+    allowedSlippage,
+    connectionReady,
+    independentField,
+    typedValue,
+  ])
 
   return useMemo(
     () => ({

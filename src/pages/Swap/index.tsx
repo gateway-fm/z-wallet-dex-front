@@ -275,6 +275,7 @@ function Swap({
           field: combinedInitialState.independentField ?? Field.INPUT,
           inputCurrencyId: combinedInitialState.INPUT.currencyId ?? undefined,
           outputCurrencyId: combinedInitialState.OUTPUT.currencyId ?? undefined,
+          typedValue: chainChanged ? '' : typedValue,
         })
       )
       // reset local state
@@ -285,7 +286,7 @@ function Swap({
         swapResult: undefined,
       })
     }
-  }, [connectedChainId, prefilledState, previousConnectedChainId, previousPrefilledState])
+  }, [connectedChainId, prefilledState, previousConnectedChainId, previousPrefilledState, typedValue])
 
   const swapInfo = useDerivedSwapInfo(state, chainId)
   const {
@@ -652,7 +653,7 @@ function Swap({
             data-testid="swap-currency-button"
             onClick={() => {
               if (disableTokenInputs) return
-              onSwitchTokens(outputTokenHasTax, formattedAmounts[dependentField], formattedAmounts[independentField])
+              onSwitchTokens(formattedAmounts[independentField])
             }}
             color={theme.neutral1}
           >

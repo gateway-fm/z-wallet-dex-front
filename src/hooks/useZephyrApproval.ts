@@ -3,7 +3,7 @@ import { useWeb3React } from '@web3-react/core'
 import { getConnection } from 'connection'
 import { ConnectionType } from 'connection/types'
 import { ApprovalState } from 'lib/hooks/useApproval'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
 import { useTransactionAdder } from 'state/transactions/hooks'
 import { TransactionType } from 'state/transactions/types'
 
@@ -24,48 +24,120 @@ export function useZephyrTokenApproval(
   const tokenContract = useTokenContract(token?.address, true)
   const addTransaction = useTransactionAdder()
 
-  const { tokenAllowance } = useTokenAllowance(token, account ?? undefined, spender)
+  const chainIdRef = useRef(chainId)
+  if (chainId !== chainIdRef.current) {
+    chainIdRef.current = chainId
+  }
+
+  const shouldFetchAllowance = chainIdRef.current === ZEPHYR_CHAIN_ID && token && account && spender
+  const { tokenAllowance, isSyncing, refetchAllowance } = useTokenAllowance(
+    shouldFetchAllowance ? token : undefined,
+    shouldFetchAllowance ? account : undefined,
+    shouldFetchAllowance ? spender : undefined
+  )
 
   const approvalState = useMemo((): ApprovalState => {
-    if (!amountToApprove || !spender || !token || chainId !== ZEPHYR_CHAIN_ID) {
+    if (!amountToApprove || !spender || !token || chainIdRef.current !== ZEPHYR_CHAIN_ID) {
+      console.debug('Approval state UNKNOWN - missing required params:', {
+        hasAmountToApprove: !!amountToApprove,
+        hasSpender: !!spender,
+        hasToken: !!token,
+        chainId: chainIdRef.current,
+        isZephyrChain: chainIdRef.current === ZEPHYR_CHAIN_ID,
+      })
       return ApprovalState.UNKNOWN
     }
-    if (!tokenAllowance) {
+
+    if (!shouldFetchAllowance) {
+      return ApprovalState.UNKNOWN
+    }
+
+    if (isSyncing || !tokenAllowance) {
+      console.debug('Approval state UNKNOWN - no token allowance data:', {
+        tokenSymbol: token.symbol,
+        tokenAddress: token.address,
+        spender,
+        account,
+      })
       return ApprovalState.UNKNOWN
     }
 
     const amountToApproveBN = BigInt(amountToApprove)
     const currentAllowanceBN = BigInt(tokenAllowance.quotient.toString())
 
-    if (currentAllowanceBN >= amountToApproveBN) {
+    const isApproved = currentAllowanceBN >= amountToApproveBN
+    console.debug('Approval state check:', {
+      tokenSymbol: token.symbol,
+      tokenAddress: token.address,
+      spender,
+      amountToApprove,
+      currentAllowance: tokenAllowance.quotient.toString(),
+      isApproved,
+      approvalState: isApproved ? 'APPROVED' : 'NOT_APPROVED',
+    })
+
+    if (isApproved) {
       return ApprovalState.APPROVED
     }
 
     return ApprovalState.NOT_APPROVED
-  }, [amountToApprove, spender, token, chainId, tokenAllowance])
+  }, [amountToApprove, spender, token, tokenAllowance, account, isSyncing, shouldFetchAllowance])
 
   const approve = useCallback(async (): Promise<void> => {
-    if (!spender || !token || chainId !== ZEPHYR_CHAIN_ID) {
+    console.debug('Zephyr token approval called:', {
+      tokenSymbol: token?.symbol,
+      tokenAddress: token?.address,
+      spender,
+      chainId: chainIdRef.current,
+      account,
+      isZephyrChain: chainIdRef.current === ZEPHYR_CHAIN_ID,
+    })
+
+    if (!spender || !token || chainIdRef.current !== ZEPHYR_CHAIN_ID) {
+      console.warn('Approval cancelled - missing required params')
       return
     }
 
     const connection = getConnection(connector)
+    console.debug('Using connection type:', connection.type)
 
     if (connection.type === ConnectionType.Z_WALLET) {
-      await approveWithZWallet(token, spender, chainId, account || '', addTransaction)
+      console.debug('Using Z-Wallet for approval')
+      await approveWithZWallet(token, spender, chainIdRef.current, account || '', addTransaction)
+      console.debug('Refreshing allowance after Z-Wallet approval')
+      refetchAllowance()
     } else {
+      console.debug('Using standard wallet for approval')
       if (!tokenContract) {
+        console.error('No token contract available for standard wallet approval')
         return
       }
-      const approvalResult = await tokenContract.approve(spender, MaxUint256.toString())
-      addTransaction(approvalResult, {
-        type: TransactionType.APPROVAL,
-        tokenAddress: token.address,
-        spender,
-        amount: MaxUint256.toString(),
-      })
+
+      try {
+        const approvalResult = await tokenContract.approve(spender, MaxUint256.toString())
+        console.debug('Standard wallet approval successful:', {
+          hash: approvalResult.hash,
+          tokenSymbol: token.symbol,
+        })
+
+        addTransaction(approvalResult, {
+          type: TransactionType.APPROVAL,
+          tokenAddress: token.address,
+          spender,
+          amount: MaxUint256.toString(),
+        })
+        console.debug('Refreshing allowance after standard wallet approval')
+        refetchAllowance()
+      } catch (error) {
+        console.error('Standard wallet approval failed:', {
+          error,
+          tokenSymbol: token.symbol,
+          tokenAddress: token.address,
+        })
+        throw error
+      }
     }
-  }, [tokenContract, spender, token, chainId, addTransaction, connector, account])
+  }, [tokenContract, spender, token, addTransaction, connector, account, refetchAllowance])
 
   return {
     approvalState,

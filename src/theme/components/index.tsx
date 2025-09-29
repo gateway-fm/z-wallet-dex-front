@@ -388,3 +388,6 @@ export const Divider = styled.div`
   margin: 0;
   background-color: ${({ theme }) => theme.surface3};
 `
+export const DividerMargin = styled(Divider)`
+  margin: 0.5em 0;
+`

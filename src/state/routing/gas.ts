@@ -3,9 +3,13 @@ import { PERMIT2_ADDRESS } from '@uniswap/permit2-sdk'
 import { Currency } from '@uniswap/sdk-core'
 import ERC20_ABI from 'abis/erc20.json'
 import { Erc20 } from 'abis/types'
+import { ALLOWANCE_CACHE_DURATION, CacheUtils } from 'config/cache'
 import { getContract } from 'utils'
 
 import { ApproveInfo } from './types'
+
+// Cache for allowance results to avoid repeated RPC calls
+const allowanceCache = new Map<string, { allowance: string; timestamp: number }>()
 
 export async function getApproveInfo(
   account: string | undefined,
@@ -19,14 +23,34 @@ export async function getApproveInfo(
   // If any of these arguments aren't provided, then we cannot generate approval cost info
   if (!account) return { needsApprove: false }
 
-  const tokenContract = getContract(currency.address, ERC20_ABI, provider) as Erc20
+  // Check cache first to avoid repeated RPC calls
+  const cacheKey = CacheUtils.createKey(currency.address, account, PERMIT2_ADDRESS)
+  const cached = allowanceCache.get(cacheKey)
+  const isRecent = cached && CacheUtils.isValid(cached.timestamp, ALLOWANCE_CACHE_DURATION)
 
-  try {
-    const allowance = await tokenContract.callStatic.allowance(account, PERMIT2_ADDRESS)
-    if (!allowance.lt(amount)) return { needsApprove: false }
-  } catch (_) {
-    // If contract lookup fails (eg if Infura goes down), then don't show approval info
-    return { needsApprove: false }
+  if (cached && isRecent) {
+    console.debug('Using cached allowance result for approve info', { cacheKey })
+    const cachedAllowance = cached.allowance
+    if (BigInt(cachedAllowance) >= BigInt(amount)) {
+      return { needsApprove: false }
+    }
+  } else {
+    const tokenContract = getContract(currency.address, ERC20_ABI, provider) as Erc20
+
+    try {
+      const allowance = await tokenContract.callStatic.allowance(account, PERMIT2_ADDRESS)
+
+      // Cache the result
+      allowanceCache.set(cacheKey, {
+        allowance: allowance.toString(),
+        timestamp: Date.now(),
+      })
+
+      if (!allowance.lt(amount)) return { needsApprove: false }
+    } catch (_) {
+      // If contract lookup fails (eg if Infura goes down), then don't show approval info
+      return { needsApprove: false }
+    }
   }
 
   // NOTE: No gas fees in this DEX solution
